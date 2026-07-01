@@ -1,0 +1,1371 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Purwadi Application - Perencanaan Pembelajaran Kokurikuler SD</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght=300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Area pengeditan langsung (Live Edit) */
+        .editable-live-zone {
+            position: relative;
+            padding-right: 20px;
+            border: 1px solid transparent;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+        .editable-live-zone:hover {
+            background-color: #f8fafc;
+            border-color: #e2e8f0;
+        }
+        .editable-live-zone:focus {
+            background-color: #fff;
+            border-color: #3b82f6;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+        }
+        
+        .live-edit-icon {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            font-size: 10px;
+            color: #94a3b8;
+            pointer-events: none;
+            opacity: 0.4;
+            transition: opacity 0.2s;
+        }
+        .editable-live-zone:hover .live-edit-icon {
+            opacity: 1;
+            color: #3b82f6;
+        }
+
+        /* Pratinjau Lembar A4 */
+        .page-container {
+            width: 210mm;
+            min-height: 297mm;
+            padding: 15mm 15mm 15mm 25mm; /* Ruang kiri disiapkan untuk ruang penjilidan */
+            margin: 0 auto;
+            background: white;
+            border: 2px solid #cbd5e1;
+            box-sizing: border-box;
+            position: relative;
+        }
+
+        #cover-page {
+            page-break-inside: avoid;
+            break-inside: avoid;
+            page-break-after: always !important;
+            break-after: page !important;
+        }
+
+        .identitas-left-tab {
+            text-align: left;
+            margin-left: 20px; 
+            width: calc(100% - 20px);
+            page-break-after: avoid !important;
+            break-after: avoid !important;
+        }
+
+        .modul-card, .assessment-section {
+            page-break-inside: auto !important;
+            break-inside: auto !important;
+        }
+
+        .ttd-section {
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+            margin-top: 40px;
+        }
+
+        h4, h5, table thead {
+            page-break-after: avoid !important;
+            break-after: avoid !important;
+        }
+
+        /* Aturan Cetak Printer */
+        @media print {
+            @page {
+                size: A4 portrait;
+                margin: 15mm 15mm 15mm 25mm;
+            }
+            html, body {
+                background: white !important;
+                overflow: visible !important;
+                height: auto !important;
+                width: 100% !important;
+                display: block !important;
+            }
+            body * {
+                visibility: hidden;
+            }
+            .no-print, aside, header {
+                display: none !important;
+            }
+            #print-area, #print-area * {
+                visibility: visible !important;
+            }
+            #print-area {
+                position: static !important;
+                width: 100% !important;
+                border: none !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                box-shadow: none !important;
+                background: white !important;
+                display: block !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            
+            #cover-page {
+                width: 100% !important;
+                height: 245mm !important;
+                max-height: 245mm !important;
+                box-sizing: border-box;
+                margin-bottom: 0 !important;
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+                page-break-after: always !important;
+                break-after: page !important;
+            }
+
+            #cover-page > div {
+                height: 100% !important;
+                min-height: 0 !important;
+                width: 100% !important;
+                box-sizing: border-box;
+            }
+
+            thead {
+                display: table-header-group;
+                page-break-after: avoid !important;
+                break-after: avoid !important;
+            }
+            tr {
+                page-break-inside: auto;
+                break-inside: auto;
+            }
+            
+            .live-edit-icon {
+                display: none !important;
+            }
+            .editable-live-zone {
+                border: none !important;
+                padding-right: 0 !important;
+                background: transparent !important;
+            }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 flex h-screen overflow-hidden">
+
+    <!-- SIDEBAR -->
+    <aside class="no-print w-72 bg-slate-900 text-slate-300 flex flex-col justify-between border-r border-slate-800 z-20 shrink-0">
+        <div>
+            <div class="p-6 border-b border-slate-800 flex items-center space-x-3 bg-slate-950">
+                <div class="bg-transparent w-10 h-10 flex items-center justify-center shrink-0 overflow-hidden">
+                    <img src="https://iili.io/Cd6VTSS.png" alt="Logo Sekolah" class="max-w-full max-h-full object-contain">
+                </div>
+                <div>
+                    <h1 class="text-white font-bold text-sm tracking-wide leading-tight">PERENCANAAN</h1>
+                    <p class="text-blue-400 text-xs font-bold tracking-wider uppercase mt-0.5">Purwadi Application</p>
+                </div>
+            </div>
+
+            <nav class="mt-6 px-4 space-y-1.5">
+                <button onclick="switchTab('beranda')" id="menu-beranda" class="w-full flex items-center justify-start text-left space-x-3.5 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-150 bg-blue-600 text-white menu-btn">
+                    <i class="fa-solid fa-house text-lg w-5 text-left"></i>
+                    <span>Beranda</span>
+                </button>
+
+                <button onclick="switchTab('identitas')" id="menu-identitas" class="w-full flex items-center justify-start text-left space-x-3.5 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-150 hover:bg-slate-800 hover:text-white text-slate-400 menu-btn">
+                    <i class="fa-solid fa-user-tie text-lg w-5 text-left"></i>
+                    <span>Identitas & Pejabat TTD</span>
+                </button>
+
+                <button onclick="switchTab('perencanaan')" id="menu-perencanaan" class="w-full flex items-center justify-start text-left space-x-3.5 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-150 hover:bg-slate-800 hover:text-white text-slate-400 menu-btn">
+                    <i class="fa-solid fa-file-pen text-lg w-5 text-left"></i>
+                    <span>Perencanaan Kokurikuler</span>
+                </button>
+
+                <button onclick="switchTab('hasil')" id="menu-hasil" class="w-full flex items-center justify-start text-left space-x-3.5 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-150 hover:bg-slate-800 hover:text-white text-slate-400 menu-btn">
+                    <i class="fa-solid fa-print text-lg w-5 text-left"></i>
+                    <span>Hasil Perencanaan</span>
+                </button>
+            </nav>
+        </div>
+
+        <div class="p-4 border-t border-slate-800 bg-slate-950 text-xs text-slate-500 flex justify-between items-center">
+            <span class="font-medium text-slate-400">Purwadi App v3.5</span>
+            <span class="flex items-center text-green-500 font-semibold">
+                <span class="w-2 h-2 rounded-full bg-green-500 mr-1.5 animate-pulse"></span> Online
+            </span>
+        </div>
+    </aside>
+
+    <!-- AREA KONTEN UTAMA -->
+    <main class="flex-1 flex flex-col h-full overflow-hidden">
+        <!-- HEADER -->
+        <header class="no-print h-16 bg-white border-b border-slate-200 px-8 flex items-center justify-between z-10 shrink-0">
+            <div>
+                <span id="current-date" class="text-sm text-slate-500 font-medium"></span>
+            </div>
+            <div class="flex items-center space-x-4">
+                <div class="flex flex-col text-right">
+                    <span id="header-nama-guru" class="text-sm font-semibold text-slate-800">Koordinator Kokurikuler</span>
+                    <span id="header-nama-sekolah" class="text-xs text-slate-500">Sekolah Dasar</span>
+                </div>
+                <div class="h-9 w-9 bg-slate-200 border border-slate-300 rounded-full flex items-center justify-center text-slate-600">
+                    <i class="fa-solid fa-user-gear"></i>
+                </div>
+            </div>
+        </header>
+
+        <!-- ROUTING TABS CONTENT -->
+        <div class="flex-1 overflow-y-auto p-8 relative">
+            
+            <!-- TAB 1: BERANDA -->
+            <section id="tab-beranda" class="space-y-6">
+                <div class="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-2xl p-8 text-white shadow-md">
+                    <h2 class="text-2xl font-bold mb-2">Perencanaan Pembelajaran Kokurikuler</h2>
+                    <p class="text-blue-100 max-w-2xl font-light font-medium">Sistem administrasi digital untuk mempermudah perumusan, pemetaan dimensi, tujuan, kemitraan, pemanfaatan digital, serta tahapan asesmen pembelajaran kokurikuler di Sekolah Dasar berdasarkan Pedoman Panduan Terbaru.</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                        <div class="w-12 h-12 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center text-xl mb-4"><i class="fa-solid fa-user-tie"></i></div>
+                        <h3 class="font-semibold text-slate-800 mb-1">1. Identitas & Pejabat TTD</h3>
+                        <p class="text-slate-500 text-sm">Input data Koordinator Kokurikuler, Kepala Sekolah, penentuan lokasi/tanggal dokumen, serta konfigurasi sampul depan.</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                        <div class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-lg flex items-center justify-center text-xl mb-4"><i class="fa-solid fa-file-pen"></i></div>
+                        <h3 class="font-semibold text-slate-800 mb-1">2. Perencanaan Kokurikuler</h3>
+                        <p class="text-slate-500 text-sm">Menentukan alokasi waktu, 8 dimensi profil lulusan, tema kegiatan, detail pedagogis, lingkungan, kemitraan, serta asesmen.</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                        <div class="w-12 h-12 bg-amber-50 text-amber-600 rounded-lg flex items-center justify-center text-xl mb-4"><i class="fa-solid fa-print"></i></div>
+                        <h3 class="font-semibold text-slate-800 mb-1">3. Cetak Hasil & Rapor</h3>
+                        <p class="text-slate-500 text-sm">Melihat pratinjau lembar cetak standar A4 Portrait yang siap dicetak langsung beserta generator asisten deskripsi rapor siswa.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 2: INPUT IDENTITAS -->
+            <section id="tab-identitas" class="hidden space-y-6">
+                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                    <h3 class="text-lg font-bold text-slate-800 mb-4 border-b pb-2"><i class="fa-solid fa-address-card mr-2 text-blue-600"></i>Informasi Instansi & Pejabat</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Nama Koordinator Kokurikuler</label>
+                            <input type="text" id="input-nama-koordinator" oninput="updateIdentitas()" placeholder="Budi, S.Pd." class="w-full border border-slate-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">NIP Koordinator</label>
+                            <input type="text" id="input-nip-koordinator" placeholder="198904152012011003" class="w-full border border-slate-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Nama Satuan Pendidikan</label>
+                            <input type="text" id="input-nama-sekolah" oninput="updateIdentitas()" placeholder="SDN 1 Merdeka Jaya" class="w-full border border-slate-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Alamat Satuan Pendidikan</label>
+                            <input type="text" id="input-alamat-sekolah" placeholder="Jl. Pendidikan No. 45, Kecamatan Cerdas, Kota Pintar" class="w-full border border-slate-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">Nama Kepala Sekolah</label>
+                            <input type="text" id="input-nama-kepsek" placeholder="Drs. H. Mulyono, M.Pd." class="w-full border border-slate-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1">NIP Kepala Sekolah</label>
+                            <input type="text" id="input-nip-kepsek" placeholder="197208151998031004" class="w-full border border-slate-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        
+                        <div class="border-t pt-4 md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-semibold text-blue-900 mb-1"><i class="fa-solid fa-location-dot mr-1"></i> Tempat Pembuatan Dokumen</label>
+                                <input type="text" id="input-tempat-ttd" placeholder="Merdeka Jaya" class="w-full border border-blue-300 bg-blue-50/50 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-blue-900 mb-1"><i class="fa-solid fa-calendar-days mr-1"></i> Tanggal Pembuatan Dokumen</label>
+                                <input type="text" id="input-tanggal-ttd" placeholder="26 Juni 2026" class="w-full border border-blue-300 bg-blue-50/50 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                        </div>
+
+                        <!-- INPUT KONFIGURASI SAMPUL -->
+                        <div class="border-t pt-4 md:col-span-2">
+                            <h4 class="text-sm font-bold text-slate-800 mb-3"><i class="fa-solid fa-sliders mr-2 text-blue-600"></i>Konfigurasi Halaman Sampul (Cover)</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-1">URL Logo Sampul</label>
+                                    <input type="text" id="input-logo-cover" value="https://iili.io/CdQPI9V.png" placeholder="https://iili.io/CdQPI9V.png" class="w-full border border-slate-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-1">Tahun Penerbitan Sampul</label>
+                                    <input type="text" id="input-tahun-cover" placeholder="2026" class="w-full border border-slate-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-1">Nama Pemerintah Daerah</label>
+                                    <input type="text" id="input-pemda-cover" placeholder="PEMERINTAH KABUPATEN TULANG BAWANG" class="w-full border border-slate-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-1">Nama Dinas</label>
+                                    <input type="text" id="input-dinas-cover" placeholder="DINAS PENDIDIKAN DAN KEBUDAYAAN" class="w-full border border-slate-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="mt-6 flex justify-end">
+                        <button onclick="switchTab('perencanaan')" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg text-sm font-medium transition-colors">Lanjut ke Data Perencanaan <i class="fa-solid fa-arrow-right ml-1"></i></button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 3: INPUT DATA PERENCANAAN -->
+            <section id="tab-perencanaan" class="hidden space-y-6">
+                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                    <h3 class="text-lg font-bold text-slate-800 mb-4 border-b pb-2"><i class="fa-solid fa-book-open-reader mr-2 text-emerald-600"></i>Struktur & Pembelajaran Kokurikuler</h3>
+                    
+                    <div class="space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-semibold text-blue-900 mb-1">Mata Pelajaran Terkait (Bisa diisi lebih dari satu pelajaran) *</label>
+                                <input type="text" id="input-mapel-terkait" placeholder="IPAS, Matematika, Bahasa Indonesia, Seni Rupa" class="w-full border border-blue-300 bg-blue-50/30 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-1">Kelas</label>
+                                <select id="input-kelas" onchange="suggestAlokasiWaktu()" class="w-full border border-slate-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="1">Kelas 1</option>
+                                    <option value="2">Kelas 2</option>
+                                    <option value="3">Kelas 3</option>
+                                    <option value="4">Kelas 4</option>
+                                    <option value="5" selected>Kelas 5</option>
+                                    <option value="6">Kelas 6</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-1">Tahun Pelajaran</label>
+                                <input type="text" id="input-tp-tahun" placeholder="2025/2026" class="w-full border border-slate-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                        </div>
+
+                        <!-- INPUT RENTANG WAKTU -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-1">Rentang Waktu Program</label>
+                                <select id="input-rentang-waktu" onchange="suggestAlokasiWaktu()" class="w-full border border-slate-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="tahun" selected>1 Tahun Pelajaran (Full Program)</option>
+                                    <option value="semester">1 Semester (Setengah Tahun)</option>
+                                    <option value="minggu">1 Minggu (Siklus Pendek)</option>
+                                    <option value="kustom">Kustom (Input JP Mandiri)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 mb-1">Jenis Kokurikuler</label>
+                                <select id="input-jenis-kokurikuler" class="w-full border border-slate-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="Pembelajaran kolaboratif lintas disiplin ilmu" selected>Pembelajaran kolaboratif lintas disiplin ilmu</option>
+                                    <option value="Gerakan 7 Kebiasaan Anak Indonesia Hebat (7 KAIH)">Gerakan 7 Kebiasaan Anak Indonesia Hebat (7 KAIH)</option>
+                                    <option value="Cara lainnya (tema-projek, pendalaman materi, studi lapangan, kegiatan khas lokal, atau kolaborasi satu disiplin)">Cara lainnya (tema-projek, pendalaman materi, studi lapangan, kegiatan khas lokal, atau kolaborasi satu disiplin)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <div class="flex justify-between items-center mb-1">
+                                    <label class="block text-sm font-medium text-slate-700">Alokasi Waktu (JP)</label>
+                                    <span id="label-rekomendasi-jp" class="text-[10px] text-blue-600 font-bold bg-blue-50 px-1.5 py-0.5 rounded">Saran: 252 JP</span>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <input type="number" id="input-alokasi-jp" placeholder="252" class="w-full border border-slate-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <span class="text-sm font-medium text-slate-500">JP</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- CHECKBOX 8 DIMENSI PROFIL LULUSAN -->
+                        <div class="bg-slate-50 p-5 rounded-xl border border-slate-200">
+                            <label class="block text-sm font-bold text-slate-800 mb-3">Delapan Dimensi Profil Lulusan (Pilih fokus dimensi):</label>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-slate-700">
+                                <label class="flex items-center space-x-3 p-2 bg-white rounded-lg border border-slate-100 shadow-sm cursor-pointer hover:bg-slate-50">
+                                    <input type="checkbox" name="dimensi" value="Keimanan dan Ketakwaan terhadap Tuhan YME" class="rounded text-blue-600 focus:ring-blue-500 w-4 h-4"> 
+                                    <span class="font-medium text-slate-900">1. Keimanan dan Ketakwaan terhadap Tuhan YME</span>
+                                </label>
+                                <label class="flex items-center space-x-3 p-2 bg-white rounded-lg border border-slate-100 shadow-sm cursor-pointer hover:bg-slate-50">
+                                    <input type="checkbox" name="dimensi" value="Kewargaan" class="rounded text-blue-600 focus:ring-blue-500 w-4 h-4"> 
+                                    <span class="font-medium text-slate-900">2. Kewargaan</span>
+                                </label>
+                                <label class="flex items-center space-x-3 p-2 bg-white rounded-lg border border-slate-100 shadow-sm cursor-pointer hover:bg-slate-50">
+                                    <input type="checkbox" name="dimensi" value="Penalaran Kritis" checked class="rounded text-blue-600 focus:ring-blue-500 w-4 h-4"> 
+                                    <span class="font-medium text-slate-900">3. Penalaran Kritis</span>
+                                </label>
+                                <label class="flex items-center space-x-3 p-2 bg-white rounded-lg border border-slate-100 shadow-sm cursor-pointer hover:bg-slate-50">
+                                    <input type="checkbox" name="dimensi" value="Kreativitas" class="rounded text-blue-600 focus:ring-blue-500 w-4 h-4"> 
+                                    <span class="font-medium text-slate-900">4. Kreativitas</span>
+                                </label>
+                                <label class="flex items-center space-x-3 p-2 bg-white rounded-lg border border-slate-100 shadow-sm cursor-pointer hover:bg-slate-50">
+                                    <input type="checkbox" name="dimensi" value="Kolaborasi" checked class="rounded text-blue-600 focus:ring-blue-500 w-4 h-4"> 
+                                    <span class="font-medium text-slate-900">5. Kolaborasi</span>
+                                </label>
+                                <label class="flex items-center space-x-3 p-2 bg-white rounded-lg border border-slate-100 shadow-sm cursor-pointer hover:bg-slate-50">
+                                    <input type="checkbox" name="dimensi" value="Kemandirian" class="rounded text-blue-600 focus:ring-blue-500 w-4 h-4"> 
+                                    <span class="font-medium text-slate-900">6. Kemandirian</span>
+                                </label>
+                                <label class="flex items-center space-x-3 p-2 bg-white rounded-lg border border-slate-100 shadow-sm cursor-pointer hover:bg-slate-50">
+                                    <input type="checkbox" name="dimensi" value="Kesehatan" class="rounded text-blue-600 focus:ring-blue-500 w-4 h-4"> 
+                                    <span class="font-medium text-slate-900">7. Kesehatan</span>
+                                </label>
+                                <label class="flex items-center space-x-3 p-2 bg-white rounded-lg border border-slate-100 shadow-sm cursor-pointer hover:bg-slate-50">
+                                    <input type="checkbox" name="dimensi" value="Komunikasi" class="rounded text-blue-600 focus:ring-blue-500 w-4 h-4"> 
+                                    <span class="font-medium text-slate-900">8. Komunikasi</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- RADIO BUTTON TEMA KEGIATAN KOKURIKULER -->
+                        <div class="bg-slate-50 p-5 rounded-xl border border-slate-200">
+                            <label class="block text-sm font-bold text-slate-800 mb-3">Inspirasi Tema Kokurikuler Resmi:</label>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-slate-700">
+                                <label class="flex items-center space-x-3 cursor-pointer"><input type="radio" name="tema-kegiatan" value="Generasi Sehat dan Bugar" checked class="text-blue-600 focus:ring-blue-500 w-4 h-4"> <span>a) Generasi Sehat dan Bugar</span></label>
+                                <label class="flex items-center space-x-3 cursor-pointer"><input type="radio" name="tema-kegiatan" value="Peduli dan Berbagi" class="text-blue-600 focus:ring-blue-500 w-4 h-4"> <span>b) Peduli dan Berbagi</span></label>
+                                <label class="flex items-center space-x-3 cursor-pointer"><input type="radio" name="tema-kegiatan" value="Aku Cinta Indonesia" class="text-blue-600 focus:ring-blue-500 w-4 h-4"> <span>c) Aku Cinta Indonesia</span></label>
+                                <label class="flex items-center space-x-3 cursor-pointer"><input type="radio" name="tema-kegiatan" value="Hidup Hemat dan Produktif" class="text-blue-600 focus:ring-blue-500 w-4 h-4"> <span>d) Hidup Hemat dan Produktif</span></label>
+                                <label class="flex items-center space-x-3 cursor-pointer"><input type="radio" name="tema-kegiatan" value="Berkarya untuk Sesama dan Bangsa" class="text-blue-600 focus:ring-blue-500 w-4 h-4"> <span>e) Berkarya untuk Sesama dan Bangsa</span></label>
+                                <label class="flex items-center space-x-3 cursor-pointer"><input type="radio" name="tema-kegiatan" value="Gaya Hidup Berkelanjutan" class="text-blue-600 focus:ring-blue-500 w-4 h-4"> <span>f) Gaya Hidup Berkelanjutan</span></label>
+                                <label class="flex items-center space-x-3 cursor-pointer"><input type="radio" name="tema-kegiatan" value="Lingkunganku Sehat Aku Kuat" class="text-blue-600 focus:ring-blue-500 w-4 h-4"> <span>g) Lingkunganku Sehat Aku Kuat (Tema Lokal)</span></label>
+                                <label class="flex items-center space-x-3 cursor-pointer"><input type="radio" name="tema-kegiatan" value="Sekolahku Ramah Anak" class="text-blue-600 focus:ring-blue-500 w-4 h-4"> <span>h) Sekolahku Ramah Anak</span></label>
+                                <div class="flex items-center space-x-2">
+                                    <input type="radio" name="tema-kegiatan" value="Lainnya" id="tema-lainnya-radio" class="text-blue-600 focus:ring-blue-500 w-4 h-4">
+                                    <input type="text" id="input-tema-lainnya" placeholder="Tema Lainnya (tulis sendiri)" class="border border-slate-300 rounded-lg px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 w-full">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- MODUL WIDGET ASISTEN GENERATOR OTOMATIS -->
+                        <div class="bg-blue-50 p-5 rounded-xl border border-blue-200 space-y-3">
+                            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                <div>
+                                    <h4 class="text-sm font-bold text-blue-900"><i class="fa-solid fa-wand-magic-sparkles mr-1.5"></i> Asisten Rencana Otomatis (Rekomendasi Alternatif)</h4>
+                                    <p class="text-xs text-blue-700">Jika Anda belum memiliki bahan input detail perencanaan, silakan pilih salah satu jenis alternatif di bawah untuk mengisi semua bidang secara otomatis berdasarkan pilihan Tema dan Mata Pelajaran Terkait.</p>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <select id="select-alternatif-variasi" class="border border-blue-300 rounded-lg px-3 py-2 text-xs focus:outline-none bg-white font-medium text-slate-800">
+                                        <option value="1">Alternatif A: Proyek Karya Kreatif (PjBL)</option>
+                                        <option value="2">Alternatif B: Studi Kasus & Investigasi Lapangan</option>
+                                        <option value="3">Alternatif C: Kampanye & Aksi Nyata (Service Learning)</option>
+                                    </select>
+                                    <button type="button" onclick="applyAlternativeTemplate()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-xs font-semibold transition-colors flex items-center shrink-0">
+                                        <i class="fa-solid fa-bolt mr-1"></i> Terapkan Rencana
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- DETAIL PERENCANAAN PEMBELAJARAN (TEXTAREAS) -->
+                        <div class="space-y-4">
+                            <h4 class="text-md font-bold text-slate-800 border-b pb-2"><i class="fa-solid fa-file-invoice mr-2 text-blue-600"></i>Detail Rincian Rencana</h4>
+                            
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1">Tujuan Pembelajaran *</label>
+                                <textarea id="input-tujuan-pembelajaran" rows="4" placeholder="Jelaskan tujuan pembelajaran yang ingin dicapai..." class="w-full border border-slate-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1">Bentuk Kegiatan (Detail) *</label>
+                                <textarea id="input-bentuk-kegiatan" rows="4" placeholder="Jelaskan bentuk kegiatan rencana detail..." class="w-full border border-slate-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1">Praktik Pedagogis *</label>
+                                <textarea id="input-pedagogis" rows="4" placeholder="Jelaskan praktik pedagogik yang akan diterapkan..." class="w-full border border-slate-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1">Lingkungan Belajar *</label>
+                                <textarea id="input-lingkungan-belajar" rows="4" placeholder="Jelaskan setting lingkungan belajar..." class="w-full border border-slate-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1">Kemitraan Pembelajaran *</label>
+                                <textarea id="input-kemitraan" rows="4" placeholder="Jelaskan kemitraan dengan pihak luar..." class="w-full border border-slate-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1">Pemanfaatan Digital *</label>
+                                <textarea id="input-digital" rows="4" placeholder="Jelaskan pemanfaatan teknologi digital..." class="w-full border border-slate-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1">Kegiatan (Sub kegiatan Detail) *</label>
+                                <textarea id="input-sub-kegiatan" rows="6" placeholder="Jelaskan sub-kegiatan secara detail dengan alokasi waktu..." class="w-full border border-slate-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1">Asesmen *</label>
+                                <textarea id="input-asesmen" rows="6" placeholder="Jelaskan metode dan instrumen asesmen..." class="w-full border border-slate-300 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="mt-6 flex justify-end">
+                        <button type="button" onclick="generatePreview(); switchTab('hasil')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-lg text-sm font-medium transition-colors"><i class="fa-solid fa-wand-magic-sparkles mr-1.5"></i> Generate & Lihat Hasil</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 4: PRATINJAU DOKUMEN -->
+            <section id="tab-hasil" class="hidden space-y-4">
+                
+                <!-- ASISTEN GENERATOR DESKRIPSI RAPOR KOKURIKULER -->
+                <div class="no-print bg-slate-900 text-slate-100 p-6 rounded-xl border border-slate-800 shadow-md max-w-[210mm] mx-auto mb-4 space-y-4">
+                    <div class="border-b border-slate-800 pb-2">
+                        <h4 class="text-sm font-bold text-white flex items-center"><i class="fa-solid fa-graduation-cap text-blue-400 mr-2"></i>Asisten Pembuat Deskripsi Rapor Murid (Lampiran Resmi Hal. 73)</h4>
+                        <p class="text-[11px] text-slate-400">Tulis nilai murid untuk menghasilkan narasi deskripsi kokurikuler di rapor secara otomatis.</p>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-3 text-xs text-slate-800">
+                        <div class="md:col-span-2">
+                            <label class="block text-slate-300 font-medium mb-1">Nama Murid</label>
+                            <input type="text" id="rapor-nama-murid" value="Putra" class="w-full rounded px-3 py-1.5 bg-slate-800 text-white border border-slate-700 focus:outline-none focus:border-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-slate-300 font-medium mb-1">Hasil Dimensi Utama</label>
+                            <select id="rapor-nilai-dimensi-utama" class="w-full rounded px-2 py-1.5 bg-slate-800 text-white border border-slate-700 focus:outline-none">
+                                <option value="Sangat Baik">Sangat Baik (SB)</option>
+                                <option value="Baik" selected>Baik (B)</option>
+                                <option value="Cukup">Cukup (C)</option>
+                                <option value="Kurang">Kurang (K)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-slate-300 font-medium mb-1">Pilih Alur Inspirasi</label>
+                            <select id="rapor-inspirasi-style" class="w-full rounded px-2 py-1.5 bg-slate-800 text-white border border-slate-700 focus:outline-none">
+                                <option value="1">Inpirasi 1 (Fokus Capaian)</option>
+                                <option value="2">Inspirasi 2 (Berbasis Solusi)</option>
+                                <option value="3">Inspirasi 3 (Berbasis Tema)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-950 p-4 rounded-lg border border-slate-800 text-xs relative">
+                        <div class="absolute top-2 right-2 text-[10px] text-emerald-400 font-bold bg-emerald-950 px-1.5 py-0.5 rounded">OUTPUT RAPOR</div>
+                        <p class="text-slate-400 font-semibold mb-1">Teks Deskripsi Kokurikuler:</p>
+                        <p id="rapor-output-text" class="text-slate-200 leading-relaxed font-mono whitespace-pre-line"></p>
+                    </div>
+                </div>
+
+                <div class="no-print flex justify-between items-center bg-white p-4 rounded-xl border border-slate-200 shadow-sm max-w-[210mm] mx-auto">
+                    <span class="text-sm text-slate-500"><i class="fa-solid fa-circle-info mr-1 text-blue-500"></i> Dioptimalkan untuk cetak portrait A4 (Margin kiri disiapkan untuk ruang jilid).</span>
+                    <div class="flex space-x-2">
+                        <button onclick="exportToWord()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center transition-all shadow-sm">
+                            <i class="fa-solid fa-file-word mr-2"></i> Ekspor Word
+                        </button>
+                        <button onclick="window.print()" class="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center transition-all shadow-sm">
+                            <i class="fa-solid fa-print mr-2"></i> Cetak Dokumen
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Editor Format Teks Mini -->
+                <div class="no-print flex items-center space-x-2 bg-slate-800 text-white p-2 rounded-lg shadow-md max-w-[210mm] mx-auto mb-2 text-xs">
+                    <span class="font-semibold text-slate-400 mr-2 border-r border-slate-700 pr-2"><i class="fa-solid fa-pen-nib mr-1 text-blue-400"></i> Format Teks Aktif:</span>
+                    <button onclick="formatText('bold')" class="p-1 hover:bg-slate-700 rounded transition-colors w-7 h-7 flex items-center justify-center font-bold">B</button>
+                    <button onclick="formatText('italic')" class="p-1 hover:bg-slate-700 rounded transition-colors w-7 h-7 flex items-center justify-center italic">I</button>
+                    <button onclick="formatText('underline')" class="p-1 hover:bg-slate-700 rounded transition-colors w-7 h-7 flex items-center justify-center underline">U</button>
+                    <span class="text-slate-600">|</span>
+                    <button onclick="formatText('insertUnorderedList')" class="p-1 hover:bg-slate-700 rounded transition-colors w-7 h-7 flex items-center justify-center"><i class="fa-solid fa-list-ul"></i></button>
+                    <button onclick="formatText('insertOrderedList')" class="p-1 hover:bg-slate-700 rounded transition-colors w-7 h-7 flex items-center justify-center"><i class="fa-solid fa-list-ol"></i></button>
+                    <span class="text-slate-600">|</span>
+                    <button onclick="formatText('removeFormat')" class="p-1 hover:bg-slate-700 rounded transition-colors w-7 h-7 flex items-center justify-center"><i class="fa-solid fa-eraser text-red-400"></i></button>
+                </div>
+
+                <!-- Lembar Area Cetak Standar A4 Portrait -->
+                <div id="print-area" class="page-container shadow-2xl text-justify">
+                    
+                    <!-- COVER PAGE (SAMPUL DIGITAL MODERN) -->
+                    <div id="cover-page" class="flex flex-col justify-between items-center text-center h-[245mm] w-full mb-[20mm]">
+                        <div class="w-full flex flex-col items-center justify-between h-full border-4 border-double border-blue-900 p-8 rounded-lg relative overflow-hidden">
+                            <div class="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-blue-600"></div>
+                            <div class="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-blue-600"></div>
+                            <div class="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-blue-600"></div>
+                            <div class="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-blue-600"></div>
+
+                            <div class="space-y-4 mt-8 w-full">
+                                <h1 class="text-[16pt] font-black tracking-wider text-slate-900 uppercase leading-snug">PERENCANAAN PEMBELAJARAN KOKURIKULER</h1>
+                                <div class="w-24 h-1 bg-blue-600 mx-auto rounded"></div>
+                                <p class="text-[13pt] font-bold text-slate-800 uppercase leading-snug" id="view-cover-tema">GENERASI SEHAT DAN BUGAR</p>
+                                <p class="text-[12pt] font-medium text-slate-600">Tahun Pelajaran: <span id="view-cover-tp">2025/2026</span></p>
+                            </div>
+
+                            <div class="my-6 space-y-6">
+                                <div class="w-40 h-40 mx-auto flex items-center justify-center p-2 border border-slate-200 rounded-2xl bg-white shadow-sm">
+                                    <img id="view-cover-logo" src="https://iili.io/CdQPI9V.png" alt="Logo Instansi" class="max-w-full max-h-full object-contain">
+                                </div>
+                                <div class="space-y-1">
+                                    <p class="text-[11px] tracking-widest text-slate-400 uppercase font-bold">Disusun Oleh:</p>
+                                    <p class="text-base font-bold text-slate-900" id="view-cover-nama-koordinator">Budi, S.Pd.</p>
+                                </div>
+                            </div>
+
+                            <div class="space-y-1.5 mb-8 w-full">
+                                <p class="text-[13pt] font-extrabold text-slate-900 uppercase" id="view-cover-pemda">PEMERINTAH KABUPATEN TULANG BAWANG</p>
+                                <p class="text-[13pt] font-bold text-slate-800 uppercase" id="view-cover-dinas">DINAS PENDIDIKAN DAN KEBUDAYAAN</p>
+                                <p class="text-[15pt] font-black text-blue-900 uppercase" id="view-cover-sekolah">SDN 1 MERDEKA JAYA</p>
+                                <p class="text-sm font-semibold text-slate-600 tracking-wide mt-2">Tahun <span id="view-cover-tahun">2026</span></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- HALAMAN UTAMA PERENCANAAN KOKURIKULER -->
+                    <div class="text-center pb-3 mb-6">
+                        <h2 class="text-base font-bold tracking-wide uppercase">PERENCANAAN KOKURIKULER</h2>
+                        <h3 class="text-sm font-bold text-slate-800 uppercase italic" id="view-title-tema">aaaaa</h3>
+                        <p class="text-xs text-slate-600">Tahun Pelajaran <span id="view-title-tp">2025/2026</span></p>
+                    </div>
+
+                    <!-- TABEL METADATA -->
+                    <div class="identitas-left-tab text-xs mb-6">
+                        <table class="w-full table-fixed border-collapse">
+                            <tbody>
+                                <tr>
+                                    <td class="w-[180px] py-1 font-semibold text-slate-900">Nama Satuan Pendidikan</td>
+                                    <td class="w-[15px] py-1">:</td>
+                                    <td id="view-sekolah" class="py-1 text-slate-800 font-bold"></td>
+                                </tr>
+                                <tr>
+                                    <td class="py-1 font-semibold text-slate-900">Kelas</td>
+                                    <td class="py-1">:</td>
+                                    <td id="view-kelas" class="py-1 text-slate-800"></td>
+                                </tr>
+                                <tr>
+                                    <td class="py-1 font-semibold text-slate-900">Jenis Kokurikuler</td>
+                                    <td class="py-1">:</td>
+                                    <td id="view-jenis-kokurikuler" class="py-1 text-slate-800"></td>
+                                </tr>
+                                <tr>
+                                    <td class="py-1 font-semibold text-slate-900">Tema</td>
+                                    <td class="py-1">:</td>
+                                    <td id="view-tema" class="py-1 text-slate-800"></td>
+                                </tr>
+                                <tr>
+                                    <td class="py-1 font-semibold text-slate-900">Mata Pelajaran Terkait</td>
+                                    <td class="py-1">:</td>
+                                    <td id="view-mapel-terkait" class="py-1 text-slate-800"></td>
+                                </tr>
+                                <tr>
+                                    <td class="py-1 font-semibold text-slate-900">Alokasi Waktu</td>
+                                    <td class="py-1">:</td>
+                                    <td id="view-alokasi" class="py-1 text-slate-800"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- KONTEN RINCIAN SEKTOR KOKURIKULER (STRUKTUR RUNTUT SESUAI FORM & PANDUAN) -->
+                    <div class="space-y-5 text-xs">
+                        
+                        <!-- A. Dimensi Profil Lulusan -->
+                        <div class="modul-card">
+                            <h4 class="font-bold text-sm text-slate-900 bg-blue-50 p-2 rounded border border-blue-100 mb-2">A. Dimensi Profil Lulusan</h4>
+                            <div class="pl-4 text-slate-700 list-disc leading-relaxed whitespace-pre-line" id="view-dimensi">
+                                - Penalaran Kritis<br>- Kolaborasi
+                            </div>
+                        </div>
+
+                        <!-- B. Tujuan Pembelajaran -->
+                        <div class="modul-card">
+                            <h4 class="font-bold text-sm text-slate-900 bg-blue-50 p-2 rounded border border-blue-100 mb-2">B. Tujuan Pembelajaran</h4>
+                            <div class="pl-4 text-slate-700 leading-relaxed whitespace-pre-line editable-live-zone" id="view-tujuan-pembelajaran" contenteditable="true">
+                                <i class="fa-solid fa-pencil live-edit-icon"></i>
+                            </div>
+                        </div>
+
+                        <!-- C. Bentuk Kegiatan -->
+                        <div class="modul-card">
+                            <h4 class="font-bold text-sm text-slate-900 bg-blue-50 p-2 rounded border border-blue-100 mb-2">C. Bentuk Kegiatan</h4>
+                            <div class="pl-4 text-slate-700 leading-relaxed whitespace-pre-line editable-live-zone" id="view-bentuk-kegiatan" contenteditable="true">
+                                <i class="fa-solid fa-pencil live-edit-icon"></i>
+                            </div>
+                        </div>
+
+                        <!-- D. Praktik Pedagogis -->
+                        <div class="modul-card">
+                            <h4 class="font-bold text-sm text-slate-900 bg-blue-50 p-2 rounded border border-blue-100 mb-2">D. Praktik Pedagogis</h4>
+                            <div class="pl-4 text-slate-700 leading-relaxed whitespace-pre-line editable-live-zone" id="view-pedagogis" contenteditable="true">
+                                <i class="fa-solid fa-pencil live-edit-icon"></i>
+                            </div>
+                        </div>
+
+                        <!-- E. Lingkungan Belajar -->
+                        <div class="modul-card">
+                            <h4 class="font-bold text-sm text-slate-900 bg-blue-50 p-2 rounded border border-blue-100 mb-2">E. Lingkungan Belajar</h4>
+                            <div class="pl-4 text-slate-700 leading-relaxed whitespace-pre-line editable-live-zone" id="view-lingkungan" contenteditable="true">
+                                <i class="fa-solid fa-pencil live-edit-icon"></i>
+                            </div>
+                        </div>
+
+                        <!-- F. Kemitraan Pembelajaran -->
+                        <div class="modul-card">
+                            <h4 class="font-bold text-sm text-slate-900 bg-blue-50 p-2 rounded border border-blue-100 mb-2">F. Kemitraan Pembelajaran</h4>
+                            <div class="pl-4 text-slate-700 leading-relaxed whitespace-pre-line editable-live-zone" id="view-kemitraan" contenteditable="true">
+                                <i class="fa-solid fa-pencil live-edit-icon"></i>
+                            </div>
+                        </div>
+
+                        <!-- G. Pemanfaatan Digital -->
+                        <div class="modul-card">
+                            <h4 class="font-bold text-sm text-slate-900 bg-blue-50 p-2 rounded border border-blue-100 mb-2">G. Pemanfaatan Digital</h4>
+                            <div class="pl-4 text-slate-700 leading-relaxed whitespace-pre-line editable-live-zone" id="view-digital" contenteditable="true">
+                                <i class="fa-solid fa-pencil live-edit-icon"></i>
+                            </div>
+                        </div>
+
+                        <!-- H. Kegiatan -->
+                        <div class="modul-card">
+                            <h4 class="font-bold text-sm text-slate-900 bg-blue-50 p-2 rounded border border-blue-100 mb-2">H. Kegiatan</h4>
+                            <div class="pl-4 text-slate-700 leading-relaxed whitespace-pre-line editable-live-zone" id="view-sub-kegiatan" contenteditable="true">
+                                <i class="fa-solid fa-pencil live-edit-icon"></i>
+                            </div>
+                        </div>
+
+                        <!-- I. Asesmen -->
+                        <div class="modul-card assessment-section">
+                            <h4 class="font-bold text-sm text-slate-900 bg-blue-50 p-2 rounded border border-blue-100 mb-2">I. Asesmen</h4>
+                            <div class="pl-4 text-slate-700 leading-relaxed whitespace-pre-line editable-live-zone mb-2" id="view-asesmen" contenteditable="true">
+                                <i class="fa-solid fa-pencil live-edit-icon"></i>
+                            </div>
+                            <div class="pl-4 text-slate-500 italic text-[11px] mt-2">
+                                Instrumen: Rubrik penilaian, lembar observasi, ceklist, jurnal refleksi, dan portofolio.
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- BLOK TANDA TANGAN PEJABAT -->
+                    <div class="ttd-section text-xs w-full leading-normal">
+                        <table class="w-full table-fixed border-collapse bg-transparent">
+                            <tbody>
+                                <tr>
+                                    <td class="w-1/2 text-center py-1"></td>
+                                    <td id="row1-kanan" class="w-1/2 text-center py-1 text-slate-900"></td>
+                                </tr>
+                                <tr>
+                                    <td class="text-center py-1 text-slate-900">Mengetahui,</td>
+                                    <td class="text-center py-1 text-slate-900">Koordinator Kokurikuler,</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-center py-1 text-slate-900">Kepala Sekolah</td>
+                                    <td class="text-center py-1"></td>
+                                </tr>
+                                <tr>
+                                    <td class="text-center h-12 py-1"></td>
+                                    <td class="text-center h-12 py-1"></td>
+                                </tr>
+                                <tr>
+                                    <td id="row6-kiri-nama" class="text-center py-1 font-bold text-slate-900"></td>
+                                    <td id="row6-kanan-nama" class="text-center py-1 font-bold text-slate-900"></td>
+                                </tr>
+                                <tr>
+                                    <td id="row7-kiri-nip" class="text-center py-0.5 text-slate-700">NIP </td>
+                                    <td id="row7-kanan-nip" class="text-center py-0.5 text-slate-700">NIP </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <!-- LOGIKA JAVASCRIPT APLIKASI -->
+    <script>
+        document.getElementById('current-date').innerText = new Date().toLocaleDateString('id-ID', {
+            weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+        });
+
+        const inputIds = [
+            'input-nama-koordinator', 'input-nip-koordinator', 'input-nama-sekolah', 'input-alamat-sekolah',
+            'input-nama-kepsek', 'input-nip-kepsek', 'input-tempat-ttd', 'input-tanggal-ttd',
+            'input-logo-cover', 'input-tahun-cover', 'input-pemda-cover', 'input-dinas-cover',
+            'input-mapel-terkait', 'input-kelas', 'input-tp-tahun', 'input-rentang-waktu',
+            'input-jenis-kokurikuler', 'input-alokasi-jp', 'input-tujuan-pembelajaran',
+            'input-bentuk-kegiatan', 'input-pedagogis', 'input-lingkungan-belajar',
+            'input-kemitraan', 'input-digital', 'input-sub-kegiatan', 'input-asesmen',
+            'input-tema-lainnya'
+        ];
+
+        // FUNGSI NAVIGASI MENU UTAMA
+        function switchTab(tabId) {
+            const tabs = ['beranda', 'identitas', 'perencanaan', 'hasil'];
+            tabs.forEach(tab => {
+                const element = document.getElementById(`tab-${tab}`);
+                const menuBtn = document.getElementById(`menu-${tab}`);
+                if (tab === tabId) {
+                    if (element) element.classList.remove('hidden');
+                    if (menuBtn) {
+                        menuBtn.className = "w-full flex items-center justify-start text-left space-x-3.5 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-150 bg-blue-600 text-white menu-btn";
+                    }
+                } else {
+                    if (element) element.classList.add('hidden');
+                    if (menuBtn) {
+                        menuBtn.className = "w-full flex items-center justify-start text-left space-x-3.5 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-150 hover:bg-slate-800 hover:text-white text-slate-400 menu-btn";
+                    }
+                }
+            });
+        }
+
+        // Menyimpan status masukan formulir secara otomatis
+        function saveAllInputs() {
+            try {
+                inputIds.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) {
+                        localStorage.setItem(id, el.value);
+                    }
+                });
+
+                const checkedDimensi = Array.from(document.querySelectorAll('input[name="dimensi"]:checked')).map(el => el.value);
+                localStorage.setItem('dimensi_selected_kokurikuler', JSON.stringify(checkedDimensi));
+
+                const checkedTema = document.querySelector('input[name="tema-kegiatan"]:checked');
+                if (checkedTema) {
+                    localStorage.setItem('tema_kegiatan_selected', checkedTema.value);
+                }
+            } catch (err) {
+                console.warn("Storage save error: ", err);
+            }
+        }
+
+        // Kalkulator Alokasi Waktu JP Otomatis
+        function suggestAlokasiWaktu() {
+            try {
+                const kelas = document.getElementById('input-kelas').value;
+                const rentang = document.getElementById('input-rentang-waktu').value;
+                const alokasiInput = document.getElementById('input-alokasi-jp');
+                const suggestLabel = document.getElementById('label-rekomendasi-jp');
+                
+                if (rentang === 'kustom') {
+                    suggestLabel.innerText = "Kustom JP Mandiri";
+                    return;
+                }
+
+                const jpPerMinggu = (kelas === "1" || kelas === "2") ? 6 : 7;
+                
+                let kalkulasiJP = 0;
+                let deskripsiKeterangan = "";
+
+                if (rentang === "minggu") {
+                    kalkulasiJP = jpPerMinggu;
+                    deskripsiKeterangan = `Saran: 1 Minggu (${kalkulasiJP} JP)`;
+                } else if (rentang === "semester") {
+                    const mingguAktif = (kelas === "6") ? 16 : 18; 
+                    kalkulasiJP = jpPerMinggu * mingguAktif;
+                    deskripsiKeterangan = `Saran: 1 Semester (${kalkulasiJP} JP)`;
+                } else if (rentang === "tahun") {
+                    if (kelas === "1" || kelas === "2") {
+                        kalkulasiJP = 216;
+                    } else if (kelas === "3" || kelas === "4" || kelas === "5") {
+                        kalkulasiJP = 252;
+                    } else if (kelas === "6") {
+                        kalkulasiJP = 224;
+                    }
+                    deskripsiKeterangan = `Saran: 1 Tahun (${kalkulasiJP} JP)`;
+                }
+
+                alokasiInput.value = kalkulasiJP;
+                suggestLabel.innerText = deskripsiKeterangan;
+                saveAllInputs();
+            } catch (err) {
+                console.warn("Calculation error: ", err);
+            }
+        }
+
+        // Memuat status masukan formulir dari penyimpanan lokal
+        function loadSavedData() {
+            try {
+                inputIds.forEach(id => {
+                    const val = localStorage.getItem(id);
+                    const el = document.getElementById(id);
+                    if (el && val !== null) {
+                        el.value = val;
+                    }
+                });
+
+                const savedDimensi = localStorage.getItem('dimensi_selected_kokurikuler');
+                if (savedDimensi) {
+                    const checkedValues = JSON.parse(savedDimensi);
+                    document.querySelectorAll('input[name="dimensi"]').forEach(el => {
+                        el.checked = checkedValues.includes(el.value);
+                    });
+                }
+
+                const savedTema = localStorage.getItem('tema_kegiatan_selected');
+                if (savedTema) {
+                    const targetRadio = document.querySelector(`input[name="tema-kegiatan"][value="${savedTema}"]`);
+                    if (targetRadio) {
+                        targetRadio.checked = true;
+                    }
+                }
+                updateIdentitas();
+                suggestAlokasiWaktu();
+            } catch (err) {
+                console.warn("Storage load error: ", err);
+            }
+        }
+
+        // FUNGSI ASISTEN GENERATOR OTOMATIS BERDASARKAN TEMA & MAPEL TERKAIT
+        function applyAlternativeTemplate() {
+            const subjects = document.getElementById('input-mapel-terkait').value.trim() || "IPAS, Matematika, Bahasa Indonesia";
+            
+            let selectedTema = "";
+            const checkedTema = document.querySelector('input[name="tema-kegiatan"]:checked');
+            if (checkedTema) {
+                selectedTema = checkedTema.value;
+                if (selectedTema === "Lainnya") {
+                    selectedTema = document.getElementById('input-tema-lainnya').value.trim() || "Tema Kokurikuler Mandiri";
+                }
+            } else {
+                selectedTema = "Generasi Sehat dan Bugar";
+            }
+
+            const variation = document.getElementById('select-alternatif-variasi').value;
+
+            let tp = "";
+            let bk = "";
+            let pp = "";
+            let lb = "";
+            let kp = "";
+            let pd = "";
+            let subK = "";
+            let asesmen = "";
+
+            if (variation === "1") { 
+                tp = `Setelah mengikuti kegiatan kokurikuler bertema "${selectedTema}" yang diintegrasikan dengan materi dari mata pelajaran terkait yaitu ${subjects}, peserta didik diharapkan mampu:
+1. Merancang produk kreatif inovatif secara kolaboratif yang mencerminkan nilai luhur ${selectedTema}.
+2. Mengaplikasikan konsep dasar praktis dari materi ${subjects} ke dalam produk akhir kelompok.
+3. Berbagi peran secara aktif dan bertanggung jawab dalam proses perancangan produk.
+4. Memaparkan hasil karya di depan publik dengan percaya diri, komunikatif, dan terstruktur.`;
+
+                bk = `Kegiatan dilaksanakan menggunakan pendekatan Project-Based Learning (PjBL) untuk menghasilkan karya nyata:
+- Sesi pemetaan konsep ide produk menggabungkan muatan teoritis ${subjects} dengan urgensi tema "${selectedTema}".
+- Pembuatan rancangan sketsa produk menggunakan kombinasi bahan lingkungan sekitar atau media visual.
+- Eksperimen penciptaan dan perakitan karya kolaboratif dalam kelompok heterogen.
+- Pelaksanaan Gelar Karya (Exhibition) di halaman sekolah untuk mengenalkan fungsi produk kepada dewan guru, komite, dan rekan sebaya.`;
+
+                pp = `Strategi pedagogis berpusat pada siswa:
+- Pembelajaran Berbasis Proyek (Project-Based Learning) untuk melatih kemandirian dan berpikir kritis.
+- Scaffolding sistematis dari koordinator guna memperkuat pemahaman integrasi materi ${subjects}.
+- Diferensiasi produk kelompok sesuai dengan minat bakat spesifik siswa (misal: fokus ke desain fisik, kriya, atau media penyuluhan digital).`;
+
+                lb = `Lingkungan belajar ditata fleksibel dan kreatif:
+- Ruang kelas diformat sebagai ruang kerja bersama (co-working space) dengan tatanan meja melingkar.
+- Pemanfaatan area terbuka hijau sekolah untuk pencarian inspirasi desain.
+- Penyediaan sudut penyimpanan khusus instrumen dan bahan daur ulang (creative corner).`;
+
+                kp = `Kemitraan yang diintegrasikan:
+- Berkolaborasi dengan Komite Sekolah/Orang Tua murid sebagai fasilitator penyedia bahan baku penunjang karya kelompok.
+- Mengundang narasumber praktisi atau pelaku usaha lokal setempat untuk memberikan evaluasi masukan guna menyempurnakan produk karya anak.`;
+
+                pd = `Pemanfaatan instrumen digital pendukung:
+- Menggunakan mesin pencari aman di bawah pengawasan untuk mengeksplorasi referensi video rancangan produk.
+- Menggunakan aplikasi desain grafis ramah anak untuk membuat rancangan poster kemasan atau label produk secara estetik.
+- Dokumentasi digital proses perakitan menggunakan perangkat gawai sekolah.`;
+
+                subK = `Rincian Tahapan Kegiatan Kerja Kelompok:
+
+1. Tahap Orientasi Masalah & Ide (2 JP):
+- Menyaksikan video pemantik seputar tantangan "${selectedTema}".
+- Menemukan kaitan peran disiplin ilmu ${subjects} sebagai jalan keluar pemecahan masalah.
+
+2. Tahap Desain Perencanaan (2 JP):
+- Menyusun rancangan sketsa gambar produk beserta pembagian tugas anggota.
+- Konsultasi kegunaan rancangan kepada koordinator kokurikuler.
+
+3. Tahap Konstruksi & Perakitan (2 JP):
+- Proses aksi kolaboratif merakit produk dengan mengutamakan keselamatan kerja.
+- Uji coba fungsi produk tahap awal.
+
+4. Tahap Pameran Karya & Penilaian (1 JP):
+- Penyajian produk pada meja stan pameran kelas.
+- Sesi tanya jawab dan presentasi ringkas kepada pengunjung pameran.`;
+
+                asesmen = `Asesmen dilakukan secara komprehensif mengacu pada proses dan produk:
+
+A. Asesmen Formatif (Proses):
+- Pengamatan rubrik kerja sama tim dan tanggung jawab selama pembuatan proyek.
+- Catatan jurnal harian guru mengenai kemajuan perancangan produk.
+
+B. Asesmen Sumatif (Akhir):
+- Rubrik penilaian kelayakan fungsi, estetika, dan inovasi dari produk akhir yang dihasilkan.
+- Penilaian performa komunikasi siswa saat presentasi pameran.
+
+C. Asesmen Otentik:
+- Jurnal refleksi mandiri siswa tentang kesulitan yang dihadapi dan cara menyelesaikannya secara gotong-royong.`;
+
+            } else if (variation === "2") { 
+                tp = `Setelah mengikuti kegiatan kokurikuler bertema "${selectedTema}" yang dikaji berdasarkan sudut pandang disiplin ilmu ${subjects}, peserta didik diharapkan mampu:
+1. Mengidentifikasi isu aktual di lingkungan sekolah yang beririsan langsung dengan tema "${selectedTema}".
+2. Menyusun pertanyaan kunci dan instrumen observasi sederhana berbasis konsep keilmuan ${subjects}.
+3. Menggunakan data temuan lapangan secara jujur, objektif, dan logis.
+4. Merumuskan alternatif rekomendasi solusi realistis yang dapat dijalankan oleh warga sekolah.`;
+
+                bk = `Kegiatan dilaksanakan melalui investigasi ilmiah (Inquiry/Case Study):
+- Sesi pengamatan langsung (observasi area sekolah) untuk memetakan kondisi riil terkait tema.
+- Wawancara terencana dengan informan kunci (kepala sekolah, petugas kantin, penjaga sekolah, atau teman sebaya).
+- Pengolahan data kuantitatif/kualitatif berkelompok menjadi bagan pemecahan masalah (diagram tulang ikan/fishbone).
+- Pembuatan mading solusi berisi usulan program perbaikan lingkungan sekolah.`;
+
+                pp = `Strategi pedagogis aktif:
+- Inquiry-Based Learning untuk memicu rasa ingin tahu ilmiah siswa.
+- Case-Based Learning dengan membedah tantangan nyata di lingkungan terdekat.
+- Diskusi kelompok reflektif berlandaskan pertanyaan pemantik HOTS terkait integrasi ${subjects}.`;
+
+                lb = `Lingkungan belajar meluas di luar dinding kelas:
+- Seluruh area fasilitas umum sekolah (kantin, taman, toilet, perpustakaan) dijadikan area riset aktif.
+- Perpustakaan difungsikan sebagai pusat pencarian data rujukan sekunder.
+- Penggunaan papan pajangan kolaboratif di kelas untuk memetakan hasil analisis kelompok.`;
+
+                kp = `Kemitraan yang terjalin meliputi:
+- Melibatkan komunitas warga sekolah (petugas kebersihan, pengelola kantin) sebagai mitra narasumber riset lapangan.
+- Kerja sama dengan petugas Puskesmas atau dinas lingkungan hidup terdekat untuk memandu ketepatan teknik analisis anak.`;
+
+                pd = `Integrasi pemanfaatan teknologi digital:
+- Pengolahan data mentah hasil temuan observasi menjadi tabel atau diagram visual sederhana lewat spreadsheet.
+- Penggunaan platform penulisan kolaboratif daring atau slide interaktif untuk menyusun bahan presentasi kelompok.
+- Mengisi kuis refleksi konseptual menggunakan instrumen digital mandiri.`;
+
+                subK = `Rincian Tahapan Kegiatan Investigasi:
+
+1. Tahap Identifikasi Isu & Instrumen (2 JP):
+- Menganalisis latar belakang permasalahan "${selectedTema}".
+- Membuat daftar pertanyaan wawancara dan lembar ceklis observasi terkait ${subjects}.
+
+2. Tahap Pengambilan Data Lapangan (2 JP):
+- Menyebar ke area observasi kelompok untuk mengambil data riil.
+- Melakukan proses wawancara singkat secara sopan dan terarah.
+
+3. Tahap Tabulasi & Analisis Data (2 JP):
+- Mengelompokkan data temuan observasi di dalam kelas.
+- Menganalisis keterkaitan temuan dengan materi dasar ${subjects}.
+
+4. Tahap Rekomendasi Solusi & Evaluasi (1 JP):
+- Menuliskan usulan solusi pemecahan dalam bentuk presentasi/infografis.
+- Menyampaikan rekomendasi langsung kepada pihak manajemen sekolah.`;
+
+                asesmen = `Asesmen ditujukan untuk mengukur kapasitas analitis siswa:
+
+A. Asesmen Formatif (Proses):
+- Penilaian rubrik observasi perilaku ilmiah (kejujuran data, objektivitas, kegigihan riset).
+- Feedback terarah dari koordinator pada lembar instrumen wawancara buatan siswa.
+
+B. Asesmen Sumatif (Akhir):
+- Penilaian kualitas laporan investigasi kelompok (ketepatan simpulan berdasarkan data lapangan).
+- Penilaian kualitas desain infografis rekomendasi pemecahan masalah.
+
+C. Asesmen Otentik:
+- Rubrik penilaian diri (self-assessment) siswa tentang perkembangan cara berpikir kritis mereka selama riset.`;
+
+            } else { 
+                tp = `Setelah mengikuti kegiatan kokurikuler bertema "${selectedTema}" yang diintegrasikan dengan materi ${subjects}, peserta didik diharapkan mampu:
+1. Menyuarakan pesan edukatif yang persuasif terkait kampanye "${selectedTema}" kepada komunitas sekolah.
+2. Membuat media kampanye kreatif (fisik atau digital) yang mengintegrasikan konsep visual/teori dari ${subjects}.
+3. Memimpin aksi keteladanan fisik harian secara konsisten di lingkungan sekolah.
+4. Mengajak rekan sebaya untuk mengadopsi pola perilaku baru yang positif sesuai arah tujuan gerakan.`;
+
+                bk = `Kegiatan dilaksanakan dalam bentuk Kampanye Sosial & Aksi Pengabdian (Service Learning):
+- Pembuatan poster imbauan kreatif, brosur edukasi, atau yel-yel aksi kelompok secara kolaboratif.
+- Sosialisasi orasi keliling secara bergantian dari satu ruang kelas ke ruang kelas lainnya.
+- Praktik aksi teladan fisik langsung secara gotong-royong di area publik sekolah saat jam istirahat.
+- Penandatanganan deklarasi komitmen bersama untuk mendukung gerakan.`;
+
+                pp = `Strategi pedagogis sosial interaktif:
+- Service Learning (Pembelajaran berbasis pengabdian masyarakat sekolah) untuk menanamkan rasa kepedulian sosial.
+- Role playing dan pembimbingan teknik komunikasi persuasif di depan umum.
+- Diskusi reflektif mendalam (debriefing) pasca-aksi sosial untuk melatih kepekaan kemanusiaan siswa.`;
+
+                lb = `Lingkungan belajar interaktif berskala luas:
+- Panggung sekolah, lorong koridor kelas, dan sudut halaman utama sekolah difungsikan sebagai media aksi sosialisasi.
+- Ruang kelas digunakan sebagai pusat latihan orasi dan pembuatan kerajinan poster ajakan kampanye.`;
+
+                kp = `Kemitraan yang diintegrasikan:
+- Kerja sama dengan kepala sekolah dan dewan guru kelas lain untuk meminta izin sosialisasi persuasif di kelas mereka selama 5 menit.
+- Melibatkan orang tua/komite sekolah untuk bersama-sama menandatangani petisi aksi komitmen gerakan kebaikan siswa di rumah.`;
+
+                pd = `Pemanfaatan media digital dalam gerakan aksi:
+- Mengedit rekaman kuantitas kampanye menjadi video pendek edukatif berdurasi 1 menit menggunakan aplikasi ramah anak.
+- Mengunggah poster digital kampanye ke media sosial resmi milik sekolah sebagai sarana syiar gerakan ke luar sekolah.
+- Mengisi angket refleksi dampak gerakan sosial menggunakan formulir digital daring.`;
+
+                subK = `Rincian Tahapan Kegiatan Aksi Kampanye:
+
+1. Tahap Membangun Empati Sosial (2 JP):
+- Mendiskusikan urgensi sosial/lingkungan dari isu "${selectedTema}".
+- Menentukan pesan persuasif utama yang terinspirasi dari materi ${subjects}.
+
+2. Tahap Pembuatan Media & Latihan (2 JP):
+- Membuat poster visual imbauan berkelompok secara kreatif.
+- Latihan bersama cara menyampaikan sosialisasi lisan secara santun dan menarik.
+
+3. Tahap Orasi & Gerakan Aksi Nyata (2 JP):
+- Menyebarkan tim ke koridor sekolah untuk melakukan gerakan fisik teladan langsung.
+- Sosialisasi pesan persuasif ke kelas-kelas sasaran kampanye.
+
+4. Tahap Deklarasi & Refleksi Dampak (1 JP):
+- Memasang papan komitmen janji bersama warga sekolah.
+- Mengadakan evaluasi reflektif bersama koordinator mengenai efektivitas gerakan.`;
+
+                asesmen = `Asesmen ditujukan untuk mengamati perkembangan karakter sosial:
+
+A. Asesmen Formatif (Proses):
+- Observasi keaktifan dan kerukunan anggota kelompok selama merancang media kampanye.
+- Penilaian tingkat partisipasi aktif saat pelaksanaan demonstrasi aksi teladan fisik.
+
+B. Asesmen Sumatif (Akhir):
+- Penilaian estetika pesan persuasif pada media kampanye poster/video hasil karya siswa.
+- Penilaian keberanian dan retorika penyampaian lisan saat bersosialisasi.
+
+C. Asesmen Otentik:
+- Penilaian antar teman (peer-rating) terkait perubahan perilaku nyata sehari-hari setelah aksi selesai.`;
+            }
+
+            document.getElementById('input-tujuan-pembelajaran').value = tp;
+            document.getElementById('input-bentuk-kegiatan').value = bk;
+            document.getElementById('input-pedagogis').value = pp;
+            document.getElementById('input-lingkungan-belajar').value = lb;
+            document.getElementById('input-kemitraan').value = kp;
+            document.getElementById('input-digital').value = pd;
+            document.getElementById('input-sub-kegiatan').value = subK;
+            document.getElementById('input-asesmen').value = asesmen;
+
+            saveAllInputs();
+            generateRaporDescription();
+            
+            const btn = document.querySelector('button[onclick="applyAlternativeTemplate()"]');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-check mr-1"></i> Sukses Diterapkan!';
+            btn.classList.replace('bg-blue-600', 'bg-green-600');
+            setTimeout(() => {
+                btn.innerHTML = originalText;
+                btn.classList.replace('bg-green-600', 'bg-blue-600');
+            }, 2000);
+        }
+
+        // GENERATOR DESKRIPSI RAPOR BERDASARKAN INSPIRASI PANDUAN HALAMAN 73
+        function generateRaporDescription() {
+            try {
+                const nama = document.getElementById('rapor-nama-murid').value.trim() || "Ananda Putra";
+                const nilai = document.getElementById('rapor-nilai-dimensi-utama').value;
+                const style = document.getElementById('rapor-inspirasi-style').value;
+                
+                const checkboxes = document.querySelectorAll('input[name="dimensi"]:checked');
+                let fokusDimensi1 = "Penalaran Kritis";
+                let fokusDimensi2 = "Komunikasi";
+                if (checkboxes.length > 0) {
+                    fokusDimensi1 = checkboxes[0].value;
+                    if (checkboxes.length > 1) {
+                        fokusDimensi2 = checkboxes[1].value;
+                    }
+                }
+
+                const checkedTema = document.querySelector('input[name="tema-kegiatan"]:checked');
+                let temaFinal = checkedTema ? checkedTema.value : "Generasi Sehat dan Bugar";
+                if (temaFinal === "Lainnya") {
+                    temaFinal = getValueOrPlaceholder('input-tema-lainnya') || "Pengembangan Karakter";
+                }
+
+                let output = "";
+                const nilaiKeterangan = (nilai === "Sangat Baik" || nilai === "Baik") ? "sudah baik" : "mulai berkembang";
+
+                if (style === "1") {
+                    output = `Ananda ${nama} ${nilaiKeterangan} dalam ${fokusDimensi1} dengan kemampuan mengidentifikasi isu esensial serta merancang gagasan pemecahan masalah secara mandiri, dan masih perlu berlatih dalam meningkatkan kematangan pada aspek ${fokusDimensi2}.`;
+                } else if (style === "2") {
+                    output = `Ananda ${nama} ${nilaiKeterangan} dalam ${fokusDimensi1} saat aktif berkontribusi mencari solusi praktis terhadap permasalahan yang diselidiki kelompok, dan masih perlu didampingi dalam mengoptimalkan dimensi ${fokusDimensi2}.`;
+                } else {
+                    output = `Ananda ${nama} ${nilaiKeterangan} dalam ${fokusDimensi1} dan masih memerlukan latihan serta bimbingan berkala pada dimensi ${fokusDimensi2} dalam rangkaian pembelajaran kokurikuler bertema ${temaFinal}.`;
+                }
+
+                document.getElementById('rapor-output-text').innerText = output;
+            } catch (e) {
+                console.warn("Rapor generation error: ", e);
+            }
+        }
+
+        function updateIdentitas() {
+            const koor = document.getElementById('input-nama-koordinator').value || document.getElementById('input-nama-koordinator').placeholder;
+            const sekolah = document.getElementById('input-nama-sekolah').value || document.getElementById('input-nama-sekolah').placeholder;
+            document.getElementById('header-nama-guru').innerText = koor;
+            document.getElementById('header-nama-sekolah').innerText = sekolah;
+        }
+
+        function getValueOrPlaceholder(id) {
+            const element = document.getElementById(id);
+            if (!element) return "";
+            return element.value.trim() !== "" ? element.value : element.placeholder;
+        }
+
+        // FUNGSI SINKRONISASI DATA KE PRATINJAU UTAMA (100% AMAN & SINKRON)
+        function generatePreview() {
+            try {
+                const namaKoordinator = getValueOrPlaceholder('input-nama-koordinator');
+                const nipKoordinator = getValueOrPlaceholder('input-nip-koordinator');
+                const namaSekolah = getValueOrPlaceholder('input-nama-sekolah');
+                const alamatSekolah = getValueOrPlaceholder('input-alamat-sekolah');
+                const namaKepsek = getValueOrPlaceholder('input-nama-kepsek');
+                const nipKepsek = getValueOrPlaceholder('input-nip-kepsek');
+                
+                const tempatTtdInput = getValueOrPlaceholder('input-tempat-ttd');
+                const tanggalTtdInput = getValueOrPlaceholder('input-tanggal-ttd');
+
+                const mapelTerkait = getValueOrPlaceholder('input-mapel-terkait');
+                const kelas = document.getElementById('input-kelas').value;
+                const alokasiJP = getValueOrPlaceholder('input-alokasi-jp');
+                const thnPel_input = getValueOrPlaceholder('input-tp-tahun');
+                const jenisKokurikuler = document.getElementById('input-jenis-kokurikuler').value;
+                const rentangWaktu = document.getElementById('input-rentang-waktu').value;
+
+                const checkedTema = document.querySelector('input[name="tema-kegiatan"]:checked');
+                let temaFinal = checkedTema ? checkedTema.value : "Generasi Sehat dan Bugar";
+                if (temaFinal === "Lainnya") {
+                    temaFinal = getValueOrPlaceholder('input-tema-lainnya');
+                }
+
+                const tpText = getValueOrPlaceholder('input-tujuan-pembelajaran');
+                const bkText = getValueOrPlaceholder('input-bentuk-kegiatan');
+                const pedagogisText = getValueOrPlaceholder('input-pedagogis');
+                const lingkunganText = getValueOrPlaceholder('input-lingkungan-belajar');
+                const kemitraanText = getValueOrPlaceholder('input-kemitraan');
+                const digitalText = getValueOrPlaceholder('input-digital');
+                const subKText = getValueOrPlaceholder('input-sub-kegiatan');
+                const asesmenText = getValueOrPlaceholder('input-asesmen');
+
+                const logoCover = getValueOrPlaceholder('input-logo-cover');
+                const tahunCover = getValueOrPlaceholder('input-tahun-cover');
+                const pemdaCover = getValueOrPlaceholder('input-pemda-cover');
+                const dinasCover = getValueOrPlaceholder('input-dinas-cover');
+
+                // Sinkronisasi Data Metadata
+                document.getElementById('view-sekolah').innerText = namaSekolah;
+                document.getElementById('view-kelas').innerText = kelas;
+                document.getElementById('view-jenis-kokurikuler').innerText = jenisKokurikuler;
+                document.getElementById('view-tema').innerText = temaFinal;
+                document.getElementById('view-mapel-terkait').innerText = mapelTerkait;
+                
+                let labelRentang = "Program";
+                if (rentangWaktu === "tahun") labelRentang = "Tahun";
+                if (rentangWaktu === "semester") labelRentang = "Semester";
+                if (rentangWaktu === "minggu") labelRentang = "Minggu";
+                document.getElementById('view-alokasi').innerText = `${alokasiJP} JP (${labelRentang})`;
+
+                document.getElementById('view-title-tema').innerText = temaFinal;
+                document.getElementById('view-title-tp').innerText = thnPel_input;
+
+                const checkboxDimensi = document.querySelectorAll('input[name="dimensi"]:checked');
+                const containerDimensi = document.getElementById('view-dimensi');
+                if (checkboxDimensi.length > 0) {
+                    let htmlDimensi = "";
+                    checkboxDimensi.forEach((chk) => {
+                        htmlDimensi += `• ${chk.value}<br>`;
+                    });
+                    containerDimensi.innerHTML = htmlDimensi;
+                } else {
+                    containerDimensi.innerHTML = "• Penalaran Kritis<br>• Kolaborasi";
+                }
+
+                // Pengisian Teks Blok (Mencegah Error Null dengan ID yang Sangat Presisi)
+                document.getElementById('view-tujuan-pembelajaran').innerHTML = tpText.replace(/\n/g, '<br>') + '<i class="fa-solid fa-pencil live-edit-icon"></i>';
+                document.getElementById('view-bentuk-kegiatan').innerHTML = bkText.replace(/\n/g, '<br>') + '<i class="fa-solid fa-pencil live-edit-icon"></i>';
+                document.getElementById('view-pedagogis').innerHTML = pedagogisText.replace(/\n/g, '<br>') + '<i class="fa-solid fa-pencil live-edit-icon"></i>';
+                document.getElementById('view-lingkungan').innerHTML = lingkunganText.replace(/\n/g, '<br>') + '<i class="fa-solid fa-pencil live-edit-icon"></i>';
+                document.getElementById('view-kemitraan').innerHTML = kemitraanText.replace(/\n/g, '<br>') + '<i class="fa-solid fa-pencil live-edit-icon"></i>';
+                document.getElementById('view-digital').innerHTML = digitalText.replace(/\n/g, '<br>') + '<i class="fa-solid fa-pencil live-edit-icon"></i>';
+                document.getElementById('view-sub-kegiatan').innerHTML = subKText.replace(/\n/g, '<br>') + '<i class="fa-solid fa-pencil live-edit-icon"></i>';
+                document.getElementById('view-asesmen').innerHTML = asesmenText.replace(/\n/g, '<br>') + '<i class="fa-solid fa-pencil live-edit-icon"></i>';
+
+                // Pembaruan Halaman Sampul (Cover)
+                document.getElementById('view-cover-logo').src = logoCover;
+                document.getElementById('view-cover-tahun').innerText = tahunCover;
+                document.getElementById('view-cover-pemda').innerText = pemdaCover;
+                document.getElementById('view-cover-dinas').innerText = dinasCover;
+                document.getElementById('view-cover-sekolah').innerText = namaSekolah;
+                document.getElementById('view-cover-nama-koordinator').innerText = namaKoordinator;
+                document.getElementById('view-cover-tema').innerText = temaFinal;
+                document.getElementById('view-cover-tp').innerText = thnPel_input;
+
+                // Tanda Tangan Pejabat
+                const tempatFinal = tempatTtdInput !== "" ? tempatTtdInput : "Merdeka Jaya";
+                const tanggalFinal = tanggalTtdInput !== "" ? tanggalTtdInput : "26 Juni 2026";
+                document.getElementById('row1-kanan').innerText = `${tempatFinal}, ${tanggalFinal}`;
+
+                document.getElementById('row6-kiri-nama').innerText = namaKepsek;
+                document.getElementById('row6-kanan-nama').innerText = namaKoordinator;
+                document.getElementById('row7-kiri-nip').innerText = "NIP " + (nipKepsek || "-");
+                document.getElementById('row7-kanan-nip').innerText = "NIP " + (nipKoordinator || "-");
+                
+                generateRaporDescription();
+            } catch (err) {
+                console.error("Sinkronisasi gagal: ", err);
+                alert("Kesalahan Teknis: " + err.message);
+            }
+        }
+
+        // BIND EVENT LISTENERS AMAN SAAT DOM SELESAI DIMUAT
+        document.addEventListener('DOMContentLoaded', () => {
+            loadSavedData();
+            
+            // Pasang event listener otomatis pada setiap ID input
+            inputIds.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.addEventListener('input', saveAllInputs);
+                    el.addEventListener('change', saveAllInputs);
+                }
+            });
+
+            // Pasang event listener pada checklist dimensi
+            document.querySelectorAll('input[name="dimensi"]').forEach(chk => {
+                chk.addEventListener('change', () => {
+                    saveAllInputs();
+                    generateRaporDescription();
+                });
+            });
+
+            // Pasang event listener pada pilihan radio tema
+            document.querySelectorAll('input[name="tema-kegiatan"]').forEach(rad => {
+                rad.addEventListener('change', () => {
+                    saveAllInputs();
+                    generateRaporDescription();
+                });
+            });
+
+            // Pasang event listener untuk fungsionalitas rapor siswa
+            const raporNama = document.getElementById('rapor-nama-murid');
+            if (raporNama) raporNama.addEventListener('input', generateRaporDescription);
+
+            const raporNilai = document.getElementById('rapor-nilai-dimensi-utama');
+            if (raporNilai) raporNilai.addEventListener('change', generateRaporDescription);
+
+            const raporInspirasi = document.getElementById('rapor-inspirasi-style');
+            if (raporInspirasi) raporInspirasi.addEventListener('change', generateRaporDescription);
+        });
+    </script>
+</body>
+</html>
