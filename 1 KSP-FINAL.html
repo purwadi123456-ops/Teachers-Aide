@@ -1,0 +1,2877 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KSP1 Purwadi Application</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons for Modern UI -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+
+        /* A4 Page Formatting for Print Preview (Gutter Offset: Left +2.5mm, Right -2.5mm) */
+        .a4-page {
+            width: 210mm;
+            height: 297mm;
+            padding: 20mm 17.5mm 20mm 22.5mm;
+            margin: 15px auto;
+            background: white;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            position: relative;
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+
+        /* Custom Dense Padding for High-Content Pages with Gutter Offset */
+        .dense-page {
+            padding: 10mm 12.5mm 10mm 17.5mm !important;
+        }
+
+        /* Abstract Cover Background Pattern */
+        .cover-pattern {
+            background: radial-gradient(circle at 100% 100%, rgba(204, 251, 241, 0.15) 0%, transparent 40%),
+                        radial-gradient(circle at 0% 0%, rgba(209, 250, 229, 0.15) 0%, transparent 40%);
+            background-color: #fafbfc;
+        }
+        
+        /* 1. PENYELARASAN JENIS HURUF GLOBAL (TIMES NEW ROMAN) */
+        html body .a4-page,
+        html body .a4-page p,
+        html body .a4-page td,
+        html body .a4-page span,
+        html body .a4-page div,
+        html body .a4-page li,
+        html body .a4-page ul,
+        html body .a4-page ol,
+        html body .a4-page table {
+            font-family: 'Times New Roman', Times, serif !important;
+            font-style: normal !important;
+        }
+
+        /* 2. PENYELARASAN UKURAN HURUF (12pt) & SPASI BARIS (1.5) SECARA SERAGAM UNTUK ISI/NARASI */
+        html body .a4-page p,
+        html body .a4-page li,
+        html body .a4-page span.body-text,
+        html body .a4-page div.body-text,
+        html body .narasi-p,
+        html body .ksp-body p {
+            font-size: 12pt !important;
+            line-height: 1.5 !important;
+            margin-bottom: 12px !important;
+            text-align: justify;
+        }
+
+        /* ATURAN PAKSA RATA TENGAH UNTUK ELEMEN JUDUL DAN SAMPUL (SPESIFISITAS TINGGI) */
+        html body .a4-page .text-center,
+        html body .a4-page .text-center p,
+        html body .a4-page .text-center span,
+        html body .a4-page .text-center div,
+        html body .a4-page .tight-sign,
+        html body .a4-page .tight-sign p,
+        html body .a4-page .tight-sign td,
+        html body .a4-page .tight-sign span {
+            text-align: center !important;
+        }
+
+        /* Memastikan Halaman Sampul Selalu Rata Tengah Sempurna Saat Dicetak */
+        html body .cover-pattern {
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: space-between !important;
+            align-items: center !important;
+            text-align: center !important;
+            padding: 20mm 20mm 20mm 20mm !important; /* Margin simetris khusus halaman sampul */
+        }
+        html body .cover-pattern .text-center {
+            text-align: center !important;
+            width: 100% !important;
+        }
+        html body .cover-pattern .my-auto {
+            margin-top: auto !important;
+            margin-bottom: auto !important;
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: center !important;
+            justify-content: center !important;
+            width: 100% !important;
+        }
+        html body .cover-pattern .mt-auto {
+            margin-top: auto !important;
+            width: 100% !important;
+        }
+        html body .cover-pattern img {
+            display: block !important;
+            margin-left: auto !important;
+            margin-right: auto !important;
+        }
+        html body .cover-pattern * {
+            text-align: center !important;
+        }
+        /* Override spesifisitas tinggi agar justify tidak merusak halaman sampul dan memaksa cetak tebal merata */
+        html body .a4-page.cover-pattern p,
+        html body .a4-page.cover-pattern span,
+        html body .a4-page.cover-pattern div,
+        html body .a4-page.cover-pattern h1,
+        html body .a4-page.cover-pattern h2 {
+            text-align: center !important;
+            font-weight: bold !important;
+        }
+
+        /* Memaksa perataan tengah pada tanda tangan pejabat ketiga dan struktur text-center */
+        html body .a4-page .text-center,
+        html body .a4-page .text-center p,
+        html body .a4-page .text-center span,
+        html body .a4-page .text-center div,
+        html body .a4-page .tight-sign,
+        html body .a4-page .tight-sign p,
+        html body .a4-page .tight-sign span,
+        html body .a4-page .tight-sign div,
+        html body .a4-page .tight-sign td {
+            text-align: center !important;
+        }
+
+        /* 3. PENYELARASAN TITEL DAN SPASI UNTUK SELURUH JUDUL BAB / SUB-JUDUL */
+        html body .a4-page h1 {
+            font-size: 18pt !important;
+            font-weight: bold !important;
+            line-height: 1.3 !important;
+            margin-top: 0px !important;
+            margin-bottom: 16px !important;
+        }
+        html body .a4-page h2 {
+            font-size: 16pt !important;
+            font-weight: bold !important;
+            line-height: 1.3 !important;
+            margin-top: 0px !important;
+            margin-bottom: 16px !important;
+        }
+        html body .a4-page h3 {
+            font-size: 14pt !important;
+            font-weight: bold !important;
+            line-height: 1.3 !important;
+            text-align: center !important;
+            margin-top: 0px !important;
+            margin-bottom: 24px !important; /* Spasi longgar default untuk halaman tanpa sub-judul */
+        }
+        
+        /* Merapatkan nomor bab (h3) dengan nama bab di bawahnya (h4) */
+        html body .a4-page h3 + h4,
+        html body .a4-page h3 + h4.bab-subtitle {
+            margin-top: -14px !important; /* Merapatkan jika ada h4 di bawah h3 */
+            margin-bottom: 24px !important;
+        }
+
+        html body .a4-page h4 {
+            font-size: 14pt !important;
+            font-weight: bold !important;
+            line-height: 1.3 !important;
+            text-align: center !important;
+            margin-top: 0px !important;
+            margin-bottom: 24px !important;
+        }
+        html body .a4-page h5 {
+            font-size: 12pt !important;
+            font-weight: bold !important;
+            line-height: 1.4 !important;
+            text-align: left !important; /* KEMBALI RATA KIRI UNTUK SUB-JUDUL */
+            margin-top: 18px !important; /* Jarak pisah dari elemen di atasnya */
+            margin-bottom: 16px !important; /* Spasi seragam 16px */
+        }
+
+        /* KEPALA TABEL WAJIB SELALU RATA TENGAH SECARA GLOBAL */
+        html body .a4-page th {
+            text-align: center !important;
+            vertical-align: middle !important;
+        }
+
+        /* ATURAN TEGAS RATA KIRI UNTUK SEL TEKS PANJANG (MEMILIKI SPESIFISITAS TINGGI) */
+        html body .a4-page td.align-left,
+        html body .a4-page .academic-table td.align-left,
+        html body .a4-page .kokur-table td.align-left,
+        html body .a4-page .compact-academic-table td.align-left {
+            text-align: left !important;
+        }
+
+        /* 4. PENGECUALIAN UNTUK DATA TABEL AKADEMIK (JP Kompak & Spasi 1.15) */
+        html body .a4-page .academic-table th, 
+        html body .a4-page .academic-table td {
+            border: 1px solid black !important;
+            padding: 3px 4px !important;
+            text-align: center;
+            font-size: 8.5pt !important;
+            line-height: 1.15 !important;
+        }
+        .academic-table th {
+            background-color: #f2f2f2 !important;
+            font-weight: bold !important;
+        }
+
+        /* Desain Tabel Kokurikuler Spesifik */
+        .kokur-table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed !important;
+        }
+        html body .a4-page .kokur-table th, 
+        html body .a4-page .kokur-table td {
+            border: 1px solid black !important;
+            padding: 1.5px 1.5px !important;
+            text-align: center;
+            word-break: break-word !important;
+            font-size: 6.5pt !important;
+            line-height: 1.15 !important;
+        }
+        .kokur-table th {
+            background-color: #f2f2f2 !important;
+            font-weight: bold !important;
+        }
+
+        /* Desain Tabel Struktur Intrakurikuler */
+        .compact-academic-table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed !important;
+        }
+        html body .a4-page .compact-academic-table th, 
+        html body .a4-page .compact-academic-table td {
+            border: 1px solid black !important;
+            padding: 3px 1px !important;
+            text-align: center;
+            overflow: hidden !important;
+            text-overflow: ellipsis;
+            font-size: 7.5pt !important;
+            line-height: 1.15 !important;
+        }
+        .compact-academic-table th {
+            background-color: #f2f2f2 !important;
+            font-weight: bold !important;
+        }
+
+        /* 5. PENGECUALIAN UNTUK TABEL INFORMASI KIRI & AREA TANDA TANGAN */
+        html body .a4-page .left-info-table td,
+        html body .a4-page .left-info-table span,
+        html body .a4-page .tight-sign,
+        html body .a4-page .tight-sign td,
+        html body .a4-page .tight-sign p,
+        html body .a4-page .tight-sign span,
+        html body .a4-page .tight-sign div {
+            font-size: 12pt !important;
+            line-height: 1.15 !important;
+            margin-top: 0px !important;
+            margin-bottom: 0px !important;
+            padding-top: 1px !important;
+            padding-bottom: 1px !important;
+        }
+
+        /* KALIBRASI ELEMEN DENSE-PAGE (HALAMAN 10 & 11) SECARA SERASI DAN PROPORSIONAL */
+        html body .dense-page h5 {
+            margin-top: 14px !important;
+            margin-bottom: 8px !important;
+            font-size: 12pt !important;
+        }
+        html body .dense-page p,
+        html body .dense-page .narasi-p {
+            margin-bottom: 8px !important;
+            line-height: 1.4 !important;
+            font-size: 11pt !important;
+        }
+        html body .dense-page .kokur-table th, 
+        html body .dense-page .kokur-table td {
+            padding: 2.5px 2px !important; /* Proporsi bantalan sel ideal */
+            font-size: 6.8pt !important;   /* Keterbacaan teks optimal */
+            line-height: 1.15 !important;
+        }
+        html body .dense-page .academic-table th, 
+        html body .dense-page .academic-table td {
+            padding: 3px 3px !important;   /* Kalibrasi padding tabel ekstrakurikuler */
+            font-size: 8pt !important;     /* Penyesuaian ukuran teks seimbang */
+            line-height: 1.15 !important;
+        }
+        html body .dense-page .text-center.font-bold {
+            margin-top: 4px !important;
+            margin-bottom: 12px !important;
+            font-size: 9pt !important;
+        }
+        
+        @media print {
+            @page {
+                size: A4;
+                margin: 0;
+            }
+            body {
+                background: none !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+            .a4-page {
+                margin: 0 !important;
+                box-shadow: none !important;
+                border: none !important;
+                page-break-after: always;
+                page-break-inside: avoid;
+                width: 210mm;
+                height: 297mm;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            .a4-page:last-child {
+                page-break-after: avoid !important;
+            }
+            * {
+                box-sizing: border-box !important;
+                word-wrap: break-word !important;
+                word-break: break-word !important;
+                max-width: 100% !important;
+            }
+            table {
+                width: 100% !important;
+                max-width: 100% !important;
+                table-layout: fixed !important;
+            }
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+
+    <!-- HEADER -->
+    <header class="bg-gradient-to-r from-blue-900 via-blue-800 to-indigo-900 text-white shadow-md">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-4">
+                <img src="https://iili.io/Cd6VTSS.png" alt="Logo Mutu" class="h-16 w-auto object-contain bg-white/10 p-1 rounded-md" onerror="this.src='https://placehold.co/150x150?text=Logo'">
+                <div>
+                    <h1 class="text-lg md:text-xl font-bold tracking-wide">KTSP BERBASIS DATA MUTU</h1>
+                    <p class="text-xs text-blue-200">Purwadi Application • Dokumen Kurikulum Satuan Pendidikan</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-3">
+                <button onclick="resetData()" class="px-3 py-1.5 bg-red-600/30 hover:bg-red-600/50 text-red-100 text-xs font-semibold rounded transition flex items-center gap-1.5">
+                    <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Reset Default
+                </button>
+                <span class="text-xs bg-emerald-500/20 text-emerald-300 px-3 py-1 rounded-full border border-emerald-500/30 font-medium">v1.3 Active</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN WRAPPER -->
+    <div class="flex-grow flex flex-col md:flex-row max-w-7xl w-full mx-auto p-4 gap-6">
+        
+        <!-- SIDEBAR NAVIGATION -->
+        <aside class="w-full md:w-64 bg-white rounded-xl shadow-sm border border-slate-200/80 p-4 self-start">
+            <nav class="space-y-1.5" id="sidebar-nav">
+                <button onclick="switchTab('tab-beranda')" id="btn-tab-beranda" class="nav-btn w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold rounded-lg text-blue-900 bg-blue-50 transition">
+                    <i data-lucide="layout-dashboard" class="w-4 h-4 text-blue-700"></i> Beranda / Dashboard
+                </button>
+                <button onclick="switchTab('tab-identitas')" id="btn-tab-identitas" class="nav-btn w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg text-slate-600 hover:bg-slate-50 transition">
+                    <i data-lucide="file-text" class="w-4 h-4 text-slate-500"></i> Input Identitas Sekolah
+                </button>
+                <button onclick="switchTab('tab-visimisi')" id="btn-tab-visimisi" class="nav-btn w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg text-slate-600 hover:bg-slate-50 transition">
+                    <i data-lucide="heart" class="w-4 h-4 text-slate-500"></i> Input Visi Misi (BAB II)
+                </button>
+                <button onclick="switchTab('tab-bab3')" id="btn-tab-bab3" class="nav-btn w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg text-slate-600 hover:bg-slate-50 transition">
+                    <i data-lucide="table" class="w-4 h-4 text-slate-500"></i> Input BAB III (Tabel)
+                </button>
+                <button onclick="switchTab('tab-bab4')" id="btn-tab-bab4" class="nav-btn w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg text-slate-600 hover:bg-slate-50 transition">
+                    <i data-lucide="book-open" class="w-4 h-4 text-slate-500"></i> Input BAB IV (Rencana)
+                </button>
+                <button onclick="switchTab('tab-bab5')" id="btn-tab-bab5" class="nav-btn w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg text-slate-600 hover:bg-slate-50 transition">
+                    <i data-lucide="award" class="w-4 h-4 text-slate-500"></i> Input BAB V (Evaluasi & PTK)
+                </button>
+                <button onclick="switchTab('tab-data-ksp')" id="btn-tab-data-ksp" class="nav-btn w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg text-slate-600 hover:bg-slate-50 transition">
+                    <i data-lucide="sliders" class="w-4 h-4 text-slate-500"></i> Mutu & Capaian KSP
+                </button>
+                <div class="border-t border-slate-100 my-3"></div>
+                <button onclick="switchTab('tab-cetak')" id="btn-tab-cetak" class="nav-btn w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold rounded-lg text-emerald-800 bg-emerald-50 transition">
+                    <i data-lucide="printer" class="w-4 h-4 text-emerald-600"></i> Pratinjau & Cetak A4
+                </button>
+            </nav>
+            <div class="mt-8 p-3 bg-slate-50 rounded-lg border border-slate-100">
+                <h4 class="text-xs font-bold text-slate-700 mb-1">Pemberitahuan Sistem</h4>
+                <p class="text-[11px] text-slate-500 leading-relaxed">Semua entri disimpan secara otomatis di database lokal perangkat Anda.</p>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT AREA -->
+        <main class="flex-grow bg-white rounded-xl shadow-sm border border-slate-200/80 p-6">
+            
+            <!-- TAB: BERANDA -->
+            <section id="tab-beranda" class="tab-content space-y-6">
+                <div class="border-b border-slate-100 pb-4">
+                    <h2 class="text-xl font-bold text-slate-950">Selamat Datang di Aplikasi KSP1</h2>
+                    <p class="text-sm text-slate-500">Sistem penyusunan dokumen Kurikulum Satuan Pendidikan berbasis analisis data mutu.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="p-5 bg-gradient-to-br from-blue-50 to-indigo-50/50 border border-blue-100 rounded-xl">
+                        <div class="p-2 bg-blue-500/10 text-blue-700 rounded-lg w-fit mb-3">
+                            <i data-lucide="compass" class="w-5 h-5"></i>
+                        </div>
+                        <h3 class="font-bold text-slate-800 mb-1">Penyusunan Visi & Misi</h3>
+                        <p class="text-xs text-slate-600 leading-relaxed">Kelola rumusan Visi, Misi, dan Tujuan institusi secara langsung untuk menghasilkan lembar kurikulum yang siap cetak.</p>
+                    </div>
+                    <div class="p-5 bg-gradient-to-br from-emerald-50 to-teal-50/50 border border-emerald-100 rounded-xl">
+                        <div class="p-2 bg-emerald-500/10 text-emerald-700 rounded-lg w-fit mb-3">
+                            <i data-lucide="check-circle" class="w-5 h-5"></i>
+                        </div>
+                        <h3 class="font-bold text-slate-800 mb-1">Validasi & Rekomendasi</h3>
+                        <p class="text-xs text-slate-600 leading-relaxed">Menghasilkan lembar rekomendasi pengawas sekolah serta lembar pengesahan resmi dinas pendidikan setempat secara otomatis.</p>
+                    </div>
+                </div>
+
+                <div class="p-4 bg-slate-50 rounded-lg border border-slate-200/80 flex items-start gap-3">
+                    <i data-lucide="info" class="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0"></i>
+                    <div>
+                        <h4 class="text-sm font-semibold text-slate-800">Petunjuk Penggunaan</h4>
+                        <ul class="text-xs text-slate-600 list-decimal pl-4 mt-1.5 space-y-1">
+                            <li>Lengkapi data instansi dan pimpinan pada menu <strong>Input Identitas Sekolah</strong>.</li>
+                            <li>Tulis rumusan Visi, Misi, dan Tujuan sekolah pada menu <strong>Input Visi, Misi & Tujuan</strong>.</li>
+                            <li>Sesuaikan alokasi waktu kurikulum pada menu <strong>Input BAB III (Tabel)</strong>.</li>
+                            <li>Sesuaikan rencana pembelajaran and penilaian pada menu <strong>Input BAB IV (Rencana)</strong>.</li>
+                            <li>Sesuaikan rencana evaluasi and tindak lanjut pada menu <strong>Input BAB V (Evaluasi & PTK)</strong>.</li>
+                            <li>Sesuaikan capaian mutu dan kurikulum pada menu <strong>Mutu & Capaian KSP</strong>.</li>
+                            <li>Pilih menu <strong>Pratinjau & Cetak A4</strong> lalu klik <strong>Buka di Tab Baru</strong> untuk mencetak dokumen.</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB: INPUT IDENTITAS -->
+            <section id="tab-identitas" class="tab-content hidden space-y-6">
+                <div class="border-b border-slate-100 pb-4">
+                    <h2 class="text-xl font-bold text-slate-950">Input Identitas Sekolah</h2>
+                    <p class="text-sm text-slate-500">Lengkapi data primer di bawah ini untuk memperbarui isi naskah dokumen KSP.</p>
+                </div>
+
+                <form id="form-identitas" class="space-y-6" onsubmit="event.preventDefault();">
+                    <!-- Bagian Instansi -->
+                    <div>
+                        <h3 class="text-xs font-bold text-blue-800 uppercase tracking-wider mb-3">A. Data Instansi & Sekolah</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">Nama Instansi Pembina</label>
+                                <input type="text" id="inp-instansi" value="PEMERINTAH KABUPATEN TULANG BAWANG" class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">Satuan Kerja / Dinas</label>
+                                <input type="text" id="inp-dinas" value="DINAS PENDIDIKAN DAN KEBUDAYAAN" class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+                            </div>
+                            <div class="md:col-span-2">
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">Nama Satuan Pendidikan (Sekolah)</label>
+                                <input type="text" id="inp-sekolah" value="SD IT Insan Cendikia" class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">NPSN</label>
+                                <input type="text" id="inp-npsn" value="10814980" class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">Tahun Pelajaran</label>
+                                <input type="text" id="inp-tp" value="2026/2027" class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bagian Alamat -->
+                    <div>
+                        <h3 class="text-xs font-bold text-blue-800 uppercase tracking-wider mb-3">B. Alamat Satuan Pendidikan</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="md:col-span-2">
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">Jalan</label>
+                                <input type="text" id="inp-jalan" value="Jl. Brawijaya Utara No. 2" class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">Desa/Campung</label>
+                                <input type="text" id="inp-desa" value="Pendowo Asri" class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">Kecamatan</label>
+                                <input type="text" id="inp-kecamatan" value="Dente Teladas" class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">Kabupaten/Kota</label>
+                                <input type="text" id="inp-kabupaten" value="Tulang Bawang" class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">Provinsi</label>
+                                <input type="text" id="inp-provinsi" value="Lampung" class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">Kode Pos</label>
+                                <input type="text" id="inp-kodepos" value="34596" class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bagian Aparatur & Pejabat -->
+                    <div>
+                        <h3 class="text-xs font-bold text-blue-800 uppercase tracking-wider mb-3">C. Pejabat, Pengawas & Kepala Sekolah</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">Nama Kepala Sekolah</label>
+                                <input type="text" id="inp-kepsek" value="SUROTO, S.Pd." class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">NIP Kepala Sekolah</label>
+                                <input type="text" id="inp-nip-kepsek" value="19000000 000000 0 000" class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">Nama Ketua Komite</label>
+                                <input type="text" id="inp-komite" value="SURATI" class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">Nama Pengawas Sekolah</label>
+                                <input type="text" id="inp-pengawas" value="PURWADI, S.Pd." class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">NIP Pengawas Sekolah</label>
+                                <input type="text" id="inp-nip-pengawas" value="196907172002121006" class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">Nama Kasi Kurikulum dan Penilaian</label>
+                                <input type="text" id="inp-kasi" value="WIWI NURHAYATI, S.Ag.,M.M." class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">NIP Kasi Kurikulum</label>
+                                <input type="text" id="inp-nip-kasi" value="19000000 000000 0 000" class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">Nama Kepala Dinas</label>
+                                <input type="text" id="inp-kadis" value="M. AMI ISWANDI ISMED BALAW, S.Kom., M.M." class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">Pangkat/Gol Kepala Dinas</label>
+                                <input type="text" id="inp-gol-kadis" value="Pembina Tk. I (IV/b)" class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">NIP Kepala Dinas</label>
+                                <input type="text" id="inp-nip-kadis" value="19801121 200604 1 005" class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Dokumen Keputusan -->
+                    <div>
+                        <h3 class="text-xs font-bold text-blue-800 uppercase tracking-wider mb-3">D. SK & Dokumen Resmi</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="md:col-span-2">
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">No. SK Pemberlakuan KSP</label>
+                                <input type="text" id="inp-sk" value="423.5 / 012 / SD-01-PA / TB / VII / 2026" class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">Tanggal Dokumen</label>
+                                <input type="date" id="inp-tgl-pembuatan" value="2026-07-17" class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Logo Upload & Control -->
+                    <div class="p-4 bg-slate-50 border border-slate-200 rounded-lg">
+                        <h3 class="text-xs font-bold text-slate-800 uppercase tracking-wider mb-2">E. Kustomisasi Logo</h3>
+                        <div class="flex flex-col md:flex-row gap-4 items-center">
+                            <div class="w-32 h-32 border-2 border-dashed border-slate-300 rounded-lg flex items-center justify-center overflow-hidden bg-white relative group">
+                                <img id="logo-preview" src="https://iili.io/CdQPI9V.png" class="max-w-full max-h-full object-contain" alt="Logo Sekolah">
+                            </div>
+                            <div class="flex-grow space-y-3 w-full">
+                                <label class="block text-xs font-semibold text-slate-700">Unggah Logo Sekolah (PNG/JPG)</label>
+                                <input type="file" id="inp-logo" accept="image/*" class="text-xs text-slate-600 block w-full file:mr-4 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="block text-[10px] font-semibold text-slate-500">Ukuran Logo (px)</label>
+                                        <input type="range" id="logo-size-slider" min="60" max="200" value="110" class="w-full accent-blue-700">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] font-semibold text-slate-500">Geser Atas/Bawah (px)</label>
+                                        <input type="range" id="logo-pos-slider" min="-30" max="30" value="0" class="w-full accent-blue-700">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </section>
+
+            <!-- TAB: INPUT VISI MISI & TUJUAN -->
+            <section id="tab-visimisi" class="tab-content hidden space-y-6">
+                <div class="border-b border-slate-100 pb-4">
+                    <h2 class="text-xl font-bold text-slate-950">Input Visi, Misi & Tujuan (BAB II)</h2>
+                    <p class="text-sm text-slate-500">Sesuaikan data visi, misi, and tujuan sekolah untuk diperbarui secara langsung di halaman dokumen.</p>
+                </div>
+
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">A. Rumusan Visi Sekolah</label>
+                        <textarea id="inp-visi" rows="3" class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" placeholder="Tuliskan rumusan visi sekolah..."></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">B. Rumusan Misi Sekolah (Satu Baris per Poin)</label>
+                        <textarea id="inp-misi" rows="6" class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" placeholder="Tuliskan misi sekolah (pisahkan dengan baris baru)..."></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">C. Rumusan Tujuan Sekolah (Satu Baris per Poin)</label>
+                        <textarea id="inp-tujuan" rows="6" class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" placeholder="Tuliskan tujuan sekolah (pisahkan dengan baris baru)..."></textarea>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB: INPUT TABLES BAB III -->
+            <section id="tab-bab3" class="tab-content hidden space-y-6">
+                <div class="border-b border-slate-100 pb-4">
+                    <h2 class="text-xl font-bold text-slate-950">Input Data Tabel (BAB III)</h2>
+                    <p class="text-sm text-slate-500">Sunting secara langsung teks and parameter isi tabel pengorganisasian pembelajaran di bawah ini.</p>
+                </div>
+
+                <!-- Bagian 0: Akordeon Tabel Struktur Kurikulum -->
+                <div class="border border-slate-200 rounded-lg overflow-hidden bg-slate-50">
+                    <button onclick="toggleAccordion('acc-intra')" class="w-full px-4 py-3 text-left font-bold text-sm text-slate-800 flex justify-between items-center border-b border-slate-200 hover:bg-slate-100 transition">
+                        <span>0. Tabel Struktur Kurikulum (Intrakurikuler)</span>
+                        <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                    </button>
+                    <div id="acc-intra" class="p-4 space-y-4">
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Penyusunan Alokasi JP (Format: Nama Mapel | I_In | I_Ko | II_In | II_Ko | III_In | III_Ko | IV_In | IV_Ko | V_In | V_Ko | VI_In | VI_Ko | JP_Tahun)</label>
+                        <textarea id="inp-table-intra" rows="10" class="w-full text-xs font-mono border border-slate-300 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500" placeholder="Ketik baris data mapel..."></textarea>
+                        <p class="text-[10px] text-slate-500 leading-normal">Kolom Jumlah (Jl.) untuk setiap kelas akan dihitung secara otomatis oleh sistem (In. + Ko.).</p>
+                    </div>
+                </div>
+
+                <!-- Bagian 1: Akordeon Tabel Kokurikuler -->
+                <div class="border border-slate-200 rounded-lg overflow-hidden bg-slate-50 mt-4">
+                    <button onclick="toggleAccordion('acc-kokur')" class="w-full px-4 py-3 text-left font-bold text-sm text-slate-800 flex justify-between items-center border-b border-slate-200 hover:bg-slate-100 transition">
+                        <span>1. Tabel Kokurikuler</span>
+                        <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                    </button>
+                    <div id="acc-kokur" class="p-4 space-y-4 hidden">
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Isi Kolom Utama (Format: No | Kls | Smt | Dimensi Profil Lulusan | Tema | Jenis Kokurikuler | Bentuk Kegiatan | Mata Pelajaran Terkait | JJP/Pekan)</label>
+                        <textarea id="inp-table-kokur" rows="6" class="w-full text-xs font-mono border border-slate-300 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500" placeholder="Ketik baris data..."></textarea>
+                    </div>
+                </div>
+
+                <!-- Bagian 2: Akordeon Tabel Ekstrakurikuler -->
+                <div class="border border-slate-200 rounded-lg overflow-hidden bg-slate-50 mt-4">
+                    <button onclick="toggleAccordion('acc-ekskul')" class="w-full px-4 py-3 text-left font-bold text-sm text-slate-800 flex justify-between items-center border-b border-slate-200 hover:bg-slate-100 transition">
+                        <span>2. Tabel Ekstrakurikuler</span>
+                        <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                    </button>
+                    <div id="acc-ekskul" class="p-4 space-y-4 hidden">
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Isi Kolom (Format: No | Kegiatan | Sifat | Sasaran | Alokasi | Profil Lulusan)</label>
+                        <textarea id="inp-table-ekskul" rows="6" class="w-full text-xs font-mono border border-slate-300 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                    </div>
+                </div>
+
+                <!-- Bagian 3: Akordeon Tabel Budaya Positif -->
+                <div class="border border-slate-200 rounded-lg overflow-hidden bg-slate-50 mt-4">
+                    <button onclick="toggleAccordion('acc-budaya')" class="w-full px-4 py-3 text-left font-bold text-sm text-slate-800 flex justify-between items-center border-b border-slate-200 hover:bg-slate-100 transition">
+                        <span>3. Tabel Pembiasaan Budaya Positif</span>
+                        <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                    </button>
+                    <div id="acc-budaya" class="p-4 space-y-4 hidden">
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Isi Kolom (Format: No | Bentuk | Kegiatan | Waktu | Tujuan)</label>
+                        <textarea id="inp-table-budaya" rows="6" class="w-full text-xs font-mono border border-slate-300 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                    </div>
+                </div>
+
+                <!-- Bagian 4: Akordeon Tabel Diagram deep learning -->
+                <div class="border border-slate-200 rounded-lg overflow-hidden bg-slate-50 mt-4">
+                    <button onclick="toggleAccordion('acc-diagram-deep')" class="w-full px-4 py-3 text-left font-bold text-sm text-slate-800 flex justify-between items-center border-b border-slate-200 hover:bg-slate-100 transition">
+                        <span>4. Kustomisasi Gambar Diagram Kerangka</span>
+                        <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                    </button>
+                    <div id="acc-diagram-deep" class="p-4 space-y-3 hidden">
+                        <label class="block text-xs font-semibold text-slate-700">Unggah Gambar Kerangka Kerja (Diagram)</label>
+                        <input type="file" id="inp-diagram-deep" accept="image/*" class="text-xs text-slate-600 block w-full file:mr-4 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                        <p class="text-[10px] text-slate-500 leading-normal">Unggah gambar diagram kerangka kerja pembelajaran mendalam untuk menggantikan diagram default di Halaman 9.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB: INPUT BAB IV -->
+            <section id="tab-bab4" class="tab-content hidden space-y-6">
+                <div class="border-b border-slate-100 pb-4">
+                    <h2 class="text-xl font-bold text-slate-950">Input BAB IV (Perencanaan Pembelajaran & Asesmen)</h2>
+                    <p class="text-sm text-slate-500">Kelola dan sesuaikan rumusan serta alur instrumen penilaian akademik sekolah.</p>
+                </div>
+
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">A. Prinsip Perencanaan Pembelajaran dan Asesmen (Paragraf 1)</label>
+                        <textarea id="inp-bab4-prinsip" rows="6" class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" placeholder="Tuliskan paragraf prinsip perencanaan..."></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">B. Perencanaan Pembelajaran Intrakurikuler dan Asesmen (Satu Baris per Paragraf)</label>
+                        <textarea id="inp-bab4-intra" rows="12" class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" placeholder="Tuliskan beberapa paragraf intrakurikuler (pisahkan dengan baris baru)..."></textarea>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB: INPUT BAB V -->
+            <section id="tab-bab5" class="tab-content hidden space-y-6">
+                <div class="border-b border-slate-100 pb-4">
+                    <h2 class="text-xl font-bold text-slate-950">Input BAB V (Evaluasi, Pengembangan Profesional, & Pendampingan)</h2>
+                    <p class="text-sm text-slate-500">Sesuaikan rumusan evaluasi dan program pendampingan profesional pendidik.</p>
+                </div>
+
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">A. Pendampingan Implementasi Kurikulum</label>
+                        <textarea id="inp-bab5-pendampingan" rows="4" class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" placeholder="Tuliskan paragraf pendampingan..."></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">B. Evaluasi Implementasi Kurikulum</label>
+                        <textarea id="inp-bab5-evaluasi" rows="4" class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" placeholder="Tuliskan paragraf evaluasi..."></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">C. Pengembangan Profesional Pendidik dan Tenaga Kependidikan</label>
+                        <textarea id="inp-bab5-pengembangan" rows="4" class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" placeholder="Tuliskan paragraf pengembangan profesional..."></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">D. Program Tindak Lanjut Hasil Evaluasi</label>
+                        <textarea id="inp-bab5-tindaklanjut" rows="4" class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" placeholder="Tuliskan paragraf program tindak lanjut..."></textarea>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB: MUTU & CAPAIAN KSP -->
+            <section id="tab-data-ksp" class="tab-content hidden space-y-6">
+                <div class="border-b border-slate-100 pb-4">
+                    <h2 class="text-xl font-bold text-slate-950">Mutu & Capaian KSP</h2>
+                    <p class="text-sm text-slate-500">Input parameter kualitas akademik dan karakteristik sosiokultural lingkungan sekolah.</p>
+                </div>
+
+                <!-- Bagian 1: Akreditasi & Karakteristik Sosio-Kultural -->
+                <div class="bg-slate-50 p-4 border border-slate-200 rounded-xl space-y-4">
+                    <h3 class="text-xs font-bold text-blue-800 uppercase tracking-wider">A. Dasar Satuan & Profil Sosiokultural</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="md:col-span-1">
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Status Akreditasi</label>
+                            <select id="inp-akreditasi" class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="A (Unggul)">A (Unggul)</option>
+                                <option value="B (Baik)">B (Baik)</option>
+                                <option value="C (Cukup)">C (Cukup)</option>
+                            </select>
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Karakteristik Sosial Budaya (Paragraf)</label>
+                            <textarea id="inp-karakteristik-sosbud" rows="3" class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500" placeholder="Ketik deskripsi tradisi, norma, sosiokultural di lingkungan sekolah Anda..."></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bagian 2: Indikator Rapor Pendidikan (Dropdown Lengkap) -->
+                <div class="bg-slate-50 p-4 border border-slate-200 rounded-xl space-y-4">
+                    <h3 class="text-xs font-bold text-blue-800 uppercase tracking-wider">B. Indikator Rapor Pendidikan</h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- A.1 Literasi -->
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">A.1 Kemampuan Literasi</label>
+                            <select id="inp-mutu-literasi" class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="masih berada di bawah standar yang diharapkan sehingga memerlukan penguatan budaya membaca">Di bawah Standar (Butuh Penguatan)</option>
+                                <option value="mencapai standar dasar nasional">Mencapai Standar Dasar Nasional</option>
+                                <option value="di atas standar nasional">Di atas Standar Nasional</option>
+                                <option value="belum_diukur">Belum diukur / Tidak ada pada jenjang</option>
+                            </select>
+                        </div>
+                        
+                        <!-- A.2 Numerasi -->
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">A.2 Kemampuan Numerasi</label>
+                            <select id="inp-mutu-numerasi" class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="telah berkembang sangat baik dan menunjukkan hasil maksimal" selected>Sangat Baik (Maksimal)</option>
+                                <option value="telah memenuhi standar dasar">Memenuhi Standar Dasar</option>
+                                <option value="masih memerlukan bimbingan dan pembenahan intensif">Perlu Pembenahan Intensif</option>
+                                <option value="belum_diukur">Belum diukur / Tidak ada pada jenjang</option>
+                            </select>
+                        </div>
+
+                        <!-- A.3 Karakter -->
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">A.3 Indeks Karakter</label>
+                            <select id="inp-mutu-karakter" class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="sangat baik dan mencerminkan Profil Lulusan secara penuh">Sangat Baik (Profil Lulusan)</option>
+                                <option value="masih memerlukan intervensi yang lebih terarah and berkelanjutan">Membutuhkan Intervensi Terarah</option>
+                                <option value="belum_diukur">Belum diukur / Tidak ada pada jenjang</option>
+                            </select>
+                        </div>
+
+                        <!-- D.1 Kualitas Pembelajaran -->
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">D.1 Kualitas Pembelajaran</label>
+                            <select id="inp-mutu-kualitas-pembelajaran" class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="sangat efektif, interaktif, and berpusat pada peserta didik" selected>Sangat Efektif (Tinggi)</option>
+                                <option value="berjalan cukup baik namun masih memerlukan beberapa peningkatan">Cukup Baik (Sedang)</option>
+                                <option value="masih memerlukan pembenahan di berbagai aspek metode pengajaran">Kurang (Perlu Pembenahan)</option>
+                                <option value="belum_diukur">Belum diukur / Tidak ada pada jenjang</option>
+                            </select>
+                        </div>
+
+                        <!-- D.2 Refleksi Pembelajaran -->
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">D.2 Refleksi & Perbaikan Pembelajaran oleh Guru</label>
+                            <select id="inp-mutu-refleksi-guru" class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="aktif dilakukan secara berkala and terdokumentasi dengan sangat baik" selected>Sangat Baik/Aktif</option>
+                                <option value="telah berjalan secara umum namun evaluasi belum terdokumentasi maksimal">Cukup Baik/Sedang</option>
+                                <option value="masih sangat jarang dilakukan dan perlu didorong pengembangannya">Perlu Dikembangkan/Rendah</option>
+                                <option value="belum_diukur">Belum diukur / Tidak ada pada jenjang</option>
+                            </select>
+                        </div>
+
+                        <!-- D.3 Kepemimpinan Instruksional -->
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">D.3 Kepemimpinan Instruksional</label>
+                            <select id="inp-mutu-kepemimpinan" class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="mampu mengarahkan kualitas pembelajaran secara visioner and taktis" selected>Sangat Baik/Tinggi</option>
+                                <option value="cukup akomodatif dalam mendukung kinerja pendidik">Cukup Baik/Sedang</option>
+                                <option value="belum optimal dalam perancangan strategi akademik">Perlu Dokumen/Rendah</option>
+                                <option value="belum_diukur">Belum diukur / Tidak ada pada jenjang</option>
+                            </select>
+                        </div>
+
+                        <!-- D.8 Iklim Kebhinekaan -->
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">D.8 Iklim Kebhinekaan</label>
+                            <select id="inp-mutu-kebhinekaan" class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="sangat kondusif dengan tingkat toleransi serta penghargaan keberagaman yang sangat tinggi" selected>Sangat Kondusif (Tinggi)</option>
+                                <option value="terjaga dengan baik and kondusif dalam seluruh kegiatan sekolah">Kondusif (Sedang)</option>
+                                <option value="memerlukan peningkatan program penanaman nilai multikultural">Perlu Pembenahan/Rendah</option>
+                                <option value="belum_diukur">Belum diukur / Tidak ada pada jenjang</option>
+                            </select>
+                        </div>
+
+                        <!-- D.10 Iklim Inklusi -->
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">D.10 Iklim Inklusi</label>
+                            <select id="inp-mutu-inklusi" class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="telah terimplementasi dengan baik dalam mendukung kebutuhan semua siswa" selected>Sangat Baik (Inklusif)</option>
+                                <option value="sudah berkembang namun masih terbatas pada fasilitas dasar">Cukup/Sedang</option>
+                                <option value="memerlukan pembenahan instrumen and kesiapan pendidik untuk melayani ABK">Perlu Pembenahan</option>
+                                <option value="belum_diukur">Belum diukur / Tidak ada pada jenjang</option>
+                            </select>
+                        </div>
+
+                        <!-- Sektor PTK -->
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Sektor PTK (Ketersediaan & Kompetensi)</label>
+                            <select id="inp-mutu-ptk" class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="berada pada tingkat kompetensi yang optimal dan ketersediaan guru yang sangat mencukupi" selected>Sangat Optimal</option>
+                                <option value="telah mencukupi kebutuhan dasar pengajaran sekolah">Optimal/Cukup</option>
+                                <option value="masih mengalami kekurangan kuantitas pendidik atau memerlukan pelatihan intensif">Kurang/Butuh Pembenahan</option>
+                                <option value="belum_diukur">Belum diukur / Tidak ada pada jenjang</option>
+                            </select>
+                        </div>
+
+                        <!-- Sektor Sapras -->
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 mb-1">Sektor Sarana Prasarana (Sapras)</label>
+                            <select id="inp-mutu-sapras" class="w-full text-sm border border-slate-300 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="sangat memadai untuk mendukung seluruh aktivitas kurikuler and ekstrakurikuler" selected>Sangat Memadai</option>
+                                <option value="telah memenuhi standar kelayakan minimum">Memenuhi Standar Kelayakan Minimum</option>
+                                <option value="masih terbatas dan memerlukan penambahan fasilitas penunjang">Terbatas/Butuh Penambahan</option>
+                                <option value="belum_diukur">Belum diukur / Tidak ada pada jenjang</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB: CETAK -->
+            <section id="tab-cetak" class="tab-content hidden space-y-6">
+                <div class="border-b border-slate-100 pb-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-950">Pratinjau & Cetak A4</h2>
+                        <p class="text-sm text-slate-500">Sistem memformat dokumen Anda ke dalam kertas standar A4.</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button onclick="bukaTabBaruCetak()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg shadow-sm transition flex items-center gap-2">
+                            <i data-lucide="printer" class="w-4 h-4"></i> Buka di Tab Baru
+                        </button>
+                    </div>
+                </div>
+
+                <div class="flex flex-col gap-6 bg-slate-100 p-4 rounded-xl border border-slate-200" id="cetak-kontainer-preview">
+                    <!-- HALAMAN 1: SAMPUL/COVER -->
+                    <div class="a4-page cover-pattern flex flex-col justify-between">
+                        <div class="text-center">
+                            <h2 class="uppercase tracking-wider font-bold">KURIKULUM SATUAN PENDIDIKAN (KSP)</h2>
+                        </div>
+
+                        <!-- POSISI TENGAH HALAMAN: LOGO, NAMA SEKOLAH, & TAHUN PELAJARAN -->
+                        <div class="flex flex-col items-center justify-center my-auto space-y-6">
+                            <!-- LOGO WRAPPER -->
+                            <div class="flex items-center justify-center" style="height: 180px;">
+                                <img id="sampul-logo" src="https://iili.io/CdQPI9V.png" style="width: 110px; margin-top: 0px;" alt="Logo Sekolah Utama">
+                            </div>
+
+                            <div class="text-center mt-2">
+                                <h1 id="out-sampul-sekolah" class="uppercase tracking-wide font-bold" style="font-size: 16pt !important;">SD NEGERI 03 PENDOWO ASRI</h1>
+                                <p class="text-slate-900 font-bold mt-2 uppercase text-center" style="font-size: 12pt !important;">TAHUN PELAJARAN <span id="out-sampul-tp">2026/2027</span></p>
+                            </div>
+                        </div>
+
+                        <div class="text-center mt-auto">
+                            <!-- KUNCI RATA TENGAH DENGAN CLASS text-center -->
+                            <div class="uppercase tracking-widest pt-6 border-t border-slate-200 text-center" style="font-size: 13pt;">
+                                <p class="font-bold text-slate-900 text-center" id="out-sampul-instansi">PEMERINTAH KABUPATEN TULANG BAWANG</p>
+                                <p class="font-bold text-slate-800 text-center" id="out-sampul-dinas">DINAS PENDIDIKAN DAN KEBUDAYAAN</p>
+                                <p class="font-bold text-slate-900 mt-2 text-center">TAHUN <span id="out-sampul-tahun">2026</span></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- HALAMAN 2: LEMBAR REKOMENDASI -->
+                    <div class="a4-page ksp-body flex flex-col justify-start">
+                        <div class="w-full">
+                            <h3 class="uppercase font-bold text-center">REKOMENDASI</h3>
+                            <h4 class="bab-subtitle uppercase font-bold text-center" style="margin-bottom: 20px !important;">KURIKULUM SATUAN PENDIDIKAN</h4>
+                            
+                            <p class="narasi-p" style="margin-bottom: 12px !important;">Setelah memeriksa dan menelaah dokumen Kurikulum Satuan Pendidikan yang disusun oleh:</p>
+                            
+                            <table class="w-full mb-4 left-info-table">
+                                <colgroup>
+                                    <col style="width: 28%;">
+                                    <col style="width: 3%;">
+                                    <col style="width: 69%;">
+                                </colgroup>
+                                <tbody>
+                                    <tr style="vertical-align: top;">
+                                        <td>Satuan Pendidikan</td>
+                                        <td>:</td>
+                                        <td><span id="out-rekom-sekolah" class="font-bold">SD NEGERI 03 PENDOWO ASRI</span></td>
+                                    </tr>
+                                    <tr style="vertical-align: top;">
+                                        <td>Alamat</td>
+                                        <td>:</td>
+                                        <td><span id="out-rekom-alamat">Jl. Kukubima No. 2 Kampung Pasiran Jaya Kecamatan Dente Teladas Kabupaten Tulang Bawang</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                            <p class="narasi-p" style="margin-bottom: 12px !important;">Berdasarkan hasil telaah and validasi terhadap dokumen Kurikulum Satuan Pendidikan (KSP), yang bertanda tangan di bawah ini:</p>
+
+                            <table class="w-full mb-4 left-info-table">
+                                <colgroup>
+                                    <col style="width: 28%;">
+                                    <col style="width: 3%;">
+                                    <col style="width: 69%;">
+                                </colgroup>
+                                <tbody>
+                                    <tr>
+                                        <td>Nama</td>
+                                        <td>:</td>
+                                        <td><span id="out-rekom-pengawas" class="font-bold">PURWADI, S.Pd.</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>NIP</td>
+                                        <td>:</td>
+                                        <td><span id="out-rekom-nip-pengawas">19690717 200212 1 006</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Jabatan</td>
+                                        <td>:</td>
+                                        <td><span>Pengawas SD</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                            <p class="narasi-p" style="margin-bottom: 12px !important;">menyatakan bahwa Kurikulum Satuan Pendidikan <span id="out-rekom-sekolah-pernyataan" class="font-bold">SD NEGERI 03 PENDOWO ASRI</span>:</p>
+
+                            <!-- PILIHAN REKOMENDASI -->
+                            <div class="space-y-2 pl-4 mb-4 text-[12pt] leading-normal" style="font-family: 'Times New Roman', Times, serif !important;">
+                                <p class="flex items-center gap-3">
+                                    <span class="inline-block border border-black w-3.5 h-3.5 flex-shrink-0"></span>
+                                    <span>Dapat direkomendasikan tanpa syarat</span>
+                                </p>
+                                <p class="flex items-center gap-3">
+                                    <span class="inline-block border border-black w-3.5 h-3.5 flex-shrink-0"></span>
+                                    <span>Dapat direkomendasikan dengan syarat perbaikan/penyempurnaan</span>
+                                </p>
+                                <p class="flex items-center gap-3">
+                                    <span class="inline-block border border-black w-3.5 h-3.5 flex-shrink-0"></span>
+                                    <span>Belum dapat direkomendasikan</span>
+                                </p>
+                            </div>
+
+                            <p class="narasi-p" style="margin-bottom: 8px !important;">dengan alasan/pertimbangan:</p>
+
+                            <!-- PILIHAN ALASAN -->
+                            <div class="space-y-2 pl-4 mb-4 text-[12pt] leading-normal" style="font-family: 'Times New Roman', Times, serif !important;">
+                                <p class="flex items-center gap-3">
+                                    <span class="inline-block border border-black w-3.5 h-3.5 flex-shrink-0"></span>
+                                    <span>Semua unsur Kurikulum Satuan Pendidikan terpenuhi dengan lengkap.</span>
+                                </p>
+                                <p class="flex items-center gap-3">
+                                    <span class="inline-block border border-black w-3.5 h-3.5 flex-shrink-0"></span>
+                                    <span>Unsur Kurikulum Satuan Pendidikan terpenuhi, namun kurang lengkap.</span>
+                                </p>
+                                <p class="flex items-center gap-3">
+                                    <span class="inline-block border border-black w-3.5 h-3.5 flex-shrink-0"></span>
+                                    <span>Unsur Kurikulum Satuan Pendidikan tidak lengkap.</span>
+                                </p>
+                            </div>
+
+                            <p class="narasi-p" style="margin-bottom: 18px !important;">Demikian rekomendasi ini dibuat sebagai bahan pertimbangan untuk disahkan dan diberlakukan di lingkungan <span id="out-rekom-sekolah-penutup" class="font-bold">SD NEGERI 03 PENDOWO ASRI</span>.</p>
+                        </div>
+
+                        <!-- TANDA TANGAN REKOMENDASI (DINAIKKAN 1 BARIS DARI PARAGRAF PENUTUP) -->
+                        <div class="w-full tight-sign" style="margin-top: 15pt !important;">
+                            <table class="w-full text-left table-fixed" style="font-family: 'Times New Roman', Times, serif;">
+                                <colgroup>
+                                    <col style="width: 50%;">
+                                    <col style="width: 50%;">
+                                </colgroup>
+                                <tbody>
+                                    <!-- Baris 1: Tanggal hanya di kolom kanan -->
+                                    <tr>
+                                        <td class="pl-12"></td>
+                                        <td class="pl-6"><span id="out-rekom-alamat-singkat">Pasiran Jaya</span>, <span id="out-rekom-tgl">17 Juli 2026</span></td>
+                                    </tr>
+                                    <!-- Baris 2: Mengetahui (Kiri - Geser Kanan) / Pengawas SD (Kanan) -->
+                                    <tr>
+                                        <td class="pl-12">Mengetahui</td>
+                                        <td class="pl-6">Pengawas SD,</td>
+                                    </tr>
+                                    <!-- Baris 3: Kasi (Kiri - Geser Kanan) / Kosong (Kanan) -->
+                                    <tr>
+                                        <td class="pl-12">Kasi Kurikulum dan Penilaian,</td>
+                                        <td class="pl-6"></td>
+                                    </tr>
+                                    <!-- Baris 4: Area Spasi Tanda Tangan -->
+                                    <tr>
+                                        <td class="pl-12"><div style="height: 65px;"></div></td>
+                                        <td class="pl-6"><div style="height: 65px;"></div></td>
+                                    </tr>
+                                    <!-- Baris 5: Nama Pejabat -->
+                                    <tr>
+                                        <td class="pl-12 font-bold text-slate-950"><span id="out-rekom-kasi">WIWI NURHAYATI, S.Ag.,M.M.</span></td>
+                                        <td class="pl-6 font-bold text-slate-950"><span id="out-rekom-pengawas-bawah">PURWADI, S.Pd.</span></td>
+                                    </tr>
+                                    <!-- Baris 6: NIP -->
+                                    <tr>
+                                        <td class="pl-12 text-slate-900">NIP. <span id="out-rekom-nip-kasi">19000000 000000 0 000</span></td>
+                                        <td class="pl-6 text-slate-900">NIP <span id="out-rekom-nip-pengawas-bawah-2">19690717 200212 1 006</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- HALAMAN 3: LEMBAR PENGESAHAN -->
+                    <div class="a4-page ksp-body flex flex-col justify-start">
+                        <div class="w-full">
+                            <h3 class="uppercase font-bold text-center">HALAMAN PENGESAHAN</h3>
+                            
+                            <p class="narasi-p" style="text-align: justify !important; margin-bottom: 0px !important;">
+                                Setelah dilakukan serangkaian kegiatan evaluasi, perencanaan, dan lokakarya penyusunan Kurikulum Satuan Pendidikan dengan melibatkan seluruh unsur pemangku kepentingan (stakeholders) internal dan eksternal sekolah yang tersedia, maka Kurikulum Satuan Pendidikan <span id="out-sah-sekolah" class="font-bold">SD IT Insan Cendikia</span> Kampung <span id="out-sah-desa" class="font-bold">Pendowo Asri</span> Kecamatan <span id="out-sah-kecamatan" class="font-bold">Dente Teladas</span> Kabupaten <span id="out-sah-kabupaten" class="font-bold">Tulang Bawang</span> ditetapkan untuk dijalankan pada Tahun Pelajaran <span id="out-sah-tp" class="font-bold">2026/2027</span> , berdasarkan Surat Keputusan <span id="out-sah-sekolah2" class="font-bold">SD IT Insan Cendikia</span> Nomor: <span id="out-sah-sk" class="font-bold">423.5 / 012 / SD-01-PA / TB / VII / 2026</span>.
+                            </p>
+                        </div>
+
+                        <!-- JALUR PENYEKAT FISIK AKURAT - SETARA SATU BARIS DEFAULT EXCEL (15pt / 20px) -->
+                        <div style="height: 15pt; min-height: 15pt; display: block; clear: both; overflow: hidden;"></div>
+
+                        <!-- AREA TANDA TANGAN (STRUKTUR TATA LETAK PROPORSIOINAL SESUAI GAMBAR) -->
+                        <div class="w-full tight-sign" style="margin-top: 0px; margin-bottom: 0px;">
+                            <table class="w-full text-left table-fixed" style="font-family: 'Times New Roman', Times, serif;">
+                                <colgroup>
+                                    <col style="width: 50%;">
+                                    <col style="width: 50%;">
+                                </colgroup>
+                                <tbody>
+                                    <!-- Baris 1: Informasi Penetapan di Kanan -->
+                                    <tr>
+                                        <td></td>
+                                        <td class="pl-16">
+                                            Ditetapkan di : <span id="out-sah-ditetapkan">Tulang Bawang</span><br>
+                                            Pada tanggal : <span id="out-sah-tgl">17 Juli 2026</span>
+                                        </td>
+                                    </tr>
+                                    <!-- Spacer Tinggi Grid Dalam -->
+                                    <tr>
+                                        <td colspan="2" style="height: 10px;"></td>
+                                    </tr>
+                                    <!-- Baris 2: Jabatan Komite dan Kepala Sekolah -->
+                                    <tr style="vertical-align: top;">
+                                        <td class="text-center">
+                                            Ketua Komite Satuan Pendidikan,
+                                        </td>
+                                        <td class="text-center">
+                                            Kepapa Satuan Pendidikan,
+                                        </td>
+                                    </tr>
+                                    <!-- Baris 3: Ruang Tanda Tangan (Spacer) -->
+                                    <tr>
+                                        <td><div style="height: 55px;"></div></td>
+                                        <td><div style="height: 55px;"></div></td>
+                                    </tr>
+                                    <!-- Baris 4: Nama Terang Pimpinan -->
+                                    <tr style="vertical-align: top;">
+                                        <td class="text-center font-bold">
+                                            <span id="out-sah-komite">SURATI</span>
+                                        </td>
+                                        <td class="text-center">
+                                            <span id="out-sah-kepsek" class="font-bold">SUROTO, S.Pd.</span><br>
+                                            <span class="text-slate-900">NIP <span id="out-sah-nip-kepsek">19000000 000000 0 000</span></span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- JALUR PENYEKAT FISIK AKURAT - SETARA SATU BARIS DEFAULT EXCEL (15pt / 20px) -->
+                        <div style="height: 15pt; min-height: 15pt; display: block; clear: both; overflow: hidden;"></div>
+
+                        <!-- SEKTOR MENGETAHUI KEPALA DINAS (STRUKTUR TENGAH SESUAI FOTO PEMANDU) -->
+                        <div class="w-full tight-sign text-center" style="margin-top: 0px; margin-bottom: 0px;">
+                            <p class="mb-1 text-center" style="margin-bottom: 2px !important;">Mengetahui</p>
+                            <p class="text-center" style="margin-bottom: 2px !important;">Kepapa Dinas Pendidikan dan Kebudayaan</p>
+                            <p class="text-center" style="margin-bottom: 12px !important;">Kabupaten <span id="out-sah-kabupaten-bawah">Tulang Bawang</span>,</p>
+                            
+                            <!-- Ruang Tanda Tangan Kadis (Spacer) -->
+                            <div style="height: 55px;"></div>
+                            
+                            <span id="out-sah-kadis" class="font-bold text-center uppercase">M. AMI ISWANDI ISMED BALAW, S.Kom., M.M.</span><br>
+                            <p class="text-center">
+                                <span id="out-sah-gol-kadis">Pembina Tk. I (IV/b)</span><br>
+                                NIP <span id="out-sah-nip-kadis">19801121 200604 1 005</span>
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- HALAMAN 4: KATA PENGANTAR -->
+                    <div class="a4-page ksp-body flex flex-col justify-start">
+                        <div class="w-full">
+                            <h3 class="uppercase font-bold text-center">KATA PENGANTAR</h3>
+                            
+                            <p class="narasi-p" style="margin-bottom: 12px !important;">
+                                Puji syukur ke hadirat Tuhan Yang Maha Esa atas segala rahmat dan karunia-Nya, sehingga Kurikulum Satuan Pendidikan <span class="out-kata-sekolah font-bold">SD IT Insan Cendikia</span> Tahun Ajaran <span class="out-kata-tp font-bold">2026/2027</span> dapat diselesaikan dengan baik. Penyusunan kurikulum ini merupakan bagian dari komitmen sekolah dalam meningkatkan mutu pendidikan yang selaras dengan visi dan misi sekolah.
+                            </p>
+                            
+                            <p class="narasi-p" style="margin-bottom: 12px !important;">
+                                Penerapan pendekatan pembelajaran mendalam (deep learning) menjadi strategi utama dalam menciptakan proses pembelajaran yang bermakna dan berkelanjutan. Dengan pendekatan ini, peserta didik diharapkan mampu memahami konsep secara komprehensif and mengaplikasikannya dalam kehidupan sehari-hari.
+                            </p>
+                            
+                            <p class="narasi-p" style="margin-bottom: 12px !important;">
+                                Penyusunan kurikulum ini dilakukan melalui serangkaian kegiatan evaluasi, perencanaan, dan lokakarya dengan melibatkan seluruh unsur pemangku kepentingan (stakeholders) internal dan eksternal sekolah yang tersedia, termasuk pengawas sekolah, komite sekolah, serta pendidik dan tenaga kependidikan sesuai dengan struktur organisasi satuan pendidikan yang ada. Kolaborasi yang erat antar pemangku kepentingan menjadi kekuatan utama dalam merancang kurikulum yang adatif, relevan, dan berpihak pada kebutuhan serta potensi peserta didik.
+                            </p>
+                            
+                            <p class="narasi-p" style="margin-bottom: 12px !important;">
+                                Kurikulum ini tidak hanya menitikberatkan pada pencapaian akademik, tetapi juga pada penguatan karakter, pengembangan keterampilan berpikir kritis dan kreatif, serta penanaman nilai-nilai moral, sosial, budaya, dan spiritual. Integrasi pengetahuan, keterampilan, sikap, serta nilai-nilai kemanusiaan menjadi fondasi dalam mewujudkan peserta didik yang berdaya saing and berkarakter.
+                            </p>
+                            
+                            <p class="narasi-p" style="margin-bottom: 12px !important;">
+                                Melalui implementasi kebijakan kurikulum yang berlaku, sekolah diberikan keleluasaan untuk menyusun kurikulum operasional yang kontekstual dan fleksibel. Hal ini diharapkan mampu menjadi solusi dalam optimalisasi pembelajaran dan menjawab tantangan pendidikan di masa kini dan mendatang.
+                            </p>
+                            
+                            <p class="narasi-p" style="margin-bottom: 12px !important;">
+                                Ucapan terima kasih disampaikan kepada seluruh pihak yang telah berkontribusi dalam proses penyusunan dan pengembangan kurikulum ini. Semoga dokumen ini dapat menjadi acuan yang bermanfaat dalam penyelenggaraan pembelajaran yang efektif, berkualitas, dan berkelanjutan.
+                            </p>
+                        </div>
+
+                        <!-- TANDA TANGAN KATA PENGANTAR -->
+                        <div class="w-full tight-sign mt-auto" style="margin-top: 15px;">
+                            <table class="w-full text-left table-fixed" style="font-family: 'Times New Roman', Times, serif;">
+                                <colgroup>
+                                    <col style="width: 55%;">
+                                    <col style="width: 45%;">
+                                </colgroup>
+                                <tbody>
+                                    <tr>
+                                        <td></td>
+                                        <td>
+                                            Hormat Kami,<br>
+                                            Tim Pengembang Kurikulum,<br>
+                                            <span class="out-kata-sekolah-bawah font-bold">SD IT Insan Cendikia</span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- HALAMAN 5: DAFTAR ISI (ADAPTIF NOMOR HALAMAN - DISESUAIKAN HASIL KONSOLIDASI BARU) -->
+                    <div class="a4-page ksp-body flex flex-col justify-start">
+                        <div class="w-full">
+                            <h3 class="uppercase font-bold text-center">DAFTAR ISI</h3>
+                            
+                            <div class="flex justify-end font-normal mb-2" style="font-size: 11pt !important;">
+                                <span>Hal.</span>
+                            </div>
+
+                            <div class="space-y-1" style="font-size: 11pt !important;">
+                                <div class="flex justify-between items-baseline">
+                                    <span>HALAMAN SAMPUL</span>
+                                    <span>i</span>
+                                </div>
+                                <div class="flex justify-between items-baseline">
+                                    <span>HALAMAN REKOMENDASI</span>
+                                    <span>ii</span>
+                                </div>
+                                <div class="flex justify-between items-baseline">
+                                    <span>HALAMAN PENGESAHAN</span>
+                                    <span>iii</span>
+                                </div>
+                                <div class="flex justify-between items-baseline">
+                                    <span>KATA PENGANTAR</span>
+                                    <span>iv</span>
+                                </div>
+                                <div class="flex justify-between items-baseline">
+                                    <span>DAFTAR ISI</span>
+                                    <span>v</span>
+                                </div>
+
+                                <div class="h-1"></div>
+
+                                <div class="flex justify-between items-baseline">
+                                    <span>I. &nbsp; ANALISIS KARAKTERISTIK SATUAN PENDIDIKAN</span>
+                                    <span>1</span>
+                                </div>
+                                <div class="pl-8 space-y-0.5">
+                                    <div class="flex justify-between items-baseline">
+                                        <span>A. Karakteristik Satuan Sosiokultural</span>
+                                        <span>1</span>
+                                    </div>
+                                    <div class="flex justify-between items-baseline">
+                                        <span>B. Analisis Kualitas Mutu Pendidikan Satuan</span>
+                                        <span>1</span>
+                                    </div>
+                                    <div class="flex justify-between items-baseline">
+                                        <span>C. Analisis Kekuatan, Kelemahan, Peluang & Tantangan (SWOT)</span>
+                                        <span>2</span>
+                                    </div>
+                                    <div class="flex justify-between items-baseline">
+                                        <span>D. Sintesis Arah Kebijakan dan Rencana Tindak Lanjut</span>
+                                        <span>2</span>
+                                    </div>
+                                </div>
+
+                                <div class="flex justify-between items-baseline">
+                                    <span>II. &nbsp; VISI, MISI, DAN TUJUAN</span>
+                                    <span>3</span>
+                                </div>
+                                <div class="pl-8 space-y-0.5">
+                                    <div class="flex justify-between items-baseline">
+                                        <span>A. Visi</span>
+                                        <span>3</span>
+                                    </div>
+                                    <div class="flex justify-between items-baseline">
+                                        <span>B. Misi</span>
+                                        <span>3</span>
+                                    </div>
+                                    <div class="flex justify-between items-baseline">
+                                        <span>C. Tujuan</span>
+                                        <span>3</span>
+                                    </div>
+                                </div>
+
+                                <div class="flex justify-between items-baseline">
+                                    <span>III. &nbsp; PENGORGANISASIAN PEMBELAJARAN</span>
+                                    <span>4</span>
+                                </div>
+
+                                <div class="pl-8 space-y-0.5">
+                                    <div class="flex justify-between items-baseline">
+                                        <span>A. Kerangka Pembelajaran Mendalam</span>
+                                        <span>4</span>
+                                    </div>
+                                    <div class="flex justify-between items-baseline">
+                                        <span>B. Pembelajaran Intrakurikuler</span>
+                                        <span>4</span>
+                                    </div>
+                                    <div class="flex justify-between items-baseline">
+                                        <span>C. Pembelajaran Kokurikuler</span>
+                                        <span>5</span>
+                                    </div>
+                                    <div class="flex justify-between items-baseline">
+                                        <span>D. Pembelajaran Ekstrakurikuler</span>
+                                        <span>5</span>
+                                    </div>
+                                    <div class="flex justify-between items-baseline">
+                                        <span>E. Pembiasaan dan Budaya Positif Satuan</span>
+                                        <span>6</span>
+                                    </div>
+                                    <div class="flex justify-between items-baseline">
+                                        <span>F. Kriteria Kenaikan Kelas dan Kelulusan</span>
+                                        <span>6</span>
+                                    </div>
+                                </div>
+
+                                <div class="flex justify-between items-baseline">
+                                    <span>IV. &nbsp; PERENCANAAN PEMBELAJARAN DAN ASESMEN</span>
+                                    <span>7</span>
+                                </div>
+
+                                <div class="pl-8 space-y-0.5">
+                                    <div class="flex justify-between items-baseline">
+                                        <span>A. Prinsip Perencanaan Pembelajaran dan Asesmen</span>
+                                        <span>7</span>
+                                    </div>
+                                    <div class="flex justify-between items-baseline">
+                                        <span>B. Perencanaan Pembelajaran Intrakurikuler dan Asesmen</span>
+                                        <span>7</span>
+                                    </div>
+                                </div>
+
+                                <div class="flex justify-between items-baseline">
+                                    <span>V. &nbsp; EVALUASI, PENGEMBANGAN PROFESIONAL, DAN PENDAMPINGAN</span>
+                                    <span>8</span>
+                                </div>
+
+                                <div class="pl-8 space-y-0.5">
+                                    <div class="flex justify-between items-baseline">
+                                        <span>A. Pendampingan Implementasi Kurikulum</span>
+                                        <span>8</span>
+                                    </div>
+                                    <div class="flex justify-between items-baseline">
+                                        <span>B. Evaluasi Implementasi Kurikulum</span>
+                                        <span>8</span>
+                                    </div>
+                                    <div class="flex justify-between items-baseline">
+                                        <span>C. Pengembangan Profesional Pendidik dan Tenaga Kependidikan</span>
+                                        <span>8</span>
+                                    </div>
+                                    <div class="flex justify-between items-baseline">
+                                        <span>D. Program Tindak Lanjut Hasil Evaluasi</span>
+                                        <span>8</span>
+                                    </div>
+                                </div>
+
+                                <div class="h-1"></div>
+
+                                <div class="flex justify-between items-baseline">
+                                    <span>LAMPIRAN - LAMPIRAN (DAFTAR LAMPIRAN)</span>
+                                    <span>9</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- HALAMAN 6: BAB I - BAGIAN 1 (ANALISIS SOSIOKULTURAL & RAPOR PENDIDIKAN) -->
+                    <div class="a4-page ksp-body flex flex-col justify-between">
+                        <div class="w-full">
+                            <h3 class="uppercase">BAB I</h3>
+                            <h4 class="bab-subtitle uppercase">ANALISIS KARAKTERISTIK SATUAN PENDIDIKAN</h4>
+                            
+                            <h5>A. Karakteristik Satuan Sosiokultural</h5>
+                            <p id="out-bab1-sosbud-narasi" class="narasi-p">Karakteristik sosiokultural lingkungan sekolah mencerminkan interaksi sosial budaya setempat.</p>
+
+                            <h5 class="mt-6">B. Analisis Kualitas Mutu Pendidikan Satuan</h5>
+                            <div id="out-bab1-rapor-narasi" class="text-justify">
+                                <!-- Terisi otomatis via JS -->
+                            </div>
+                        </div>
+
+                        <!-- FOOTER AKADEMIK KECIL -->
+                        <div class="w-full mt-auto pt-2 border-t border-slate-200 text-right text-[9pt] text-slate-400 no-print">
+                            Dokumen KSP • <span class="out-sekolah-footer-dynamic">SD IT Insan Cendikia</span> • Halaman 1
+                        </div>
+                    </div>
+
+                    <!-- HALAMAN 7: BAB I - BAGIAN 2 (SWOT & SINTESIS STRATEGIS) -->
+                    <div class="a4-page ksp-body flex flex-col justify-between">
+                        <div class="w-full">
+                            <h5>C. Analisis Kekuatan, Kelemahan, Peluang & Tantangan (SWOT)</h5>
+                            <div id="out-bab1-swot-narasi" class="w-full text-justify text-[12pt] leading-relaxed">
+                                <!-- Terisi otomatis via JS -->
+                            </div>
+
+                            <h5 class="mt-6">D. Sintesis Arah Kebijakan dan Rencana Tindak Lanjut</h5>
+                            <p class="narasi-p">
+                                Berdasarkan pemetaan komparatif di atas, rencana strategis pengembangan kurikulum satuan pendidikan diarahkan untuk memprioritaskan pembenahan pilar akademik fundamental yang masih berada di bawah target nasional. Sinergi antara komite sekolah, paguyuban orang tua, serta pengawas pembina dioptimalkan secara terstruktur untuk menjamin keberlanjutan mutu pembelajaran. Langkah ini diharapkan mampu menciptakan iklim belajar kontekstual yang bermutu tinggi, mandiri, inklusif, dan adatif terhadap perkembangan teknologi masa kini.
+                            </p>
+                        </div>
+
+                        <!-- FOOTER AKADEMIK KECIL -->
+                        <div class="w-full mt-auto pt-2 border-t border-slate-200 text-right text-[9pt] text-slate-400 no-print">
+                            Dokumen KSP • <span class="out-sekolah-footer-dynamic">SD IT Insan Cendikia</span> • Halaman 2
+                        </div>
+                    </div>
+
+                    <!-- HALAMAN 8: BAB II - VISI, MISI, DAN TUJUAN -->
+                    <div class="a4-page ksp-body flex flex-col justify-start">
+                        <div class="w-full">
+                            <h3 class="uppercase font-bold text-center">BAB II</h3>
+                            <h4 class="bab-subtitle uppercase font-bold text-center">VISI, MISI, DAN TUJUAN</h4>
+
+                            <h5 class="font-bold">A. Visi</h5>
+                            <div class="border border-black p-4 text-justify" style="margin-bottom: 14px !important; min-height: 50px;">
+                                <p id="out-bab2-visi" style="margin-bottom: 0px !important;">-</p>
+                            </div>
+
+                            <h5 class="font-bold">B. Misi</h5>
+                            <div class="border border-black p-4 text-justify" style="margin-bottom: 14px !important; min-height: 120px;">
+                                <ul id="out-bab2-misi" class="list-disc pl-5 space-y-1.5">
+                                    <!-- Terisi otomatis via JS -->
+                                </ul>
+                            </div>
+
+                            <h5 class="font-bold">C. Tujuan</h5>
+                            <div class="border border-black p-4 text-justify" style="min-height: 120px;">
+                                <ul id="out-bab2-tujuan" class="list-disc pl-5 space-y-1.5">
+                                    <!-- Terisi otomatis via JS -->
+                                </ul>
+                            </div>
+                        </div>
+
+                        <!-- FOOTER AKADEMIK KECIL -->
+                        <div class="w-full mt-auto pt-2 border-t border-slate-200 text-right text-[9pt] text-slate-400 no-print">
+                            Dokumen KSP • <span class="out-sekolah-footer-dynamic">SD IT Insan Cendikia</span> • Halaman 3
+                        </div>
+                    </div>
+
+                    <!-- HALAMAN 9: BAB III - PENGORGANISASIAN (BAGIAN A: DEEP LEARNING & BAGIAN B: INTRAKURIKULER) -->
+                    <div class="a4-page ksp-body flex flex-col justify-start">
+                        <div class="w-full">
+                            <h3 class="uppercase font-bold text-center">BAB III</h3>
+                            <h4 class="bab-subtitle uppercase font-bold text-center">PENGORGANISASIAN PEMBELAJARAN</h4>
+
+                            <h5 class="font-bold mb-1">A. Kerangka Pembelajaran Mendalam</h5>
+                            <p class="narasi-p" style="margin-bottom: 8px !important; font-size: 11pt !important;">
+                                Penerapan pendekatan pembelajaran mendalam (<strong>deep learning</strong>) menjadi acuan utama dalam merancang proses belajar yang bermakna bagi peserta didik. Struktur ini digambarkan secara konseptual melalui pilar-pilar pokok di bawah ini:
+                            </p>
+
+                            <div class="border border-slate-200 rounded-lg p-3 bg-white flex flex-col items-center justify-center my-2" style="height: 300px;">
+                                <img id="out-diagram-deep" src="https://lh3.googleusercontent.com/d/1yrnaQXwpXAtByfW068k3PXHXObHUFcNF" class="max-h-[250px] w-auto object-contain" alt="Gambar 3.1 Kerangka Kerja Pembelajaran Mendalam" onerror="this.src='https://drive.google.com/uc?export=view&id=1yrnaQXwpXAtByfW068k3PXHXObHUFcNF'">
+                                <div class="mt-1.5 text-center font-bold text-[9pt] text-slate-800">
+                                    Gambar 3.1 Kerangka Kerja Pembelajaran Mendalam
+                                </div>
+                            </div>
+
+                            <h5 class="font-bold mb-1">B. Pembelajaran Intrakurikuler</h5>
+                            <p class="narasi-p" style="margin-bottom: 8px !important; font-size: 11pt !important;">
+                                Pengorganisasian pembelajaran dengan pendekatan mata pelajaran dirancang secara seimbang antara aspek keagamaan, literasi, numerasi, sains, serta keunggulan muatan lokal daerah:
+                            </p>
+
+                            <table class="compact-academic-table text-[7.5pt]">
+                                <thead>
+                                    <tr>
+                                        <th rowspan="2" style="width: 3%;">No.</th>
+                                        <th rowspan="2" style="width: 22%;">Mata Pelajaran</th>
+                                        <th colspan="3" style="width: 11.5%;">Kelas I</th>
+                                        <th colspan="3" style="width: 11.5%;">Kelas II</th>
+                                        <th colspan="3" style="width: 11.5%;">Kelas III</th>
+                                        <th colspan="3" style="width: 11.5%;">Kelas IV</th>
+                                        <th colspan="3" style="width: 11.5%;">Kelas V</th>
+                                        <th colspan="3" style="width: 11.5%;">Kelas VI</th>
+                                        <th rowspan="2" style="width: 7%;">Total JP/Th</th>
+                                    </tr>
+                                    <tr>
+                                        <th>In.</th>
+                                        <th>Ko.</th>
+                                        <th class="bg-slate-100 font-bold">Jl.</th>
+                                        <th>In.</th>
+                                        <th>Ko.</th>
+                                        <th class="bg-slate-100 font-bold">Jl.</th>
+                                        <th>In.</th>
+                                        <th>Ko.</th>
+                                        <th class="bg-slate-100 font-bold">Jl.</th>
+                                        <th>In.</th>
+                                        <th>Ko.</th>
+                                        <th class="bg-slate-100 font-bold">Jl.</th>
+                                        <th>In.</th>
+                                        <th>Ko.</th>
+                                        <th class="bg-slate-100 font-bold">Jl.</th>
+                                        <th>In.</th>
+                                        <th>Ko.</th>
+                                        <th class="bg-slate-100 font-bold">Jl.</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="out-table-intra">
+                                    <!-- Terisi otomatis via JS -->
+                                </tbody>
+                            </table>
+                            <div class="text-center font-bold text-[9pt] mt-1.5">
+                                Tabel 3.2 Struktur Kurikulum SD <span class="out-sekolah-title-dynamic">IT INSAN CENDIKIA</span>
+                            </div>
+                        </div>
+
+                        <!-- FOOTER AKADEMIK KECIL -->
+                        <div class="w-full mt-auto pt-2 border-t border-slate-200 text-right text-[9pt] text-slate-400 no-print">
+                            Dokumen KSP • <span class="out-sekolah-footer-dynamic">SD IT Insan Cendikia</span> • Halaman 4
+                        </div>
+                    </div>
+
+                    <!-- HALAMAN 10: BAB III - PENGORGANISASIAN (BAGIAN C: KOKURIKULER & BAGIAN D: EKSTRAKURIKULER) -->
+                    <div class="a4-page ksp-body dense-page flex flex-col justify-start">
+                        <div class="w-full">
+                            <h5 class="font-bold mb-1">C. Pembelajaran Kokurikuler</h5>
+                            <div id="out-bab3-kokur-narasi" class="text-justify text-[10.5pt] leading-normal" style="font-family: 'Times New Roman', Times, serif !important;">
+                                <!-- Terisi via JS -->
+                            </div>
+
+                            <table class="kokur-table mt-1.5">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 4%;">No</th>
+                                        <th style="width: 5%;">Kls</th>
+                                        <th style="width: 5%;">Smt</th>
+                                        <th style="width: 18%;">Dimensi Profil Lulusan</th>
+                                        <th style="width: 15%;">Tema</th>
+                                        <th style="width: 18%;">Jenis Kokurikuler</th>
+                                        <th style="width: 18%;">Bentuk Kegiatan</th>
+                                        <th style="width: 11%;">Mata Pelajaran Terkait</th>
+                                        <th style="width: 6%;">JJP/Pekan</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="out-table-kokur">
+                                    <!-- Terisi otomatis via JS -->
+                                </tbody>
+                            </table>
+                            <div class="text-center font-bold text-[9pt] mt-1 mb-3">
+                                Gambar 3.3 Tabel Pengorganisasian Kokurikuler
+                            </div>
+
+                            <h5 class="font-bold mb-1">D. Pembelajaran Ekstrakurikuler</h5>
+                            <p class="narasi-p" style="margin-bottom: 6px !important; font-size: 11pt !important;">
+                                Ekstrakurikuler berfungsi untuk menampung bakat, minat, and potensi unik siswa secara sukarela dan mandiri:
+                            </p>
+
+                            <table class="academic-table text-[8.5pt]">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 4%;">No</th>
+                                        <th style="width: 25%;">Nama Kegiatan</th>
+                                        <th style="width: 12%;">Sifat</th>
+                                        <th style="width: 18%;">Sasaran</th>
+                                        <th style="width: 18%;">Alokasi Waktu</th>
+                                        <th style="width: 23%;">Profil Lulusan</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="out-table-ekskul">
+                                    <!-- Terisi otomatis via JS -->
+                                </tbody>
+                            </table>
+                            <div class="text-center font-bold text-[9pt] mt-1.5">
+                                Tabel 3.4 Pengorganisasian Pembelajaran Ekstrakurikuler
+                            </div>
+                        </div>
+
+                        <!-- FOOTER AKADEMIK KECIL -->
+                        <div class="w-full mt-auto pt-2 border-t border-slate-200 text-right text-[9pt] text-slate-400 no-print">
+                            Dokumen KSP • <span class="out-sekolah-footer-dynamic">SD IT Insan Cendikia</span> • Halaman 5
+                        </div>
+                    </div>
+
+                    <!-- HALAMAN 11: BAB III - PENGORGANISASIAN (BAGIAN E: BUDAYA POSITIF & BAGIAN F: KRITERIA KENAIKAN KELAS) -->
+                    <div class="a4-page ksp-body dense-page flex flex-col justify-start">
+                        <div class="w-full">
+                            <h5 class="font-bold mb-1">E. Pembiasaan dan Budaya Positif Satuan</h5>
+                            <p class="narasi-p" style="margin-bottom: 6px !important; font-size: 11pt !important;">
+                                Kegiatan pembiasaan dirancang untuk membina kebiasaan baik dan menanamkan akhlak mulia secara terus-menerus:
+                            </p>
+
+                            <table class="academic-table text-[8.5pt]">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 4%;">No</th>
+                                        <th style="width: 20%;">Bentuk Budaya Positif</th>
+                                        <th style="width: 33%;">Kegiatan Terjadwal</th>
+                                        <th style="width: 18%;">Waktu / Frekuensi</th>
+                                        <th style="width: 25%;">Tujuan Karakter</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="out-table-budaya">
+                                    <!-- Terisi otomatis via JS -->
+                                </tbody>
+                            </table>
+                            <div class="text-center font-bold text-[9pt] mt-1 mb-3">
+                                Tabel 3.5 Kegiatan Pembiasaan & Budaya Positif Sekolah
+                            </div>
+
+                            <h5 class="font-bold mb-1">F. Kriteria Kenaikan Kelas dan Kelulusan</h5>
+                            <p class="narasi-p" style="margin-bottom: 6px !important; font-size: 11pt !important;">
+                                Standar evaluasi kelayakan kenaikan kelas mengacu pada kriteria profesional guru rapat dewan guru:
+                            </p>
+
+                            <table class="academic-table text-[8.5pt] mb-1">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 4%;">No</th>
+                                        <th style="width: 25%;">Aspek Penilaian</th>
+                                        <th style="width: 71%;">Kriteria Keberhasilan Akademik</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>1</td>
+                                        <td class="align-left font-bold">Kehadiran Fisik</td>
+                                        <td class="align-left">Menempuh kehadiran tatap muka sekurang-kurangnya 85% dari hari efektif.</td>
+                                    </tr>
+                                    <tr>
+                                        <td>2</td>
+                                        <td class="align-left font-bold">Akademik</td>
+                                        <td class="align-left">Menuntaskan nilai seluruh mata pelajaran semester ganjil dan genap.</td>
+                                    </tr>
+                                    <tr>
+                                        <td>3</td>
+                                        <td class="align-left font-bold">Karakter & Sikap</td>
+                                        <td class="align-left">Memiliki predikat perilaku minimum bernilai Baik secara konsisten.</td>
+                                    </tr>
+                                    <tr>
+                                        <td>4</td>
+                                        <td class="align-left font-bold">Ekstrakurikuler</td>
+                                        <td class="align-left">Mengikuti kegiatan ekstrakurikuler wajib dengan predikat minimal Baik.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <div class="text-center font-bold text-[9pt] mt-1">
+                                Tabel 3.6 Kriteria Kenaikan Kelas dan Kelulusan Siswa
+                            </div>
+                        </div>
+
+                        <!-- FOOTER AKADEMIK KECIL -->
+                        <div class="w-full mt-auto pt-2 border-t border-slate-200 text-right text-[9pt] text-slate-400 no-print">
+                            Dokumen KSP • <span class="out-sekolah-footer-dynamic">SD IT Insan Cendikia</span> • Halaman 6
+                        </div>
+                    </div>
+
+                    <!-- HALAMAN 12: BAB IV - PERENCANAAN PEMBELAJARAN DAN ASESMEN -->
+                    <div class="a4-page ksp-body flex flex-col justify-between">
+                        <div class="w-full">
+                            <h3 class="uppercase font-bold text-center">BAB IV</h3>
+                            <h4 class="bab-subtitle uppercase font-bold text-center" style="margin-bottom: 24px !important;">PERENCANAAN PEMBELAJARAN DAN ASESMEN</h4>
+
+                            <h5 class="font-bold mb-2" style="margin-top: 14px !important; margin-bottom: 8px !important; text-align: left !important; font-size: 12pt !important;">A. Prinsip Perencanaan Pembelajaran dan Asesmen</h5>
+                            <p id="out-bab4-prinsip-p1" class="narasi-p" style="margin-bottom: 14px !important; text-align: justify !important; text-indent: 0px !important;">
+                                <!-- Terisi otomatis via JS -->
+                            </p>
+
+                            <h5 class="font-bold mb-2" style="margin-top: 20px !important; margin-bottom: 8px !important; text-align: left !important; font-size: 12pt !important;">B. Perencanaan Pembelajaran Intrakurikuler dan Asesmen</h5>
+                            <div id="out-bab4-intra-container" class="space-y-3.5">
+                                <!-- Terisi otomatis via JS -->
+                            </div>
+                        </div>
+
+                        <!-- FOOTER AKADEMIK KECIL -->
+                        <div class="w-full mt-auto pt-2 border-t border-slate-200 text-right text-[9pt] text-slate-400 no-print">
+                            Dokumen KSP • <span class="out-sekolah-footer-dynamic">SD IT Insan Cendikia</span> • Halaman 7
+                        </div>
+                    </div>
+
+                    <!-- HALAMAN 13: BAB V - EVALUASI, PENGEMBANGAN PROFESIONAL, DAN PENDAMPINGAN -->
+                    <div class="a4-page ksp-body flex flex-col justify-between">
+                        <div class="w-full">
+                            <h3 class="uppercase font-bold text-center">BAB V</h3>
+                            <h4 class="bab-subtitle uppercase font-bold text-center" style="margin-bottom: 24px !important;">EVALUASI, PENGEMBANGAN PROFESIONAL, DAN PENDAMPINGAN</h4>
+
+                            <h5 class="font-bold mb-2" style="margin-top: 14px !important; margin-bottom: 8px !important; text-align: left !important; font-size: 12pt !important;">A. Pendampingan Implementasi Kurikulum</h5>
+                            <p id="out-bab5-p1" class="narasi-p" style="margin-bottom: 14px !important; text-align: justify !important; text-indent: 0px !important;">
+                                <!-- Terisi otomatis via JS -->
+                            </p>
+
+                            <h5 class="font-bold mb-2" style="margin-top: 18px !important; margin-bottom: 8px !important; text-align: left !important; font-size: 12pt !important;">B. Evaluasi Implementasi Kurikulum</h5>
+                            <p id="out-bab5-p2" class="narasi-p" style="margin-bottom: 14px !important; text-align: justify !important; text-indent: 0px !important;">
+                                <!-- Terisi otomatis via JS -->
+                            </p>
+
+                            <h5 class="font-bold mb-2" style="margin-top: 18px !important; margin-bottom: 8px !important; text-align: left !important; font-size: 12pt !important;">C. Pengembangan Profesional Pendidik dan Tenaga Kependidikan</h5>
+                            <p id="out-bab5-p3" class="narasi-p" style="margin-bottom: 14px !important; text-align: justify !important; text-indent: 0px !important;">
+                                <!-- Terisi otomatis via JS -->
+                            </p>
+
+                            <h5 class="font-bold mb-2" style="margin-top: 18px !important; margin-bottom: 8px !important; text-align: left !important; font-size: 12pt !important;">D. Program Tindak Lanjut Hasil Evaluasi</h5>
+                            <p id="out-bab5-p4" class="narasi-p" style="margin-bottom: 14px !important; text-align: justify !important; text-indent: 0px !important;">
+                                <!-- Terisi otomatis via JS -->
+                            </p>
+                        </div>
+
+                        <!-- FOOTER AKADEMIK KECIL -->
+                        <div class="w-full mt-auto pt-2 border-t border-slate-200 text-right text-[9pt] text-slate-400 no-print">
+                            Dokumen KSP • <span class="out-sekolah-footer-dynamic">SD IT Insan Cendikia</span> • Halaman 8
+                        </div>
+                    </div>
+
+                    <!-- HALAMAN 14: DAFTAR LAMPIRAN -->
+                    <div class="a4-page ksp-body flex flex-col justify-between">
+                        <div class="w-full">
+                            <h3 class="uppercase font-bold text-center">DAFTAR LAMPIRAN</h3>
+                            
+                            <div style="height: 20px;"></div>
+                            
+                            <p class="narasi-p" style="margin-bottom: 24px !important;">
+                                Berikut adalah daftar dokumen pendukung (lampiran) yang disertakan sebagai bagian yang tidak terpisahkan dari dokumen Kurikulum Satuan Pendidikan:
+                            </p>
+
+                            <div class="space-y-4 pl-4" style="font-size: 12pt !important; font-family: 'Times New Roman', Times, serif !important;">
+                                <!-- Item 1 -->
+                                <div class="flex items-start">
+                                    <span class="inline-block border border-black w-4 h-4 mt-1 mr-4 flex-shrink-0 bg-white"></span>
+                                    <span>Kalender Pendidikan</span>
+                                </div>
+                                <!-- Item 2 -->
+                                <div class="flex items-start">
+                                    <span class="inline-block border border-black w-4 h-4 mt-1 mr-4 flex-shrink-0 bg-white"></span>
+                                    <span>Sampel Alur Tujuan Pembelajaran</span>
+                                </div>
+                                <!-- Item 3 -->
+                                <div class="flex items-start">
+                                    <span class="inline-block border border-black w-4 h-4 mt-1 mr-4 flex-shrink-0 bg-white"></span>
+                                    <span>Sampel Perencanaan Pembelajaran / Modul Ajar Intrakurikuler</span>
+                                </div>
+                                <!-- Item 4 -->
+                                <div class="flex items-start">
+                                    <span class="inline-block border border-black w-4 h-4 mt-1 mr-4 flex-shrink-0 bg-white"></span>
+                                    <span>Sampel Perencanaan / Modul Ajar Kokurikuler</span>
+                                </div>
+                                <!-- Item 5 -->
+                                <div class="flex items-start">
+                                    <span class="inline-block border border-black w-4 h-4 mt-1 mr-4 flex-shrink-0 bg-white"></span>
+                                    <span>SK Tim Pengembang Kurikulum memuat Uraian Tugas</span>
+                                </div>
+                                <!-- Item 6 -->
+                                <div class="flex items-start">
+                                    <span class="inline-block border border-black w-4 h-4 mt-1 mr-4 flex-shrink-0 bg-white"></span>
+                                    <span>Berita Acara Rapat Penyusunan Kurikulum</span>
+                                </div>
+                                <!-- Item 7 -->
+                                <div class="flex items-start">
+                                    <span class="inline-block border border-black w-4 h-4 mt-1 mr-4 flex-shrink-0 bg-white"></span>
+                                    <span>SK Pemberlakuan Kurikulum</span>
+                                </div>
+                                <!-- Item 8 -->
+                                <div class="flex items-start">
+                                    <span class="inline-block border border-black w-4 h-4 mt-1 mr-4 flex-shrink-0 bg-white"></span>
+                                    <span>Lembar Evaluasi Kegiatan Pengembangan Diri</span>
+                                </div>
+                                <!-- Item 9 -->
+                                <div class="flex items-start">
+                                    <span class="inline-block border border-black w-4 h-4 mt-1 mr-4 flex-shrink-0 bg-white"></span>
+                                    <span>Format Analisis Hasil Evaluasi dan Tindak Lanjut</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- FOOTER AKADEMIK KECIL -->
+                        <div class="w-full mt-auto pt-2 border-t border-slate-200 text-right text-[9pt] text-slate-400 no-print">
+                            Dokumen KSP • <span class="out-sekolah-footer-dynamic">SD IT Insan Cendikia</span> • Halaman 9
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- SCRIPT ENGINE -->
+    <script>
+        // Data Default dari Naskah KSP
+        const defaultData = {
+            instansi: "PEMERINTAH KABUPATEN TULANG BAWANG",
+            dinas: "DINAS PENDIDIKAN DAN KEBUDAYAAN",
+            sekolah: "SD IT Insan Cendikia",
+            npsn: "10814980",
+            tp: "2026/2027",
+            jalan: "Jl. Brawijaya Utara No. 2",
+            desa: "Pendowo Asri",
+            kecamatan: "Dente Teladas",
+            kabupaten: "Tulang Bawang",
+            provinsi: "Lampung",
+            kodepos: "34596",
+            kepsek: "SUROTO, S.Pd.",
+            nipKepsek: "19000000 000000 0 000",
+            komite: "SURATI",
+            pengawas: "PURWADI, S.Pd.",
+            nipPengawas: "196907172002121006",
+            kasi: "WIWI NURHAYATI, S.Ag.,M.M.",
+            nipKasi: "19000000 000000 0 000",
+            kadis: "M. AMI ISWANDI ISMED BALAW, S.Kom., M.M.",
+            golKadis: "Pembina Tk. I (IV/b)",
+            nipKadis: "19801121 200604 1 005",
+            sk: "423.5 / 012 / SD-01-PA / TB / VII / 2026",
+            tglPembuatan: "2026-07-17",
+            akreditasi: "A (Unggul)",
+            karakteristikSosbud: "Kondisi sosial budaya di lingkungan sekolah ditandai dengan kehidupan masyarakat yang rukun, menjunjung tinggi nilai gotong royong, kebersamaan, dan toleransi antarsesama. Berbagai kegiatan sosial, keagamaan, dan budaya masih dilaksanakan secara aktif sehingga tercipta lingkungan yang harmonis, aman, dan kondusif dalam mendukung proses pendidikan serta pembentukan karakter peserta didik.",
+            mutuLiterasi: "mencapai standar dasar nasional",
+            mutuNumerasi: "telah berkembang sangat baik dan menunjukkan hasil maksimal",
+            mutuKarakter: "sangat baik dan mencerminkan Profil Lulusan secara penuh",
+            mutuKualitasPembelajaran: "sangat efektif, interaktif, dan berpusat pada peserta didik",
+            mutuRefleksiGuru: "aktif dilakukan secara berkala and terdokumentasi dengan sangat baik",
+            mutuKepemimpinan: "mampu mengarahkan kualitas pembelajaran secara visioner dan taktis",
+            mutuKebhinekaan: "sangat kondusif dengan tingkat toleransi serta penghargaan keberagaman yang sangat tinggi",
+            mutuInklusi: "telah terimplementasi dengan baik dalam mendukung kebutuhan semua siswa",
+            mutuPtk: "berada pada tingkat kompetensi yang optimal dan ketersediaan guru yang sangat mencukupi",
+            mutuSapras: "sangat memadai untuk mendukung seluruh aktivitas kurikuler dan ekstrakurikuler",
+            logoSize: "110",
+            logoPos: "0",
+            logoData: "https://iili.io/CdQPI9V.png",
+            
+            visi: "Terwujudnya Peserta Didik yang Berkarakter 8 Dimensi profil lulusan, Unggul dalam Prestasi, Berwawasan Global, dan Peduli Lingkungan.",
+            misi: "Menyelenggarakan proses pendidikan yang menanamkan nilai-nilai keimanan, ketaqwaan, dan akhlak mulia sesuai ajaran agama.\nMelaksanakan pembelajaran aktif, kreatif, efektif, menyenangkan, dan inovatif.\nMengembangkan bakat, minat, dan potensi peserta didik secara optimal melalui kegiatan intrakurikuler and ekstrakurikuler.\nMenanamkan karakter Profil Lulusan di lingkungan sekolah dan masyarakat.\nMembudayakan kepedulian terhadap kelestarian lingkungan hidup dan kebersihan sekitar.",
+            tujuan: "Menghasilkan lulusan yang taat beribadah, toleran, dan memiliki integritas moral yang tinggi dalam kehidupan sehari-hari.\nMencapai peningkatan rerata nilai capaian asesmen kompetensi minimum (AKM) dan prestasi perlombaan minat-bakat siswa setiap tahunnya.\nMemastikan seluruh siswa mampu mengimplementasikan nilai-nilai gotong royong, mandiri, dan berkebinekaan global di lingkungan masyarakat.\nMemasilitasi sarana pembelajaran digital yang merata and efektif untuk mendukung kemandirian belajar serta riset sederhana peserta didik.\nMewujudkan lingkungan sekolah yang bersih, sehat, rindang, dan aman (Green School) demi kenyamanan seluruh warga satuan pendidikan.",
+
+            // BAB IV DATA DEFAULT
+            bab4Prinsip: "Perencanaan pembelajaran dan asesmen di SD It Insan Cendikia disusun sebagai bagian yang terpadu dalam penyelenggaraan pendidikan untuk memastikan tercapainya kompetensi peserta didik secara optimal. Perencanaan pembelajaran dirancang dengan mengacu pada capaian pembelajaran, karakteristik peserta didik, karakteristik satuan pendidikan, serta konteks lingkungan belajar. Sementara itu, asesmen direncanakan sebagai proses pengumpulan dan pengolahan informasi untuk mengetahui kebutuhan belajar, perkembangan, dan pencapaian hasil belajar peserta didik. Keterpaduan antara pembelajaran and asesmen memungkinkan guru merancang pengalaman belajar yang bermakna, berpusat pada peserta didik, serta mendukung perbaikan pembelajaran secara berkelanjutan. Dengan prinsip tersebut, pembelajaran dan asesmen dilaksanakan secara fleksibel, adil, valid, dan akuntabel sesuai dengan tujuan pendidikan satuan pendidikan.",
+            bab4Intra: [
+                "Perencanaan pembelajaran intrakurikuler di SD It Insan Cendikia disusun secara sistematis sebagai pedoman penyelenggaraan pembelajaran yang berpusat pada peserta didik. Perencanaan tersebut mengacu pada capaian pembelajaran, karakteristik peserta didik, karakteristik satuan pendidikan, serta konteks lingkungan belajar untuk memastikan tercapainya tujuan pembelajaran secara optimal.",
+                "Sebagai dasar penyelenggaraan pembelajaran, guru menyusun Alur Tujuan Pembelajaran (ATP) yang memuat urutan tujuan pembelajaran secara logis, sistematis, dan berkesinambungan dalam satu fase pembelajaran. ATP menjadi acuan dalam merancang pengalaman belajar yang bermakna serta mendukung pencapaian kompetensi peserta didik. Contoh ATP terlampir pada dokumen ini.",
+                "Berdasarkan ATP, guru menyusun rencana pembelajaran dalam bentuk modul ajar yang memuat tujuan pembelajaran, langkah-langkah kegiatan, asesmen, sumber belajar, serta strategi pembelajaran yang disesuaikan dengan kebutuhan peserta didik. Modul ajar berfungsi sebagai panduan operasional dalam pelaksanaan pembelajaran. Contoh rencana pembelajaran atau modul ajar terlampir pada dokumen ini.",
+                "Asesmen diagnostik dilaksanakan apabila diperlukan untuk mengidentifikasi kesiapan dan kebutuhan belajar peserta didik. Selain itu, asesmen formatif dan sumatif dilaksanakan untuk memantau perkembangan belajar, mengukur ketercapaian tujuan pembelajaran, serta menjadi dasar refleksi dan tindak lanjut pembelajaran. Contoh instrumen asesmen terlampir pada dokumen ini."
+            ].join('\n'),
+
+            // BAB V DATA DEFAULT
+            bab5Pendampingan: "Pendampingan implementasi kurikulum dilaksanakan secara berkelanjutan untuk memastikan keterlaksanaan kurikulum sesuai dengan perencanaan yang telah ditetapkan. Kegiatan pendampingan dilakukan melalui supervisi akademik, observasi pembelajaran, refleksi, diskusi profesional, dan berbagai bentuk pembinaan lainnya yang bertujuan meningkatkan kualitas pembelajaran dan layanan pendidikan. Instrumen pendampingan implementasi kurikulum tercantum pada lampiran.",
+            bab5Evaluasi: "Evaluasi implementasi kurikulum dilaksanakan secara berkala untuk memperoleh informasi mengenai tingkat keterlaksanaan program, efektivitas pembelajaran, ketercapaian tujuan pendidikan, serta dampaknya terhadap perkembangan peserta didik. Hasil evaluasi digunakan sebagai dasar pengambilan keputusan dalam upaya peningkatan mutu pendidikan secara berkelanjutan. Instrumen evaluasi implementasi kurikulum tercantum pada lampiran.",
+            bab5Pengembangan: "Pengembangan profesional pendidik dan tenaga kependidikan dilaksanakan secara berkelanjutan melalui berbagai kegiatan yang mendukung peningkatan kompetensi, kinerja, dan profesionalisme. Kegiatan tersebut dapat berupa pelatihan, lokakarya, komunitas belajar, supervisi akademik, diseminasi praktik baik, maupun bentuk pengembangan lainnya sesuai kebutuhan satuan pendidikan. Instrumen identifikasi kebutuhan dan evaluasi pengembangan profesional tercantum pada lampiran.",
+            bab5TindakLanjut: "Program tindak lanjut disusun berdasarkan hasil evaluasi implementasi kurikulum dan hasil pendampingan yang telah dilakukan. Program ini menjadi dasar perbaikan dan pengembangan layanan pendidikan agar semakin efektif, relevan, dan sesuai dengan kebutuhan peserta didik serta tujuan satuan pendidikan. Format analisis hasil evaluasi dan program tindak lanjut tercantum pada lampiran.",
+
+            // TABEL-TABEL BAB III
+            tableIntra: [
+                "Pendidikan Agama & Budi Pekerti | 3 | 1 | 3 | 1 | 3 | 1 | 3 | 1 | 3 | 1 | 3 | 1 | 144",
+                "Pendidikan Pancasila | 4 | 1 | 4 | 1 | 4 | 1 | 4 | 1 | 4 | 1 | 4 | 1 | 180",
+                "Bahasa Indonesia | 7 | 1 | 7 | 1 | 6 | 1 | 6 | 1 | 6 | 1 | 6 | 1 | 252",
+                "Matematika | 4 | 1 | 4 | 1 | 5 | 1 | 5 | 1 | 5 | 1 | 5 | 1 | 216",
+                "Muatan Lokal / Bahasa & Aksara Lampung | 2 | 0 | 2 | 0 | 2 | 0 | 2 | 0 | 2 | 0 | 2 | 0 | 72",
+                "Seni dan Budaya | 3 | 1 | 3 | 1 | 3 | 1 | 3 | 1 | 3 | 1 | 3 | 1 | 144",
+                "Pendidikan Jasmani, Olahraga, & Kesehatan | 3 | 1 | 3 | 1 | 3 | 1 | 3 | 1 | 3 | 1 | 3 | 1 | 144",
+                "Bahasa Inggris | 2 | 0 | 2 | 0 | 2 | 0 | 2 | 0 | 2 | 0 | 2 | 0 | 72",
+                "Bahasa & Aksara Lampung | 2 | 0 | 2 | 0 | 2 | 0 | 2 | 0 | 2 | 0 | 2 | 0 | 72",
+                "Pendidikan Anti Korupsi | 1 | 0 | 1 | 0 | 1 | 0 | 1 | 0 | 1 | 0 | 1 | 0 | 36"
+            ].join('\n'),
+
+            // Data Default untuk Tabel Kokurikuler (Disesuaikan dengan 8 dimensi, 3 jenis pilihan, dan JP Kelas)
+            tableKokur: [
+                "1 | I | I | Keimanan dan Ketakwaan terhadap Tuhan YME | Gaya Hidup Berkelanjutan | Pembelajaran kolaboratif lintas disiplin ilmu | Pengolahan pot tanaman ramah lingkungan dari barang bekas | IPAS, Seni Rupa | 6",
+                "2 | I | II | Kewargaan | Kearifan Lokal | Gerakan Tujuh Kebiasaan Anak Indonesia Hebat (7 KAIH) | Simulasi budaya antre, kerja bakti kelas, dan gotong royong | Pendidikan Pancasila, Bahasa Indonesia | 6",
+                "3 | II | I | Penalaran Kritis | Rekayasa dan Teknologi | Pembelajaran kolaboratif lintas disiplin ilmu | Percobaan sains sederhana pembuatan penjernih air kelapa | IPAS, Matematika | 6",
+                "4 | II | II | Kreativitas | Kewirausahaan | Cara lainnya (ditentukan sekolah) | Gelar karya pembuatan celengan karakter dari botol bekas | Matematika, Seni Rupa | 6",
+                "5 | III | I | Kolaborasi | Bhinneka Tunggal Ika | Pembelajaran kolaboratif lintas disiplin ilmu | Pentas seni kreasi musik tradisional dan tari daerah nusantara | Seni Musik, Pendidikan Pancasila | 7",
+                "6 | III | II | Kemandirian | Bangunlah Jiwa dan Raganya | Gerakan Tujuh Kebiasaan Anak Indonesia Hebat (7 KAIH) | Penyusunan jadwal kebersihan diri dan penataan meja belajar | PJOK, Bahasa Indonesia | 7",
+                "7 | IV | I | Kesehatan | Bangunlah Jiwa dan Raganya | Pembelajaran kolaboratif lintas disiplin ilmu | Kampanye pola hidup bersih, sehat, dan pemilihan jajanan sehat | PJOK, IPAS | 7",
+                "8 | IV | II | Komunikasi | Kearifan Lokal | Cara lainnya (ditentukan sekolah) | Pembuatan artikel dinding atau cerita rakyat bertema silsilah daerah | Bahasa Indonesia, Seni Rupa | 7",
+                "9 | V | I | Keimanan dan Ketakwaan terhadap Tuhan YME | Gaya Hidup Berkelanjutan | Gerakan Tujuh Kebiasaan Anak Indonesia Hebat (7 KAIH) | Aksi nyata pemilahan jenis sampah organik dan anorganik sekolah | IPAS, Pendidikan Pancasila | 7",
+                "10 | V | II | Penalaran Kritis | Rekayasa dan Teknologi | Pembelajaran kolaboratif lintas disiplin ilmu | Perancangan alat filterisasi air keruh alami di pekarangan | IPAS, Matematika | 7",
+                "11 | VI | I | Kolaborasi | Kewirausahaan | Pembelajaran kolaboratif lintas disiplin ilmu | Pembuatan makanan tradisional bernilai ekonomis berbahan dasar singkong | Matematika, IPAS, Bahasa Indonesia | 7",
+                "12 | VI | II | Kewargaan | Bhinneka Tunggal Ika | Gerakan Tujuh Kebiasaan Anak Indonesia Hebat (7 KAIH) | Pameran bersama miniatur rumah adat and pakaian daerah Lampung | Pendidikan Pancasila, Seni Rupa | 7"
+            ].join('\n'),
+
+            // Data Default untuk Tabel Ekstrakurikuler (10 contoh lengkap)
+            tableEkskul: [
+                "1 | Pramuka Siaga/Penggalang | Wajib | Kelas I - VI | 120 Menit / Pekan | Mandiri, Gotong Royong, Berakhlak Mulia",
+                "2 | Usaha Kesehatan Sekolah (UKS) | Pilihan | Kelas IV - VI | 120 Menit / Pekan | Bernalar Kritis, Mandiri, Peduli",
+                "3 | Seni Tari Tradisional | Pilihan | Kelas I - VI | 120 Menit / Pekan | Berkebinekaan Global, Kreatif",
+                "4 | Palang Merah Remaja (PMR) | Pilihan | Kelas III - VI | 120 Menit / Pekan | Gotong Royong, Mandiri, Berakhlak Mulia",
+                "5 | Pasukan Pengibar Bendera (Paskibra) | Pilihan | Kelas IV - VI | 120 Menit / Pekan | Mandiri, Disiplin, Gotong Royong",
+                "6 | Klub Sains dan Matematika | Pilihan | Kelas III - V | 120 Menit / Pekan | Bernalar Kritis, Kreatif, Mandiri",
+                "7 | Seni Musik Musik dan Angklung | Pilihan | Kelas I - VI | 120 Menit / Pekan | Berkebinekaan Global, Kreatif",
+                "8 | Pencak Silat | Pilihan | Kelas I - VI | 120 Menit / Pekan | Mandiri, Disiplin, Berakhlak Mulia",
+                "9 | Klub Robotik & Coding Sederhana | Pilihan | Kelas IV - VI | 120 Menit / Pekan | Bernalar Kritis, Kreatif",
+                "10 | Tartil & Tahfidz Al-Qur'an | Pilihan | Kelas I - VI | 120 Menit / Pekan | Beriman, Bertakwa, Berakhlak Mulia"
+            ].join('\n'),
+
+            // Data Default untuk Tabel Budaya Positif (13 contoh lengkap)
+            tableBudaya: [
+                "1 | Upacara Bendera | Pelaksanaan upacara rutin mingguan | Senin Pagi | Nasionalis & Disiplin",
+                "2 | Berdoa Bersama | Pembacaan doa harian dan asmaul husna | Setiap Pagi Sebelum Belajar | Religius & Berakhlak Mulia",
+                "3 | Budaya 5S | Senyum, Sapa, Salam, Sopan, Santun di gerbang | Setiap Pagi | Karakter Mulia & Karakter Sosial",
+                "4 | Gerakan Literasi Sekolah (GLS) | Membaca buku non-pelajaran 15 menit | Setiap Hari Sebelum Belajar | Gemar Membaca & Mandiri",
+                "5 | Salat Duha Berjamaah | Pembiasaan ibadah sunah terjadwal | Istirahat Pertama | Religius & Pembiasaan Karakter",
+                "6 | Salat Zuhur Berjamaah | Pelaksanaan salat berjamaah wajib | Waktu Zuhur | Religius, Disiplin, & Kebersamaan",
+                "7 | Jumat Bersih / Gotong Royong | Kebersihan lingkungan kelas dan halaman | Jumat Pagi (Dua Pekan Sekali) | Peduli Lingkungan & Gotong Royong",
+                "8 | Jumat Sehat | Senam bersama seluruh warga sekolah | Jumat Pagi (Selingan) | Kesehatan Jasmani & Kebersamaan",
+                "9 | Jumat Takwa / Keputrian | Kajian keagamaan and pembacaan yasin | Jumat Pagi (Selingan) | Keimanan, Ketakwaan, & Akhlak Mulia",
+                "10 | Tabungan Sosial / Infaq | Pengumpulan dana sukarela peduli sesama | Setiap Jumat | Empati, Berbagi, & Peduli Sosial",
+                "11 | Piket Kelas Mandiri | Pembagian regu kebersihan kelas | Setiap Hari Setelah Pulang | Mandiri & Tanggung Jawab",
+                "12 | Pojok Sampah Pilah | Pembiasaan memilah sampah organik/anorganik | Setiap Hari | Peduli Lingkungan & Disiplin",
+                "13 | Upacara Hari Besar Nasional | Peringatan hari nasional terstruktur | Hari Besar Nasional | Cinta Tanah Air & Menghargai Sejarah"
+            ].join('\n'),
+
+            diagramDeepData: "https://lh3.googleusercontent.com/d/1yrnaQXwpXAtByfW068k3PXHXObHUFcNF"
+        };
+
+        // Accordion toggle helper
+        function toggleAccordion(id) {
+            const el = document.getElementById(id);
+            if (el.classList.contains('hidden')) {
+                el.classList.remove('hidden');
+            } else {
+                el.classList.add('hidden');
+            }
+        }
+
+        // Switch Tab UI
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.add('hidden');
+            });
+            document.getElementById(tabId).classList.remove('hidden');
+
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.className = "nav-btn w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg text-slate-600 hover:bg-slate-50 transition";
+            });
+
+            const activeBtn = document.getElementById('btn-' + tabId);
+            if (activeBtn) {
+                if (tabId === 'tab-cetak') {
+                    activeBtn.className = "nav-btn w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold rounded-lg text-emerald-800 bg-emerald-50 transition";
+                } else {
+                    activeBtn.className = "nav-btn w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold rounded-lg text-blue-900 bg-blue-50 transition";
+                }
+            }
+        }
+
+        // Buka di Tab Baru untuk Cetak
+        function bukaTabBaruCetak() {
+            const printContents = document.getElementById('cetak-kontainer-preview').innerHTML;
+            const newWindow = window.open('', '_blank');
+            newWindow.document.write(`
+                <!DOCTYPE html>
+                <html lang="id">
+                <head>
+                    <meta charset="UTF-8">
+                    <title>Cetak Dokumen KSP</title>
+                    <script src="https://cdn.tailwindcss.com"><\/script>
+                    <style>
+                        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+                        body {
+                            background-color: #f1f5f9;
+                            padding: 20px;
+                        }
+                        .print-container {
+                            display: flex;
+                            flex-direction: column;
+                            gap: 20px;
+                        }
+                        .a4-page {
+                            width: 210mm;
+                            height: 297mm;
+                            padding: 20mm 17.5mm 20mm 22.5mm;
+                            margin: 15px auto;
+                            background: white;
+                            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+                            position: relative;
+                            box-sizing: border-box;
+                            overflow: hidden;
+                        }
+                        .dense-page {
+                            padding: 10mm 12.5mm 10mm 17.5mm !important;
+                        }
+                        .cover-pattern {
+                            background: radial-gradient(circle at 100% 100%, rgba(204, 251, 241, 0.15) 0%, transparent 40%),
+                                         radial-gradient(circle at 0% 0%, rgba(209, 250, 229, 0.15) 0%, transparent 40%);
+                            background-color: #fafbfc;
+                        }
+                        html body .a4-page {
+                            font-family: 'Times New Roman', Times, serif !important;
+                        }
+                        html body .a4-page.ksp-body,
+                        html body .a4-page.ksp-body p,
+                        html body .a4-page.ksp-body td,
+                        html body .a4-page.ksp-body span,
+                        html body .a4-page.ksp-body div,
+                        html body .a4-page.ksp-body table {
+                            font-family: 'Times New Roman', Times, serif !important;
+                            font-size: 12pt !important;
+                        }
+                        html body .cover-pattern h2 {
+                            font-size: 16pt !important;
+                            font-weight: bold !important;
+                            line-height: 1.3 !important;
+                        }
+                        html body .cover-pattern h1 {
+                            font-size: 18pt !important;
+                            font-weight: bold !important;
+                            line-height: 1.3 !important;
+                        }
+                        html body .cover-pattern p {
+                            font-size: 12pt !important;
+                            line-height: 1.3 !important;
+                        }
+                        html body .a4-page p,
+                        html body .a4-page p.narasi-p,
+                        html body .ksp-body p,
+                        html body .ksp-body ul,
+                        html body .ksp-body li {
+                            line-height: 1.5 !important;
+                            margin-bottom: 12px !important;
+                            text-align: justify !important;
+                        }
+                        html body .a4-page td,
+                        html body .a4-page th,
+                        html body .tight-sign,
+                        html body .tight-sign td,
+                        html body .tight-sign p,
+                        html body .tight-sign span,
+                        html body .tight-sign div,
+                        html body .left-info-table,
+                        html body .left-info-table td,
+                        html body .left-info-table span {
+                            line-height: 1.15 !important;
+                            margin-top: 0px !important;
+                            margin-bottom: 0px !important;
+                            padding-top: 1px !important;
+                            padding-bottom: 1px !important;
+                        }
+                        html body .ksp-body h3 {
+                            font-size: 14pt !important;
+                            font-weight: bold !important;
+                            text-align: center !important;
+                            line-height: 1.3 !important;
+                            margin-bottom: 24px !important; /* Jarak pisah longgar judul yang berdiri sendiri */
+                        }
+                        html body .ksp-body h3 + h4,
+                        html body .ksp-body h3 + h4.bab-subtitle {
+                            margin-top: -14px !important; /* Merapatkan nomor bab jika ada sub-judul */
+                            margin-bottom: 24px !important;
+                        }
+                        html body .ksp-body h4.bab-subtitle {
+                            font-size: 14pt !important;
+                            font-weight: bold !important;
+                            text-align: center !important;
+                            line-height: 1.3 !important;
+                            margin-bottom: 24px !important;
+                        }
+                        html body .ksp-body h5 {
+                            font-size: 12pt !important;
+                            font-weight: bold !important;
+                            line-height: 1.4 !important;
+                            margin-top: 14px !important;
+                            margin-bottom: 8px !important;
+                            text-align: left !important;
+                        }
+                        
+                        /* Layout & Garis Tabel Akademik (Rata Cetak Stabil) */
+                        .academic-table, .kokur-table, .compact-academic-table {
+                            width: 100% !important;
+                            border-collapse: collapse !important;
+                            table-layout: fixed !important;
+                        }
+                        html body .a4-page .academic-table,
+                        html body .a4-page .academic-table th, 
+                        html body .a4-page .academic-table td,
+                        html body .a4-page .kokur-table,
+                        html body .a4-page .kokur-table th, 
+                        html body .a4-page .kokur-table td,
+                        html body .a4-page .compact-academic-table,
+                        html body .a4-page .compact-academic-table th, 
+                        html body .a4-page .compact-academic-table td {
+                            border: 1px solid black !important;
+                        }
+                        
+                        html body .a4-page .academic-table th, 
+                        html body .a4-page .academic-table td {
+                            padding: 3px 4px !important;
+                            text-align: center !important;
+                            font-size: 8.5pt !important;
+                            line-height: 1.15 !important;
+                        }
+                        .academic-table th {
+                            background-color: #f2f2f2 !important;
+                            font-weight: bold !important;
+                        }
+                        .compact-academic-table th {
+                            background-color: #f2f2f2 !important;
+                            font-weight: bold !important;
+                        }
+                        
+                        html body .a4-page .kokur-table th, 
+                        html body .a4-page .kokur-table td {
+                            padding: 1.5px 1.5px !important;
+                            text-align: center !important;
+                            word-break: break-word !important;
+                            font-size: 6.5pt !important;
+                            line-height: 1.15 !important;
+                        }
+                        .kokur-table th {
+                            background-color: #f2f2f2 !important;
+                            font-weight: bold !important;
+                        }
+                        
+                        html body .a4-page .compact-academic-table th, 
+                        html body .a4-page .compact-academic-table td {
+                            padding: 3px 1px !important;
+                            text-align: center !important;
+                            overflow: hidden !important;
+                            text-overflow: ellipsis !important;
+                            font-size: 7.5pt !important;
+                            line-height: 1.15 !important;
+                        }
+                        
+                        html body .a4-page p,
+                        html body .a4-page td,
+                        html body .a4-page table td {
+                            font-weight: normal !important;
+                        }
+                        html body .font-bold,
+                        html body .font-bold span,
+                        html body .font-bold div,
+                        html body h1,
+                        html body h2,
+                        html body h3,
+                        html body h4,
+                        html body h5,
+                        html body th,
+                        html body strong,
+                        html body b {
+                            font-weight: bold !important;
+                        }
+                        
+                        /* Memastikan Halaman Sampul Selalu Rata Tengah Sempurna Saat Dicetak */
+                        html body .cover-pattern {
+                            display: flex !important;
+                            flex-direction: column !important;
+                            justify-content: space-between !important;
+                            align-items: center !important;
+                            text-align: center !important;
+                            padding: 20mm 20mm 20mm 20mm !important;
+                        }
+                        html body .cover-pattern .text-center {
+                            text-align: center !important;
+                            width: 100% !important;
+                        }
+                        html body .cover-pattern .my-auto {
+                            margin-top: auto !important;
+                            margin-bottom: auto !important;
+                            display: flex !important;
+                            flex-direction: column !important;
+                            align-items: center !important;
+                            justify-content: center !important;
+                            width: 100% !important;
+                        }
+                        html body .cover-pattern .mt-auto {
+                            margin-top: auto !important;
+                            width: 100% !important;
+                        }
+                        html body .cover-pattern img {
+                            display: block !important;
+                            margin-left: auto !important;
+                            margin-right: auto !important;
+                        }
+                        html body .cover-pattern * {
+                            text-align: center !important;
+                        }
+                        /* Override spesifisitas tinggi agar justify tidak merusak halaman sampul dan memaksa cetak tebal merata */
+                        html body .a4-page.cover-pattern p,
+                        html body .a4-page.cover-pattern span,
+                        html body .a4-page.cover-pattern div,
+                        html body .a4-page.cover-pattern h1,
+                        html body .a4-page.cover-pattern h2 {
+                            text-align: center !important;
+                            font-weight: bold !important;
+                        }
+
+                        /* Memaksa perataan tengah pada tanda tangan pejabat ketiga dan struktur text-center */
+                        html body .a4-page .text-center,
+                        html body .a4-page .text-center p,
+                        html body .a4-page .text-center span,
+                        html body .a4-page .text-center div,
+                        html body .a4-page .tight-sign,
+                        html body .a4-page .tight-sign p,
+                        html body .a4-page .tight-sign span,
+                        html body .a4-page .tight-sign div,
+                        html body .a4-page .tight-sign td {
+                            text-align: center !important;
+                        }
+
+                        /* ATURAN TEGAS RATA KIRI UNTUK SEL TEKS PANJANG (MEMILIKI SPESIFISITAS TINGGI) */
+                        html body .a4-page td.align-left,
+                        html body .a4-page .academic-table td.align-left,
+                        html body .a4-page .kokur-table td.align-left,
+                        html body .a4-page .compact-academic-table td.align-left {
+                            text-align: left !important;
+                        }
+
+                        /* KALIBRASI ELEMEN DENSE-PAGE (HALAMAN 10 & 11) SECARA SERASI DAN PROPORSIONAL */
+                        html body .dense-page h5 {
+                            margin-top: 14px !important;
+                            margin-bottom: 8px !important;
+                            font-size: 12pt !important;
+                        }
+                        html body .dense-page p,
+                        html body .dense-page .narasi-p {
+                            margin-bottom: 8px !important;
+                            line-height: 1.4 !important;
+                            font-size: 11pt !important;
+                        }
+                        html body .dense-page .kokur-table th, 
+                        html body .dense-page .kokur-table td {
+                            padding: 2.5px 2px !important; /* Proporsi bantalan sel ideal */
+                            font-size: 6.8pt !important;   /* Keterbacaan teks optimal */
+                            line-height: 1.15 !important;
+                        }
+                        html body .dense-page .academic-table th, 
+                        html body .dense-page .academic-table td {
+                            padding: 3px 3px !important;   /* Kalibrasi padding tabel ekstrakurikuler */
+                            font-size: 8pt !important;     /* Penyesuaian ukuran teks seimbang */
+                            line-height: 1.15 !important;
+                        }
+                        html body .dense-page .text-center.font-bold {
+                            margin-top: 4px !important;
+                            margin-bottom: 12px !important;
+                            font-size: 9pt !important;
+                        }
+                        
+                        @media print {
+                            @page {
+                                size: A4;
+                                margin: 0;
+                            }
+                            body {
+                                background: none !important;
+                                padding: 0 !important;
+                                margin: 0 !important;
+                            }
+                            .a4-page {
+                                margin: 0 !important;
+                                box-shadow: none !important;
+                                border: none !important;
+                                page-break-after: always;
+                                page-break-inside: avoid;
+                                width: 210mm;
+                                height: 297mm;
+                                -webkit-print-color-adjust: exact;
+                                print-color-adjust: exact;
+                            }
+                            .a4-page:last-child {
+                                page-break-after: avoid !important;
+                            }
+                            * {
+                                box-sizing: border-box !important;
+                                word-wrap: break-word !important;
+                                word-break: break-word !important;
+                                max-width: 100% !important;
+                            }
+                            table {
+                                width: 100% !important;
+                                max-width: 100% !important;
+                                table-layout: fixed !important;
+                            }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="print-container">
+                        ${printContents}
+                    </div>
+                </body>
+                </html>
+            `);
+            newWindow.document.close();
+        }
+
+        // Save & Sync Data with LocalStorage
+        function saveToStorage() {
+            const data = {
+                instansi: document.getElementById('inp-instansi').value,
+                dinas: document.getElementById('inp-dinas').value,
+                sekolah: document.getElementById('inp-sekolah').value,
+                npsn: document.getElementById('inp-npsn').value,
+                tp: document.getElementById('inp-tp').value,
+                jalan: document.getElementById('inp-jalan').value,
+                desa: document.getElementById('inp-desa').value,
+                kecamatan: document.getElementById('inp-kecamatan').value,
+                kabupaten: document.getElementById('inp-kabupaten').value,
+                provinsi: document.getElementById('inp-provinsi').value,
+                kodepos: document.getElementById('inp-kodepos').value,
+                kepsek: document.getElementById('inp-kepsek').value,
+                nipKepsek: document.getElementById('inp-nip-kepsek').value,
+                komite: document.getElementById('inp-komite').value,
+                pengawas: document.getElementById('inp-pengawas').value,
+                nipPengawas: document.getElementById('inp-nip-pengawas').value,
+                kasi: document.getElementById('inp-kasi').value,
+                nipKasi: document.getElementById('inp-nip-kasi').value,
+                kadis: document.getElementById('inp-kadis').value,
+                golKadis: document.getElementById('inp-gol-kadis').value,
+                nipKadis: document.getElementById('inp-nip-kadis').value,
+                sk: document.getElementById('inp-sk').value,
+                tglPembuatan: document.getElementById('inp-tgl-pembuatan').value,
+                
+                akreditasi: document.getElementById('inp-akreditasi').value,
+                karakteristikSosbud: document.getElementById('inp-karakteristik-sosbud').value,
+                
+                mutuLiterasi: document.getElementById('inp-mutu-literasi').value,
+                mutuNumerasi: document.getElementById('inp-mutu-numerasi').value,
+                mutuKarakter: document.getElementById('inp-mutu-karakter').value,
+                mutuKualitasPembelajaran: document.getElementById('inp-mutu-kualitas-pembelajaran').value,
+                mutuRefleksiGuru: document.getElementById('inp-mutu-refleksi-guru').value,
+                mutuKepemimpinan: document.getElementById('inp-mutu-kepemimpinan').value,
+                mutuKebhinekaan: document.getElementById('inp-mutu-kebhinekaan').value,
+                mutuInklusi: document.getElementById('inp-mutu-inklusi').value,
+                mutuPtk: document.getElementById('inp-mutu-ptk').value,
+                mutuSapras: document.getElementById('inp-mutu-sapras').value,
+
+                visi: document.getElementById('inp-visi').value,
+                misi: document.getElementById('inp-misi').value,
+                tujuan: document.getElementById('inp-tujuan').value,
+
+                bab4Prinsip: document.getElementById('inp-bab4-prinsip').value,
+                bab4Intra: document.getElementById('inp-bab4-intra').value,
+
+                bab5Pendampingan: document.getElementById('inp-bab5-pendampingan').value,
+                bab5Evaluasi: document.getElementById('inp-bab5-evaluasi').value,
+                bab5Pengembangan: document.getElementById('inp-bab5-pengembangan').value,
+                bab5TindakLanjut: document.getElementById('inp-bab5-tindaklanjut').value,
+
+                tableIntra: document.getElementById('inp-table-intra').value,
+                tableKokur: document.getElementById('inp-table-kokur').value,
+                tableEkskul: document.getElementById('inp-table-ekskul').value,
+                tableBudaya: document.getElementById('inp-table-budaya').value,
+                
+                logoSize: document.getElementById('logo-size-slider').value,
+                logoPos: document.getElementById('logo-pos-slider').value,
+                logoData: document.getElementById('logo-preview').src,
+                diagramDeepData: document.getElementById('out-diagram-deep').src
+            };
+            localStorage.setItem('ksp_purwadi_data', JSON.stringify(data));
+            updatePreviewDOM(data);
+        }
+
+        // Load & Populate Data
+        function loadData() {
+            let localData = localStorage.getItem('ksp_purwadi_data');
+            let parsedData = localData ? JSON.parse(localData) : {};
+            let data = { ...defaultData, ...parsedData };
+
+            // Fill Forms
+            document.getElementById('inp-instansi').value = data.instansi || "";
+            document.getElementById('inp-dinas').value = data.dinas || "";
+            document.getElementById('inp-sekolah').value = data.sekolah || "";
+            document.getElementById('inp-npsn').value = data.npsn || "";
+            document.getElementById('inp-tp').value = data.tp || "";
+            document.getElementById('inp-jalan').value = data.jalan || "";
+            document.getElementById('inp-desa').value = data.desa || "";
+            document.getElementById('inp-kecamatan').value = data.kecamatan || "";
+            document.getElementById('inp-kabupaten').value = data.kabupaten || "";
+            document.getElementById('inp-provinsi').value = data.provinsi || "";
+            document.getElementById('inp-kodepos').value = data.kodepos || "";
+            document.getElementById('inp-kepsek').value = data.kepsek || "";
+            document.getElementById('inp-nip-kepsek').value = data.nipKepsek || "";
+            document.getElementById('inp-komite').value = data.komite || "";
+            document.getElementById('inp-pengawas').value = data.pengawas || "";
+            document.getElementById('inp-nip-pengawas').value = data.nipPengawas || "";
+            document.getElementById('inp-kasi').value = data.kasi || "";
+            document.getElementById('inp-nip-kasi').value = data.nipKasi || "";
+            document.getElementById('inp-kadis').value = data.kadis || "";
+            document.getElementById('inp-gol-kadis').value = data.golKadis || "";
+            document.getElementById('inp-nip-kadis').value = data.nipKadis || "";
+            document.getElementById('inp-sk').value = data.sk || "";
+            document.getElementById('inp-tgl-pembuatan').value = data.tglPembuatan || "";
+            
+            document.getElementById('inp-akreditasi').value = data.akreditasi || "A (Unggul)";
+            document.getElementById('inp-karakteristik-sosbud').value = data.karakteristikSosbud || defaultData.karakteristikSosbud;
+            
+            // Dropdowns
+            document.getElementById('inp-mutu-literasi').value = data.mutuLiterasi || defaultData.mutuLiterasi;
+            document.getElementById('inp-mutu-numerasi').value = data.mutuNumerasi || defaultData.mutuNumerasi;
+            document.getElementById('inp-mutu-karakter').value = data.mutuKarakter || defaultData.mutuKarakter;
+            document.getElementById('inp-mutu-kualitas-pembelajaran').value = data.mutuKualitasPembelajaran || defaultData.mutuKualitasPembelajaran;
+            document.getElementById('inp-mutu-refleksi-guru').value = data.mutuRefleksiGuru || defaultData.mutuRefleksiGuru;
+            document.getElementById('inp-mutu-kepemimpinan').value = data.mutuKepemimpinan || defaultData.mutuKepemimpinan;
+            document.getElementById('inp-mutu-kebhinekaan').value = data.mutuKebhinekaan || defaultData.mutuKebhinekaan;
+            document.getElementById('inp-mutu-inklusi').value = data.mutuInklusi || defaultData.mutuInklusi;
+            document.getElementById('inp-mutu-ptk').value = data.mutuPtk || defaultData.mutuPtk;
+            document.getElementById('inp-mutu-sapras').value = data.mutuSapras || defaultData.mutuSapras;
+
+            document.getElementById('inp-visi').value = data.visi || defaultData.visi;
+            document.getElementById('inp-misi').value = data.misi || defaultData.misi;
+            document.getElementById('inp-tujuan').value = data.tujuan || defaultData.tujuan;
+
+            document.getElementById('inp-bab4-prinsip').value = data.bab4Prinsip || defaultData.bab4Prinsip;
+            document.getElementById('inp-bab4-intra').value = data.bab4Intra || defaultData.bab4Intra;
+
+            document.getElementById('inp-bab5-pendampingan').value = data.bab5Pendampingan || defaultData.bab5Pendampingan;
+            document.getElementById('inp-bab5-evaluasi').value = data.bab5Evaluasi || defaultData.bab5Evaluasi;
+            document.getElementById('inp-bab5-pengembangan').value = data.bab5Pengembangan || defaultData.bab5Pengembangan;
+            document.getElementById('inp-bab5-tindaklanjut').value = data.bab5TindakLanjut || defaultData.bab5TindakLanjut;
+
+            document.getElementById('inp-table-intra').value = data.tableIntra || defaultData.tableIntra;
+            document.getElementById('inp-table-kokur').value = data.tableKokur || defaultData.tableKokur;
+            document.getElementById('inp-table-ekskul').value = data.tableEkskul || defaultData.tableEkskul;
+            document.getElementById('inp-table-budaya').value = data.tableBudaya || defaultData.tableBudaya;
+
+            document.getElementById('logo-size-slider').value = data.logoSize || "110";
+            document.getElementById('logo-pos-slider').value = data.logoPos || "0";
+            document.getElementById('logo-preview').src = data.logoData || "https://iili.io/CdQPI9V.png";
+            document.getElementById('out-diagram-deep').src = data.diagramDeepData || "https://lh3.googleusercontent.com/d/1yrnaQXwpXAtByfW068k3PXHXObHUFcNF";
+
+            updatePreviewDOM(data);
+        }
+
+        // Format Date to Indonesia format
+        function formatIndoDate(dateStr) {
+            if (!dateStr) return "-";
+            const months = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+            const d = new Date(dateStr);
+            if (isNaN(d.getTime())) return dateStr;
+            return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+        }
+
+        // Sistem Penyusunan Narasi Akademik Dinamis untuk BAB I (Tepat 3 Paragraf)
+        function bangunNarasiRaporPendidikan(data) {
+            let p1 = `Analisis kualitas akademik pada satuan pendidikan ini diukur secara komparatif melalui Rapor Pendidikan terbaru. Berdasarkan data mutu yang terdokumentasi, pencapaian mutu diawali dengan predikat evaluasi Akreditasi Satuan Pendidikan yang saat ini telah berada pada tingkat <strong class="text-blue-900">${data.akreditasi}</strong>. Hal tersebut mencerminkan akuntabilitas pengelolaan sistem akademik yang berjalan dengan baik dan berkelanjutan. `;
+
+            if (data.mutuLiterasi !== "belum_diukur" || data.mutuNumerasi !== "belum_diukur") {
+                p1 += "Dalam mengukur keberhasilan aspek kognitif dasar, ";
+                if (data.mutuLiterasi !== "belum_diukur") {
+                    p1 += `capaian kemampuan literasi peserta didik secara umum tercatat <strong class="text-slate-900">${data.mutuLiterasi}</strong>`;
+                }
+                if (data.mutuLiterasi !== "belum_diukur" && data.mutuNumerasi !== "belum_diukur") {
+                    p1 += ", sedangkan pada sisi lain ";
+                }
+                if (data.mutuNumerasi !== "belum_diukur") {
+                    p1 += `tingkat kemampuan numerasi siswa menunjukkan hasil yang <strong class="text-slate-900">${data.mutuNumerasi}</strong>`;
+                }
+                p1 += ". Dinamika kognitif ini memberikan arah kebijakan kurikulum operasional yang lebih terfokus pada integrasi metode literasi dan numerasi di setiap mata pelajaran dasar.";
+            }
+
+            let p2 = `Pada dimensi perkembangan non-kognitif and iklim belajar mengajar di kelas, satuan pendidikan menunjukkan focus yang kuat pada pembentukan perilaku positif. `;
+            if (data.mutuKarakter !== "belum_diukur") {
+                p2 += `Indeks perkembangan karakter siswa berada dalam kondisi <strong class="text-slate-900">${data.mutuKarakter}</strong>. hal ini berkaitan erat dengan `;
+            }
+            if (data.mutuKualitasPembelajaran !== "belum_diukur") {
+                p2 += `interaksi pembelajaran di dalam kelas yang dirasa <strong class="text-slate-900">${data.mutuKualitasPembelajaran}</strong>. `;
+            }
+            if (data.mutuRefleksiGuru !== "belum_diukur" || data.mutuKepemimpinan !== "belum_diukur") {
+                p2 += "Kondisi tersebut didorong oleh kompetensi guru dan kepemimpinan sekolah yang sinergis; di mana ";
+                if (data.mutuRefleksiGuru !== "belum_diukur") {
+                    p2 += `kegiatan refleksi serta perbaikan berkala oleh tenaga pendidik telah <strong class="text-slate-900">${data.mutuRefleksiGuru}</strong>`;
+                }
+                if (data.mutuRefleksiGuru !== "belum_diukur" && data.mutuKepemimpinan !== "belum_diukur") {
+                    p2 += ", didukung oleh pola ";
+                }
+                if (data.mutuKepemimpinan !== "belum_diukur") {
+                    p2 += `kepemimpinan instruksional dari pimpinan sekolah yang <strong class="text-slate-900">${data.mutuKepemimpinan}</strong>`;
+                }
+                p2 += ".";
+            }
+
+            let p3 = `Selanjutnya, kenyamanan dan keamanan lingkungan belajar menjadi fondasi utama dalam mendukung stabilitas emosional siswa. `;
+            if (data.mutuKebhinekaan !== "belum_diukur" || data.mutuInklusi !== "belum_diukur") {
+                if (data.mutuKebhinekaan !== "belum_diukur") {
+                    p3 += `Iklim kebhinekaan di sekolah dirasakan <strong class="text-slate-900">${data.mutuKebhinekaan}</strong>`;
+                }
+                if (data.mutuKebhinekaan !== "belum_diukur" && data.mutuInklusi !== "belum_diukur") {
+                    p3 += ", serta didukung oleh ";
+                }
+                if (data.mutuInklusi !== "belum_diukur") {
+                    p3 += `iklim inklusivitas pelayanan pendidikan yang <strong class="text-slate-900">${data.mutuInklusi}</strong>`;
+                }
+                p3 += ". ";
+            }
+            if (data.mutuPtk !== "belum_diukur" || data.mutuSapras !== "belum_diukur") {
+                p3 += "Aspek penunjang fisik dan operasional harian, ";
+                if (data.mutuPtk !== "belum_diukur") {
+                    p3 += `faktor ketersediaan serta kompetensi PTK dinilai <strong class="text-slate-900">${data.mutuPtk}</strong>`;
+                }
+                if (data.mutuPtk !== "belum_diukur" && data.mutuSapras !== "belum_diukur") {
+                    p3 += ", didukung dengan ketersediaan ";
+                }
+                if (data.mutuSapras !== "belum_diukur") {
+                    p3 += `sarana dan prasarana penunjang yang <strong class="text-slate-900">${data.mutuSapras}</strong>`;
+                }
+                p3 += ". Kombinasi pilar pendukung ini menjadi modal sosiokultural yang penting bagi perkembangan emosional anak didik.";
+            }
+
+            return `<p class="narasi-p">${p1}</p><p class="narasi-p">${p2}</p><p class="narasi-p">${p3}</p>`;
+        }
+
+        // Sistem Penyusunan Narasi SWOT Dinamis dan Kompak
+        function bangunNarasiSWOT(data) {
+            let kekuatan = `Kekuatan utama bertumpu pada status mutu Akreditasi yang telah berpredikat ${data.akreditasi}`;
+            if (data.mutuNumerasi !== "belum_diukur") {
+                kekuatan += ` serta capaian kompetensi Numerasi peserta didik yang tergolong ${data.mutuNumerasi}`;
+            }
+            kekuatan += `, serta dukungan nilai gotong royong sosiokultural sekitar sekolah yang masih sangat terjaga erat.`;
+
+            let kelemahan = `Kelemahan utama teridentifikasi dari aspek kemampuan dasar Literasi membaca peserta didik yang tergolong ${data.mutuLiterasi}. Hal ini membutuhkan pembenahan strategi literasi yang berkelanjutan.`;
+
+            let peluang = `Peluang pengembangan kompetensi terbuka lebar melalui kolaborasi terprogram bersama lembaga eksternal, komite, tokoh adat, serta program digitalisasi terpadu dari dinas setempat.`;
+
+            let ancaman = `Tantangan eksternal (Ancaman) dipengaruhi oleh masifnya disrupsi teknologi digital global yang berpotensi melunturkan nilai moral sosiokultural lokal apabila tidak difasilitasi dengan pendampingan karakter Pancasila yang ketat.`;
+
+            return `<p class="narasi-p" style="margin-bottom: 8px !important;">Uraian analisis komparatif SWOT secara akademis dirumuskan sebagai berikut:</p>
+            <p class="narasi-p" style="margin-bottom: 6px !important;"><strong>1. Kekuatan (Strengths):</strong> ${kekuatan}</p>
+            <p class="narasi-p" style="margin-bottom: 6px !important;"><strong>2. Kelemahan (Weaknesses):</strong> ${kelemahan}</p>
+            <p class="narasi-p" style="margin-bottom: 3px !important;"><strong>3. Peluang (Opportunities):</strong> ${peluang}</p>
+            <p class="narasi-p" style="margin-bottom: 0px !important;"><strong>4. Tantangan/Ancaman (Threats):</strong> ${ancaman}</p>`;
+        }
+
+        // Helper untuk me-render data tabel dinamis dari textarea pipe-separated
+        function renderTableFromText(textareaVal, targetId, colCount) {
+            const container = document.getElementById(targetId);
+            if (!container) return;
+            container.innerHTML = "";
+            
+            const lines = textareaVal.split('\n');
+            lines.forEach(line => {
+                if (line.trim() !== "") {
+                    const cols = line.split('|');
+                    const tr = document.createElement('tr');
+                    for (let i = 0; i < colCount; i++) {
+                        const td = document.createElement('td');
+                        td.innerText = cols[i] ? cols[i].trim() : "";
+                        
+                        // Left-align dynamic detection logic based on column data asymmetry
+                        if (targetId === 'out-table-kokur') {
+                            if (i === 3 || i === 4 || i === 5 || i === 6 || i === 7) {
+                                td.className = "align-left";
+                            }
+                        } else if (targetId === 'out-table-ekskul') {
+                            if (i === 1 || i === 3 || i === 5) {
+                                td.className = "align-left";
+                            }
+                        } else if (targetId === 'out-table-budaya') {
+                            if (i === 1 || i === 2 || i === 3 || i === 4) {
+                                td.className = "align-left";
+                            }
+                        }
+                        tr.appendChild(td);
+                    }
+                    container.appendChild(tr);
+                }
+            });
+        }
+
+        // Helper untuk me-render tabel Intrakurikuler secara akademis dan terhitung vertikal/horizontal
+        function renderTableIntra(textareaVal) {
+            const container = document.getElementById('out-table-intra');
+            if (!container) return;
+            container.innerHTML = "";
+
+            const lines = textareaVal.split('\n');
+            
+            // Inisialisasi array untuk total vertikal (6 kelas * 3 kolom = 18 total)
+            let colTotals = Array(18).fill(0);
+            let grandTotalJPYear = 0;
+
+            lines.forEach((line, index) => {
+                if (line.trim() === "") return;
+                const parts = line.split('|');
+                if (parts.length < 14) return;
+
+                const subjectName = parts[0].trim();
+                const jpYear = parseInt(parts[13]) || 0;
+                grandTotalJPYear += jpYear;
+
+                const tr = document.createElement('tr');
+                
+                // No
+                const tdNo = document.createElement('td');
+                tdNo.innerText = index + 1;
+                tr.appendChild(tdNo);
+
+                // Nama Mapel (Unequal length -> Rata Kiri)
+                const tdName = document.createElement('td');
+                tdName.className = "align-left font-medium";
+                tdName.innerText = subjectName;
+                tr.appendChild(tdName);
+
+                // Render 6 kelas
+                let colIdx = 0;
+                for (let k = 0; k < 6; k++) {
+                    const intraVal = parseInt(parts[1 + k*2]) || 0;
+                    const koVal = parseInt(parts[2 + k*2]) || 0;
+                    const jmlVal = intraVal + koVal;
+
+                    // Akumulasi total vertikal
+                    colTotals[colIdx] += intraVal;
+                    colTotals[colIdx + 1] += koVal;
+                    colTotals[colIdx + 2] += jmlVal;
+
+                    // Cell Intra (In.)
+                    const tdIntra = document.createElement('td');
+                    tdIntra.innerText = intraVal || "-";
+                    tr.appendChild(tdIntra);
+
+                    // Cell Ko
+                    const tdKo = document.createElement('td');
+                    tdKo.innerText = koVal || "-";
+                    tr.appendChild(tdKo);
+
+                    // Cell Jumlah (Jl.)
+                    const tdJml = document.createElement('td');
+                    tdJml.className = "bg-slate-50 font-bold";
+                    tdJml.innerText = jmlVal || "-";
+                    tr.appendChild(tdJml);
+
+                    colIdx += 3;
+                }
+
+                // JP/Year
+                const tdJPYear = document.createElement('td');
+                tdJPYear.innerText = jpYear;
+                tr.appendChild(tdJPYear);
+
+                container.appendChild(tr);
+            });
+
+            // Tambahkan baris TOTAL di paling bawah
+            const trTotal = document.createElement('tr');
+            trTotal.className = "font-bold bg-slate-100";
+            
+            const tdTotalLabelNo = document.createElement('td');
+            tdTotalLabelNo.innerText = "";
+            trTotal.appendChild(tdTotalLabelNo);
+
+            const tdTotalLabelText = document.createElement('td');
+            tdTotalLabelText.className = "align-left font-bold";
+            tdTotalLabelText.innerText = "JUMLAH";
+            trTotal.appendChild(tdTotalLabelText);
+
+            colTotals.forEach(val => {
+                const tdTotalCell = document.createElement('td');
+                tdTotalCell.className = "font-bold";
+                tdTotalCell.innerText = val || "-";
+                trTotal.appendChild(tdTotalCell);
+            });
+
+            const tdGrandJP = document.createElement('td');
+            tdGrandJP.className = "font-bold";
+            tdGrandJP.innerText = grandTotalJPYear;
+            trTotal.appendChild(tdGrandJP);
+
+            container.appendChild(trTotal);
+        }
+
+        // Helper penyelarasan nama sekolah di dalam teks input secara dinamis
+        function selaraskanNamaSekolah(teks, namaSekolah) {
+            if (!teks) return "";
+            return teks.replace(/SD\s*I[tT]\s*Insan\s*Cendikia/gi, namaSekolah);
+        }
+
+        // Update Print Preview Content
+        function updatePreviewDOM(data) {
+            const formattedTgl = formatIndoDate(data.tglPembuatan);
+            const tahunPembuatan = data.tglPembuatan ? new Date(data.tglPembuatan).getFullYear() : "2026";
+
+            // Sampul Page (Page 1)
+            if (document.getElementById('out-sampul-sekolah')) {
+                document.getElementById('out-sampul-sekolah').innerText = data.sekolah;
+            }
+            if (document.getElementById('out-sampul-tp')) {
+                document.getElementById('out-sampul-tp').innerText = data.tp;
+            }
+            if (document.getElementById('out-sampul-instansi')) {
+                document.getElementById('out-sampul-instansi').innerText = data.instansi;
+            }
+            if (document.getElementById('out-sampul-dinas')) {
+                document.getElementById('out-sampul-dinas').innerText = data.dinas;
+            }
+            if (document.getElementById('out-sampul-tahun')) {
+                document.getElementById('out-sampul-tahun').innerText = tahunPembuatan;
+            }
+            
+            // Adjust Logo Pos & Size
+            const sampulLogo = document.getElementById('sampul-logo');
+            sampulLogo.src = data.logoData;
+            sampulLogo.style.width = `${data.logoSize}px`;
+            sampulLogo.style.marginTop = `${data.logoPos}px`;
+
+            // Rekomendasi Page (Page 2)
+            document.getElementById('out-rekom-sekolah').innerText = data.sekolah;
+            if (document.getElementById('out-rekom-sekolah-pernyataan')) {
+                document.getElementById('out-rekom-sekolah-pernyataan').innerText = data.sekolah;
+            }
+            if (document.getElementById('out-rekom-sekolah-penutup')) {
+                document.getElementById('out-rekom-sekolah-penutup').innerText = data.sekolah;
+            }
+            document.getElementById('out-rekom-alamat').innerText = `${data.jalan} Kampung ${data.desa} Kecamatan ${data.kecamatan} Kabupaten ${data.kabupaten}`;
+            document.getElementById('out-rekom-kasi').innerText = data.kasi;
+            document.getElementById('out-rekom-nip-kasi').innerText = data.nipKasi;
+            document.getElementById('out-rekom-alamat-singkat').innerText = data.desa;
+            document.getElementById('out-rekom-tgl').innerText = formattedTgl;
+            document.getElementById('out-rekom-pengawas').innerText = data.pengawas;
+            document.getElementById('out-rekom-nip-pengawas').innerText = data.nipNavigator || data.nipPengawas;
+            
+            if (document.getElementById('out-rekom-pengawas-bawah')) {
+                document.getElementById('out-rekom-pengawas-bawah').innerText = data.pengawas;
+            }
+            if (document.getElementById('out-rekom-nip-pengawas-bawah')) {
+                document.getElementById('out-rekom-nip-pengawas-bawah').innerText = data.nipPengawas;
+            }
+            if (document.getElementById('out-rekom-nip-pengawas-bawah-2')) {
+                document.getElementById('out-rekom-nip-pengawas-bawah-2').innerText = data.nipPengawas;
+            }
+
+            // Pengesahan Page (Page 3)
+            if (document.getElementById('out-sah-sekolah')) {
+                document.getElementById('out-sah-sekolah').innerText = data.sekolah;
+            }
+            if (document.getElementById('out-sah-sekolah2')) {
+                document.getElementById('out-sah-sekolah2').innerText = data.sekolah;
+            }
+            if (document.getElementById('out-sah-desa')) {
+                document.getElementById('out-sah-desa').innerText = data.desa;
+            }
+            if (document.getElementById('out-sah-kecamatan')) {
+                document.getElementById('out-sah-kecamatan').innerText = data.kecamatan;
+            }
+            if (document.getElementById('out-sah-kabupaten')) {
+                document.getElementById('out-sah-kabupaten').innerText = data.kabupaten;
+            }
+            if (document.getElementById('out-sah-kabupaten-bawah')) {
+                document.getElementById('out-sah-kabupaten-bawah').innerText = data.kabupaten;
+            }
+            if (document.getElementById('out-sah-tp')) {
+                document.getElementById('out-sah-tp').innerText = data.tp;
+            }
+            if (document.getElementById('out-sah-sk')) {
+                document.getElementById('out-sah-sk').innerText = data.sk;
+            }
+            if (document.getElementById('out-sah-komite')) {
+                document.getElementById('out-sah-komite').innerText = data.komite;
+            }
+            if (document.getElementById('out-sah-ditetapkan')) {
+                document.getElementById('out-sah-ditetapkan').innerText = data.kabupaten;
+            }
+            if (document.getElementById('out-sah-tgl')) {
+                document.getElementById('out-sah-tgl').innerText = formattedTgl;
+            }
+            if (document.getElementById('out-sah-kepsek')) {
+                document.getElementById('out-sah-kepsek').innerText = data.kepsek;
+            }
+            if (document.getElementById('out-sah-nip-kepsek')) {
+                document.getElementById('out-sah-nip-kepsek').innerText = data.nipKepsek;
+            }
+            if (document.getElementById('out-sah-kadis')) {
+                document.getElementById('out-sah-kadis').innerText = data.kadis;
+            }
+            if (document.getElementById('out-sah-gol-kadis')) {
+                document.getElementById('out-sah-gol-kadis').innerText = data.golKadis;
+            }
+            if (document.getElementById('out-sah-nip-kadis')) {
+                document.getElementById('out-sah-nip-kadis').innerText = data.nipKadis;
+            }
+
+            // Kata Pengantar Page (Page 4)
+            document.querySelectorAll('.out-kata-sekolah').forEach(el => el.innerText = data.sekolah);
+            document.querySelectorAll('.out-kata-tp').forEach(el => el.innerText = data.tp);
+            document.querySelectorAll('.out-kata-sekolah-bawah').forEach(el => el.innerText = data.sekolah);
+
+            // Sync Footer Satuan Pendidikan di Seluruh Halaman Cetak
+            document.querySelectorAll('.out-sekolah-footer-dynamic').forEach(el => {
+                el.innerText = data.sekolah;
+            });
+            document.querySelectorAll('.out-sekolah-title-dynamic').forEach(el => {
+                el.innerText = data.sekolah.toUpperCase();
+            });
+
+            // Bab I (Page 6 & 7)
+            document.getElementById('out-bab1-rapor-narasi').innerHTML = bangunNarasiRaporPendidikan(data);
+            document.getElementById('out-bab1-sosbud-narasi').innerText = data.karakteristikSosbud || defaultData.karakteristikSosbud;
+            document.getElementById('out-bab1-swot-narasi').innerHTML = bangunNarasiSWOT(data);
+
+            // Bab II (Page 8)
+            if (document.getElementById('out-bab2-sekolah-title')) {
+                document.getElementById('out-bab2-sekolah-title').innerText = data.sekolah.toUpperCase();
+            }
+            document.getElementById('out-bab2-visi').innerText = data.visi;
+
+            // Render Misi List
+            const missionsContainer = document.getElementById('out-bab2-misi');
+            missionsContainer.innerHTML = "";
+            const missionLines = data.misi.split('\n');
+            missionLines.forEach(line => {
+                if (line.trim() !== "") {
+                    const li = document.createElement('li');
+                    li.innerText = line;
+                    missionsContainer.appendChild(li);
+                }
+            });
+
+            // Render Tujuan List
+            const objectivesContainer = document.getElementById('out-bab2-tujuan');
+            objectivesContainer.innerHTML = "";
+            const objectiveLines = data.tujuan.split('\n');
+            objectiveLines.forEach(line => {
+                if (line.trim() !== "") {
+                    const li = document.createElement('li');
+                    li.innerText = line;
+                    objectivesContainer.appendChild(li);
+                }
+            });
+
+            // RINGKASAN NARASI MENJADI 1 PARAGRAF PADAT AGAR COCOK DENGAN KAPASITAS HALAMAN DAN BATAS FOOTER (HALAMAN 10)
+            const ringkasanNarasiKokur = `Pembelajaran kokurikuler di <strong>${data.sekolah}</strong> dirancang secara lintas disiplin ilmu untuk memperkuat, mendalami, dan memperkaya pembelajaran intrakurikuler melalui pengalaman belajar kontekstual yang bermakna. Proyek ini dikembangkan berdasarkan tema pilihan seperti Gaya Hidup Berkelanjutan, Kearifan Lokal, Kewirausahaan, Bhinneka Tunggal Ika, dan Bangunlah Jiwa Raganya, yang diimplementasikan secara kolaboratif menggunakan pilihan model Pembelajaran Kolaboratif Lintas Disiplin Ilmu, Gerakan Tujuh Kebiasaan Anak Indonesia Hebat (7 KAIH), maupun cara kreatif lainnya guna menumbuhkan capaian 8 dimensi profil lulusan secara berkelanjutan.`;
+
+            document.getElementById('out-bab3-kokur-narasi').innerHTML = `
+                <p class="narasi-p" style="margin-bottom: 6px !important; font-size: 11pt !important;">${ringkasanNarasiKokur}</p>
+            `;
+
+            // Bab IV (Page 12) - Sinkronisasi otomatis dengan Nama Sekolah dinamis
+            document.getElementById('out-bab4-prinsip-p1').innerText = selaraskanNamaSekolah(data.bab4Prinsip, data.sekolah);
+            
+            const intraContainer = document.getElementById('out-bab4-intra-container');
+            intraContainer.innerHTML = "";
+            const intraLines = data.bab4Intra.split('\n');
+            intraLines.forEach(line => {
+                if (line.trim() !== "") {
+                    const p = document.createElement('p');
+                    p.className = "narasi-p";
+                    p.style.textAlign = "justify";
+                    p.style.marginBottom = "12px";
+                    p.innerText = selaraskanNamaSekolah(line, data.sekolah);
+                    intraContainer.appendChild(p);
+                }
+            });
+
+            // Bab V (Page 13)
+            document.getElementById('out-bab5-p1').innerText = selaraskanNamaSekolah(data.bab5Pendampingan, data.sekolah);
+            document.getElementById('out-bab5-p2').innerText = selaraskanNamaSekolah(data.bab5Evaluasi, data.sekolah);
+            document.getElementById('out-bab5-p3').innerText = selaraskanNamaSekolah(data.bab5Pengembangan, data.sekolah);
+            document.getElementById('out-bab5-p4').innerText = selaraskanNamaSekolah(data.bab5TindakLanjut, data.sekolah);
+
+            // Render Tabel BAB III
+            renderTableIntra(data.tableIntra);
+            renderTableFromText(data.tableKokur, 'out-table-kokur', 9);
+            renderTableFromText(data.tableEkskul, 'out-table-ekskul', 6);
+            renderTableFromText(data.tableBudaya, 'out-table-budaya', 5);
+        }
+
+        // Reset Data to Initial State
+        function resetData() {
+            if (confirm("Apakah Anda yakin ingin mengatur ulang data aplikasi kembali ke pengaturan default?")) {
+                localStorage.removeItem('ksp_purwadi_data');
+                loadData();
+                alert("Data berhasil direset.");
+            }
+        }
+
+        // Handle Image Upload
+        document.getElementById('inp-logo').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(evt) {
+                    document.getElementById('logo-preview').src = evt.target.result;
+                    saveToStorage();
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Handle Diagram Deep Learning Upload
+        document.getElementById('inp-diagram-deep').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(evt) {
+                    document.getElementById('out-diagram-deep').src = evt.target.result;
+                    saveToStorage();
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Event Listeners for Live Update
+        document.querySelectorAll('#form-identitas input, #form-identitas select, #tab-visimisi textarea, #tab-bab3 textarea, #tab-bab4 textarea, #tab-bab5 textarea, #tab-data-ksp select, #tab-data-ksp textarea').forEach(element => {
+            element.addEventListener('input', saveToStorage);
+        });
+
+        document.getElementById('logo-size-slider').addEventListener('input', saveToStorage);
+        document.getElementById('logo-pos-slider').addEventListener('input', saveToStorage);
+
+        // App Initialisation
+        window.onload = function() {
+            loadData();
+            if (window.lucide) {
+                lucide.createIcons();
+            }
+        };
+    </script>
+</body>
+</html>
