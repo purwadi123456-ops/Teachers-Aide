@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="id" x-data="appState()" x-init="initApp()">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartSchedule - Purwadi (A4 Landscape Only)</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- AlpineJS -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #f8fafc;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Screen Preview Themes (Hanya tampil di layar monitor) */
+        .bg-pattern-edu {
+            background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 100%);
+            background-image: radial-gradient(#bae6fd 1px, transparent 1px), radial-gradient(#bae6fd 1px, #f0f9ff 1px);
+            background-size: 24px 24px;
+            background-position: 0 0, 12px 12px;
+        }
+        .bg-pattern-tosca {
+            background: linear-gradient(135deg, #e6fffa 0%, #f0fdfa 100%);
+            background-image: radial-gradient(#99f6e4 1.5px, transparent 1.5px);
+            background-size: 20px 20px;
+        }
+        .bg-pattern-clean {
+            background: #ffffff;
+            border: 2px solid #cbd5e1;
+        }
+
+        /* Print Styles - Hard Constraints for A4 Landscape 1 Page Only */
+        @media print {
+            @page {
+                size: A4 landscape; /* Cetak A4 Lanskap */
+                margin: 0; /* Margin nol agar dikontrol presisi oleh kontainer */
+            }
+            body {
+                background: #ffffff !important;
+                color: #000000 !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            /* Hilangkan elemen dasbor agar tidak memicu halaman kosong di atasnya */
+            .no-print {
+                display: none !important;
+            }
+            .print-container {
+                display: block !important;
+                position: absolute !important;
+                left: 0 !important;
+                top: 0 !important;
+                width: 297mm !important;
+                height: 210mm !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                background: #ffffff !important;
+            }
+            /* Bingkai Halaman & Dimensi Lanskap Aliran Alami */
+            .print-card-bg {
+                box-shadow: none !important;
+                border: 2px solid #000000 !important; /* Bingkai Halaman */
+                border-radius: 0 !important;
+                background: #ffffff !important;
+                width: 297mm !important;
+                height: 210mm !important;
+                padding: 10mm 12mm !important;
+                box-sizing: border-box !important;
+                page-break-inside: avoid !important;
+                page-break-before: avoid !important;
+                page-break-after: avoid !important;
+                display: block !important; /* Menggunakan block agar mengalir alami mendekati tabel */
+            }
+            /* Optimasi tabel untuk landscape */
+            table {
+                width: 100% !important;
+                border-collapse: collapse !important;
+                margin-bottom: 0 !important;
+            }
+            th {
+                padding: 6px 8px !important;
+                font-size: 11px !important;
+                border: 1px solid #000000 !important;
+                text-align: center !important; /* Kepala tabel rata tengah */
+            }
+            td {
+                padding: 5px 8px !important;
+                font-size: 11px !important;
+                border: 1px solid #000000 !important;
+                text-align: left !important; /* Isi tabel rata kiri */
+            }
+            td.col-center {
+                text-align: center !important; /* No dan Waktu rata tengah */
+            }
+        }
+    </style>
+</head>
+<body class="antialiased text-slate-800">
+
+    <!-- Kontainer Utama Dasbor (Diberi no-print agar bersih saat dicetak langsung) -->
+    <div class="flex min-h-screen no-print">
+        <!-- ================= SIDEBAR (Kiri) ================= -->
+        <aside class="w-72 bg-slate-900 text-slate-100 flex flex-col border-r border-slate-800 shrink-0">
+            <div class="p-6 border-b border-slate-800">
+                <div class="flex items-center gap-3">
+                    <!-- Foto Pengganti Teks JP dekat dengan teks Purwadi -->
+                    <img src="https://lh3.googleusercontent.com/d/1SkSDHz37olYvKih6Jk5Eb2ZhU20I69Nx" class="h-10 w-10 rounded-xl object-cover shadow-lg shadow-teal-500/30" alt="Purwadi Logo">
+                    <div>
+                        <h2 class="font-bold text-base tracking-wide leading-none">SmartSchedule</h2>
+                        <span class="text-[10px] text-teal-400 font-semibold tracking-wider uppercase">Purwadi</span>
+                    </div>
+                </div>
+            </div>
+            
+            <nav class="flex-1 p-4 space-y-1">
+                <button @click="activeTab = 'dashboard'" :class="activeTab === 'dashboard' ? 'bg-teal-600 text-white' : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-100'" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition duration-200">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2v-4zM14 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2v-4z"></path></svg>
+                    Dasbor Utama
+                </button>
+                
+                <button @click="activeTab = 'identitas'" :class="activeTab === 'identitas' ? 'bg-teal-600 text-white' : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-100'" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition duration-200">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                    Input Identitas Sekolah
+                </button>
+                
+                <button @click="activeTab = 'mapel'" :class="activeTab === 'mapel' ? 'bg-teal-600 text-white' : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-100'" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition duration-200">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
+                    Tabel Mapel & JJP
+                </button>
+                
+                <button @click="activeTab = 'pengaturan'" :class="activeTab === 'pengaturan' ? 'bg-teal-600 text-white' : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-100'" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition duration-200">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    Penyusunan Jadwal
+                </button>
+                
+                <button @click="activeTab = 'cetak'" :class="activeTab === 'cetak' ? 'bg-teal-600 text-white' : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-100'" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition duration-200">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                    Cetak Jadwal A4
+                </button>
+            </nav>
+
+            <div class="p-4 border-t border-slate-800 text-xs text-slate-500">
+                Pemerintah Daerah &copy; 2026
+            </div>
+        </aside>
+
+        <!-- ================= KONTEN UTAMA ================= -->
+        <main class="flex-1 overflow-y-auto p-8">
+            
+            <!-- HALAMAN 1: DASHBOARD -->
+            <div x-show="activeTab === 'dashboard'" class="space-y-6">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">Dasbor Kurikulum</h1>
+                        <p class="text-sm text-slate-500">Pemantauan alokasi jam pelajaran dan konfigurasi jadwal.</p>
+                    </div>
+                </div>
+
+                <!-- Metrics Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-4">
+                        <div class="p-3 bg-teal-50 text-teal-600 rounded-xl"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg></div>
+                        <div>
+                            <span class="text-xs text-slate-400 block font-medium">Satuan Pendidikan</span>
+                            <span class="font-bold text-slate-800 text-sm" x-text="identitas.sekolah || 'Belum Diatur'"></span>
+                        </div>
+                    </div>
+                    <!-- Penggantian Teks Metrik Sesuai Instruksi -->
+                    <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-4">
+                        <div class="p-3 bg-emerald-50 text-emerald-600 rounded-xl"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg></div>
+                        <div>
+                            <span class="text-xs text-slate-400 block font-medium">Mata pelajaran dan kegiatan terkonfirmasi</span>
+                            <span class="font-bold text-slate-800 text-sm" x-text="mapels.filter(m => m.nama && m.singkat && m.singkat !== '0').length + ' Mapel'"></span>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-4">
+                        <div class="p-3 bg-teal-50 text-teal-600 rounded-xl"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg></div>
+                        <div>
+                            <span class="text-xs text-slate-400 block font-medium">Kelas Terpilih</span>
+                            <span class="font-bold text-slate-800 text-sm" x-text="'Kelas ' + selectedKelas"></span>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-4">
+                        <div class="p-3 bg-purple-50 text-purple-600 rounded-xl"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></div>
+                        <div>
+                            <span class="text-xs text-slate-400 block font-medium">Kurikulum</span>
+                            <span class="font-bold text-slate-800 text-sm">Purwadi</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-r from-teal-600 to-emerald-700 text-white p-8 rounded-3xl shadow-md relative overflow-hidden">
+                    <div class="relative z-10 max-w-xl">
+                        <h2 class="text-xl font-bold mb-2">Sistem Jadwal Pelajaran - Purwadi</h2>
+                        <p class="text-sm text-teal-50 leading-relaxed mb-4">Aplikasi penataan jadwal sekolah yang presisi. Kelola daftar mata pelajaran, lakukan validasi pemenuhan JJP, dan cetak lembar jadwal A4 Lanskap dengan susunan terstruktur.</p>
+                        <button @click="activeTab = 'identitas'" class="bg-white text-teal-800 hover:bg-slate-100 text-xs font-bold px-5 py-2.5 rounded-xl transition duration-200">
+                            Konfigurasi Identitas
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- HALAMAN 2: INPUT IDENTITAS -->
+            <div x-show="activeTab === 'identitas'" class="space-y-6">
+                <div>
+                    <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">Identitas Dokumen</h1>
+                    <p class="text-sm text-slate-500">Sesuaikan informasi instansi, satuan pendidikan, dan tanda tangan penanggung jawab.</p>
+                </div>
+
+                <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-4">
+                        <h3 class="text-sm font-semibold text-teal-600 border-b pb-2">Kop Dokumen & Logo</h3>
+                        
+                        <!-- Drag and Drop Image Uploader -->
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-500 mb-2">Logo Satuan Pendidikan (Klik atau Tarik Gambar Ke Sini)</label>
+                            <div 
+                                @dragover.prevent="dragOver = true" 
+                                @dragleave.prevent="dragOver = false" 
+                                @drop.prevent="handleLogoDrop($event); dragOver = false"
+                                :class="dragOver ? 'border-teal-500 bg-teal-50/50' : 'border-slate-200 bg-slate-50 hover:bg-slate-100/50'"
+                                class="border-2 border-dashed rounded-2xl p-4 text-center cursor-pointer transition relative flex flex-col items-center justify-center min-h-[140px]"
+                            >
+                                <input type="file" @change="handleLogoSelect($event)" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full" accept="image/*">
+                                <template x-if="identitas.logo">
+                                    <div class="flex items-center gap-4">
+                                        <img :src="identitas.logo" class="h-16 w-16 object-contain rounded-lg border bg-white p-1" alt="Logo Preview">
+                                        <div class="text-left">
+                                            <p class="text-xs font-bold text-slate-700">Logo Aktif</p>
+                                            <p class="text-[10px] text-slate-400">Tarik gambar baru untuk mengganti</p>
+                                        </div>
+                                    </div>
+                                </template>
+                                <template x-if="!identitas.logo">
+                                    <div>
+                                        <svg class="w-8 h-8 text-slate-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                        <p class="text-xs font-semibold text-slate-500">Seret gambar logo ke sini atau klik untuk memilih</p>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-500 mb-1">Penyelenggara Baris 1</label>
+                            <input type="text" x-model="identitas.instansi1" class="w-full text-xs px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-500 mb-1">Penyelenggara Baris 2 (misal: Dinas Pendidikan)</label>
+                            <input type="text" x-model="identitas.instansi2" class="w-full text-xs px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-500 mb-1">Nama Satuan Pendidikan / Sekolah</label>
+                            <input type="text" x-model="identitas.sekolah" class="w-full text-xs px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-500 mb-1">Alamat Satuan Pendidikan (Akan Mengalir ke Kop Jadwal)</label>
+                            <textarea x-model="identitas.alamat" rows="2" class="w-full text-xs px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500 outline-none"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4">
+                        <h3 class="text-sm font-semibold text-teal-600 border-b pb-2">Keterangan Jadwal & Struktur TTD</h3>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 mb-1">Semester</label>
+                                <input type="text" x-model="identitas.semester" class="w-full text-xs px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500 outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 mb-1">Tahun Ajaran</label>
+                                <input type="text" x-model="identitas.tahunAjaran" class="w-full text-xs px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500 outline-none">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 mb-1">Nama Guru Kelas / Wali Kelas</label>
+                                <input type="text" x-model="identitas.guru" class="w-full text-xs px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500 outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 mb-1">NIP Guru Kelas / Wali Kelas</label>
+                                <input type="text" x-model="identitas.nipGuru" class="w-full text-xs px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500 outline-none">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 mb-1">Nama Kepala Sekolah</label>
+                                <input type="text" x-model="identitas.kepsek" class="w-full text-xs px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500 outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 mb-1">NIP Kepala Sekolah</label>
+                                <input type="text" x-model="identitas.nipKepsek" class="w-full text-xs px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500 outline-none">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 mb-1">Tempat Penerbitan</label>
+                                <input type="text" x-model="identitas.tempat" class="w-full text-xs px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500 outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-500 mb-1">Tanggal Dokumen</label>
+                                <input type="text" x-model="identitas.tanggal" class="w-full text-xs px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-teal-500 outline-none">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-end">
+                    <button @click="saveState(); activeTab = 'mapel'" class="bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold px-6 py-3 rounded-xl transition duration-200 flex items-center gap-2 shadow-lg shadow-teal-600/20">
+                        Simpan & Lanjutkan
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- HALAMAN 3: INPUT MAPEL & JJP -->
+            <div x-show="activeTab === 'mapel'" class="space-y-6">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">Mata Pelajaran & Alokasi JJP</h1>
+                        <p class="text-sm text-slate-500">Mata pelajaran dan singkatan di sini akan otomatis terhubung ke seluruh pilihan jadwal.</p>
+                    </div>
+                    <button @click="resetToDefaultMapels()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-600 px-4 py-2.5 rounded-xl font-bold border border-slate-200 transition duration-200">
+                        Reset Data Pelajaran
+                    </button>
+                </div>
+
+                <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-50/75 border-b border-slate-100 text-slate-500">
+                                    <th class="py-3.5 px-4 text-xs font-bold text-center w-12">No</th>
+                                    <th class="py-3.5 px-4 text-xs font-bold w-72">Mata Pelajaran dan Kegiatan</th>
+                                    <th class="py-3.5 px-4 text-xs font-bold w-40">Singkatan (Kode Dropdown)</th>
+                                    <th colspan="6" class="py-2.5 px-4 text-xs font-bold text-center bg-teal-50/40 text-teal-700 border-l border-teal-100">Jumlah JJP/Kemunculan Dalam Jadwal</th>
+                                </tr>
+                                <tr class="bg-teal-50/10 text-slate-500 border-b border-slate-100">
+                                    <th colspan="3" class="border-r border-slate-100"></th>
+                                    <th class="py-2 px-1 text-xs font-bold text-center w-12 border-l border-teal-100">I</th>
+                                    <th class="py-2 px-1 text-xs font-bold text-center w-12 border-l border-teal-100">II</th>
+                                    <th class="py-2 px-1 text-xs font-bold text-center w-12 border-l border-teal-100">III</th>
+                                    <th class="py-2 px-1 text-xs font-bold text-center w-12 border-l border-teal-100">IV</th>
+                                    <th class="py-2 px-1 text-xs font-bold text-center w-12 border-l border-teal-100">V</th>
+                                    <th class="py-2 px-1 text-xs font-bold text-center w-12 border-l border-teal-100">VI</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100">
+                                <template x-for="(mapel, index) in mapels" :key="index">
+                                    <tr class="hover:bg-slate-50/40 transition duration-150">
+                                        <td class="py-2 px-4 text-xs text-center font-semibold text-slate-400" x-text="index + 1"></td>
+                                        <td class="py-1 px-3">
+                                            <input type="text" x-model="mapel.nama" class="w-full text-xs px-2.5 py-1.5 bg-transparent border border-transparent rounded-lg hover:border-slate-200 focus:bg-white focus:border-teal-500 outline-none transition">
+                                        </td>
+                                        <td class="py-1 px-3">
+                                            <input type="text" x-model="mapel.singkat" class="w-full text-xs px-2.5 py-1.5 bg-transparent border border-transparent rounded-lg hover:border-slate-200 focus:bg-white focus:border-teal-500 outline-none font-semibold text-teal-600 transition">
+                                        </td>
+                                        <template x-for="cIdx in [0, 1, 2, 3, 4, 5]" :key="cIdx">
+                                            <td class="py-1 px-2 border-l border-teal-50/40">
+                                                <input type="number" x-model.number="mapel.jjp[cIdx]" class="w-full text-center text-xs px-1 py-1.5 bg-transparent border border-transparent rounded-lg hover:border-slate-200 focus:bg-white focus:border-teal-500 outline-none font-semibold transition">
+                                            </td>
+                                        </template>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-3">
+                    <button @click="saveState(); activeTab = 'pengaturan'" class="bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold px-6 py-3 rounded-xl transition duration-200 flex items-center gap-2 shadow-lg shadow-teal-600/20">
+                        Lanjut Atur Jadwal
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- HALAMAN 4: PENGATURAN JADWAL -->
+            <div x-show="activeTab === 'pengaturan'" class="space-y-6">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">Penyusunan Jadwal & Validasi</h1>
+                        <p class="text-sm text-slate-500">Pilih kelas di bawah untuk mendesain jadwal khusus masing-masing versi kelas.</p>
+                    </div>
+                    <div class="flex items-center bg-white p-1 rounded-xl border border-slate-200 shadow-sm">
+                        <template x-for="kls in ['I', 'II', 'III', 'IV', 'V', 'VI']" :key="kls">
+                            <button @click="selectedKelas = kls" :class="selectedKelas === kls ? 'bg-teal-600 text-white' : 'text-slate-600 hover:text-teal-900'" class="px-4 py-2 rounded-lg text-xs font-bold transition duration-200" x-text="'Kelas ' + kls"></button>
+                        </template>
+                    </div>
+                </div>
+
+                <div class="bg-teal-50 border border-teal-100 p-4 rounded-xl text-xs text-teal-700 leading-relaxed flex items-center gap-3">
+                    <svg class="w-5 h-5 shrink-0 text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <span><strong>Informasi Versi:</strong> Sistem otomatis menyesuaikan pembagian jam untuk Kelas I-II (dengan 1 istirahat) dan Kelas III-VI (dengan 2 istirahat/pulang lebih siang). Waktu dan mata pelajaran terhubung secara langsung dengan validasi kesesuaian di bagian kanan.</span>
+                </div>
+
+                <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                    
+                    <!-- Kiri & Tengah: Tabel Jadwal Pelajaran -->
+                    <div class="xl:col-span-2 bg-white rounded-2xl border border-slate-100 shadow-sm p-6 overflow-hidden space-y-4">
+                        <div class="flex items-center justify-between border-b pb-4">
+                            <h3 class="font-bold text-base text-slate-800" x-text="'Tabel Penjadwalan: Kelas ' + selectedKelas"></h3>
+                            <div class="flex gap-2">
+                                <button @click="autoFillRecessAndFlag()" class="text-xs bg-teal-50 hover:bg-teal-100 text-teal-600 px-3 py-1.5 rounded-lg font-bold border border-teal-100 transition">
+                                    Set Upacara & Istirahat
+                                </button>
+                                <button @click="clearCurrentSchedule()" class="text-xs bg-rose-50 hover:bg-rose-100 text-rose-600 px-3 py-1.5 rounded-lg font-bold border border-rose-100 transition">
+                                    Kosongkan Jadwal
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse min-w-[700px]">
+                                <thead>
+                                    <tr class="bg-slate-50 text-slate-500 border-b border-slate-100">
+                                        <th class="py-3 px-3 text-xs font-bold text-center w-12">No</th>
+                                        <th class="py-3 px-3 text-xs font-bold w-28">Hari / Waktu</th>
+                                        <th class="py-3 px-3 text-xs font-bold">Senin</th>
+                                        <th class="py-3 px-3 text-xs font-bold">Selasa</th>
+                                        <th class="py-3 px-3 text-xs font-bold">Rabu</th>
+                                        <th class="py-3 px-3 text-xs font-bold">Kamis</th>
+                                        <th class="py-3 px-3 text-xs font-bold">Jumat</th>
+                                        <th class="py-3 px-3 text-xs font-bold">Sabtu</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-100 text-xs">
+                                    <template x-for="(row, rIdx) in getActiveScheduleRows()" :key="rIdx">
+                                        <tr class="hover:bg-slate-50/50 transition duration-150" :class="row.isIstirahat ? 'bg-amber-50/40' : ''">
+                                            <!-- Jam Pelajaran -->
+                                            <td class="py-2.5 px-3 text-center font-bold text-slate-400" x-text="row.no"></td>
+                                            
+                                            <!-- Waktu / Durasi -->
+                                            <td class="py-1 px-2">
+                                                <input type="text" x-model="row.waktu" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-center font-semibold text-slate-700 outline-none focus:border-teal-500">
+                                            </td>
+
+                                            <!-- Hari Senin s/d Sabtu (Dropdown Terkoneksi) -->
+                                            <template x-for="day in ['senin', 'selasa', 'rabu', 'kamis', 'jumat', 'sabtu']" :key="day">
+                                                <td class="py-1 px-1.5">
+                                                    <select x-model="row[day]" @change="saveState()" class="w-full px-2 py-1.5 bg-slate-50/80 hover:bg-slate-50 border border-slate-200 rounded-lg outline-none font-medium focus:bg-white focus:border-teal-500 focus:ring-1 focus:ring-teal-500 transition text-slate-700">
+                                                        <option value="">-- Kosong --</option>
+                                                        <template x-for="mapel in mapels" :key="mapel.singkat">
+                                                            <option x-show="mapel.singkat && mapel.singkat !== '0'" :value="mapel.singkat" x-text="mapel.singkat" :selected="row[day] === mapel.singkat"></option>
+                                                        </template>
+                                                        <option value="Istirahat">Istirahat</option>
+                                                    </select>
+                                                </td>
+                                            </template>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Kanan: Tabel Kesesuaian & Validasi -->
+                    <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 space-y-4">
+                        <div>
+                            <h3 class="font-bold text-base text-slate-800">Kesesuaian Target JJP</h3>
+                            <p class="text-xs text-slate-400">Verifikasi pemenuhan jam mengajar secara real-time berdasarkan input dropdown di sebelah kiri.</p>
+                        </div>
+
+                        <div class="divide-y divide-slate-100 overflow-y-auto max-h-[500px] pr-2">
+                            <template x-for="(v, index) in getValidationData()" :key="index">
+                                <div class="py-3 flex items-center justify-between gap-4 text-xs">
+                                    <div class="flex-1 min-w-0">
+                                        <span class="font-semibold text-slate-700 block truncate" x-text="v.nama"></span>
+                                        <span class="text-[10px] text-slate-400 block font-medium" x-text="'Kode: ' + v.singkat"></span>
+                                    </div>
+                                    <div class="text-right shrink-0">
+                                        <div class="font-bold text-slate-700 text-xs">
+                                            <span x-text="v.current"></span>/<span x-text="v.target"></span> JP
+                                        </div>
+                                        <span :class="v.statusClass" class="inline-block px-2 py-0.5 rounded-md font-bold text-[10px] mt-1" x-text="v.status"></span>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-3">
+                    <button @click="activeTab = 'cetak'" class="bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold px-6 py-3 rounded-xl transition duration-200 flex items-center gap-2 shadow-lg shadow-teal-600/20">
+                        Ke Halaman Cetak
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 02h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 02zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- HALAMAN 5: PRINT PREVIEW CONTROL -->
+            <div x-show="activeTab === 'cetak'" class="space-y-6">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">Kustomisasi Layout Cetak</h1>
+                        <p class="text-sm text-slate-500">Pilih tema layar (tidak ikut tercetak) dan buka dokumen bersih pada tab baru untuk dicetak lewat **Ctrl+P**.</p>
+                    </div>
+                    
+                    <div class="flex flex-wrap gap-3">
+                        <!-- Fitur Cetak Tab Baru Sesuai Permintaan -->
+                        <button @click="openPrintTab()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-5 py-2.5 rounded-xl transition duration-200 flex items-center gap-2 shadow-lg shadow-indigo-600/20">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                            Buka di Tab Baru & Cetak (Ctrl+P)
+                        </button>
+                        
+                        <button @click="window.print()" class="bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold px-5 py-2.5 rounded-xl transition duration-200 flex items-center gap-2 shadow-lg shadow-teal-600/20">
+                            Cetak Langsung dari Sini
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Customizer Panel -->
+                <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 space-y-4">
+                    <div class="flex flex-wrap items-center gap-6">
+                        <div>
+                            <span class="text-xs font-bold text-slate-500 block mb-2">Pilih Latar Belakang Jadwal (Khusus Tampilan Layar):</span>
+                            <div class="flex flex-wrap gap-2">
+                                <template x-for="theme in themes" :key="theme.id">
+                                    <button @click="selectedTheme = theme.id" :class="selectedTheme === theme.id ? 'ring-2 ring-teal-600 ring-offset-2' : ''" class="px-3 py-1.5 rounded-lg text-xs font-bold text-white transition duration-200" :style="'background: ' + theme.style" x-text="theme.name"></button>
+                                </template>
+                            </div>
+                        </div>
+                        <div>
+                            <span class="text-xs font-bold text-slate-500 block mb-2">Pilih Kelas yang Dicetak:</span>
+                            <div class="flex gap-1 bg-slate-100 p-1 rounded-lg">
+                                <template x-for="kls in ['I', 'II', 'III', 'IV', 'V', 'VI']" :key="kls">
+                                    <button @click="selectedKelas = kls" :class="selectedKelas === kls ? 'bg-teal-600 text-white' : 'text-slate-600'" class="px-3 py-1 rounded-md text-xs font-bold transition duration-200" x-text="kls"></button>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- PREVIEW AREA / LAYOUT DOKUMEN CETAK A4 LANDSCAPE -->
+    <div :class="activeTab === 'cetak' ? 'block' : 'hidden md:hidden'" class="p-8 bg-slate-100 min-h-screen flex justify-center items-start print-container">
+        <!-- Main Document A4 Landscape Frame -->
+        <div id="printable-area" class="w-[297mm] h-[210mm] bg-white rounded-none shadow-2xl relative overflow-hidden flex flex-col print-card-bg transition duration-300" :class="getThemeClass()" :style="selectedTheme !== 'clean' ? 'background: ' + getThemeStyle() : ''">
+            
+            <!-- Clean Official Header (KOP Surat Resmi) -->
+            <div class="flex items-center gap-5 border-b-2 border-slate-900 pb-3 mb-4 shrink-0">
+                <div class="shrink-0">
+                    <img :src="identitas.logo" class="h-16 w-16 object-contain" alt="Logo">
+                </div>
+                <div class="flex-1 text-center">
+                    <h1 class="text-xs font-bold uppercase tracking-wide text-slate-900 leading-none" x-text="identitas.instansi1"></h1>
+                    <h2 class="text-sm font-bold uppercase text-slate-800 mt-1" x-text="identitas.instansi2"></h2>
+                    <h3 class="text-base font-black uppercase text-teal-800 mt-0.5" x-text="identitas.sekolah"></h3>
+                    <!-- Alamat Mengalir Dinamis -->
+                    <p class="text-[9px] text-slate-600 italic font-semibold leading-tight mt-1" x-text="identitas.alamat"></p>
+                </div>
+                <div class="shrink-0 text-right bg-slate-900/5 px-3 py-1.5 rounded-lg border border-slate-300 shadow-sm">
+                    <span class="text-[8px] font-bold text-slate-500 block uppercase leading-none">Jadwal Pelajaran</span>
+                    <span class="text-xs font-black text-slate-800 block" x-text="'Kelas ' + selectedKelas"></span>
+                    <span class="text-[8px] font-semibold text-slate-500 block" x-text="'Sem: ' + identitas.semester"></span>
+                </div>
+            </div>
+
+            <!-- Document Table Schedule Content -->
+            <div class="w-full">
+                <table class="w-full border border-slate-400 text-[11px] font-medium leading-normal">
+                    <thead>
+                        <tr class="bg-slate-900/5 text-slate-800 border-b border-slate-400 font-extrabold text-center">
+                            <th class="py-1 px-2 border-r border-slate-400 w-10">No</th>
+                            <th class="py-1 px-2 border-r border-slate-400 w-28">Hari / Waktu</th>
+                            <th class="py-1 px-3 border-r border-slate-400">Senin</th>
+                            <th class="py-1 px-3 border-r border-slate-400">Selasa</th>
+                            <th class="py-1 px-3 border-r border-slate-400">Rabu</th>
+                            <th class="py-1 px-3 border-r border-slate-400">Kamis</th>
+                            <th class="py-1 px-3 border-r border-slate-400">Jumat</th>
+                            <th class="py-1 px-3">Sabtu</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-400">
+                        <template x-for="(row, rIdx) in getActiveScheduleRows()" :key="rIdx">
+                            <tr :class="row.isIstirahat ? 'bg-amber-50/20 italic font-bold' : ''">
+                                <!-- Jam Pelajaran -->
+                                <td class="py-1.5 px-2 border-r border-slate-400 font-bold text-slate-500 col-center" x-text="row.no"></td>
+                                
+                                <!-- Waktu -->
+                                <td class="py-1.5 px-2 border-r border-slate-400 font-bold text-slate-700 col-center" x-text="row.waktu"></td>
+                                
+                                <!-- Hari Senin s/d Sabtu (Isi Rata Kiri) -->
+                                <td class="py-1.5 px-3 border-r border-slate-400 font-semibold text-slate-800 text-left" x-text="row.senin || '-'"></td>
+                                <td class="py-1.5 px-3 border-r border-slate-400 font-semibold text-slate-800 text-left" x-text="row.selasa || '-'"></td>
+                                <td class="py-1.5 px-3 border-r border-slate-400 font-semibold text-slate-800 text-left" x-text="row.rabu || '-'"></td>
+                                <td class="py-1.5 px-3 border-r border-slate-400 font-semibold text-slate-800 text-left" x-text="row.kamis || '-'"></td>
+                                <td class="py-1.5 px-3 border-r border-slate-400 font-semibold text-slate-800 text-left" x-text="row.jumat || '-'"></td>
+                                <td class="py-1.5 px-3 font-semibold text-slate-800 text-left" x-text="row.sabtu || '-'"></td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Document Footer Signature (TTD Kiri memiliki pl-24 untuk ruang cap stempel) -->
+            <div class="mt-[10mm] flex justify-between items-start text-[11px] leading-normal font-medium text-slate-800 shrink-0">
+                <!-- TTD Kiri (Digeser ke kanan dengan pl-24 agar ruang stempel bersih di kirinya) -->
+                <div class="w-80 pl-24 text-left">
+                    <p class="mb-12">Mengetahui,<br>Kepala Satuan Pendidikan,</p>
+                    <p class="font-extrabold underline text-slate-950 text-[12px]" x-text="identitas.kepsek"></p>
+                    <p class="text-[9px] text-slate-500" x-text="identitas.nipKepsek ? 'NIP ' + identitas.nipKepsek : ''"></p>
+                </div>
+                
+                <!-- TTD Kanan (Tetap di posisinya) -->
+                <div class="w-64 pr-4 text-left">
+                    <p class="mb-12"><span x-text="identitas.tempat + ', ' + identitas.tanggal"></span><br>Wali Kelas / Guru Kelas,</p>
+                    <p class="font-extrabold underline text-slate-950 text-[12px]" x-text="identitas.guru"></p>
+                    <p class="text-[9px] text-slate-500" x-text="identitas.nipGuru ? 'NIP ' + identitas.nipGuru : ''"></p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Script Utama State dan Manajemen Konfigurasi -->
+    <script>
+        function appState() {
+            return {
+                activeTab: 'dashboard',
+                selectedKelas: 'I',
+                selectedTheme: 'pastel-teal',
+                dragOver: false,
+                
+                // Identitas Organisasi bawaan gambar
+                identitas: {
+                    logo: 'https://lh3.googleusercontent.com/d/1EghwY6vdvw3g8ypqkkweCbsFnxwLN_1E',
+                    instansi1: 'Pemerintah Kabupaten Tulang Bawang',
+                    instansi2: 'Dinas Pendidikan Dan Kebudayaan',
+                    sekolah: 'SD NEGERI 01 PENDOWO ASRI',
+                    alamat: 'Jl. Pendowo Asri, Kec. Dente Teladas, Kab. Tulang Bawang, Lampung',
+                    guru: 'SURATI, S.Pd.SD',
+                    nipGuru: '99999',
+                    kepsek: 'SUROTO, S.Pd.',
+                    nipKepsek: '99999',
+                    tempat: 'Pendowo Asri',
+                    tanggal: '14 Juli 2026',
+                    semester: 'I (Ganjil)',
+                    tahunAjaran: '2026/2027'
+                },
+
+                // Pilihan latar belakang untuk layar (tidak ikut tercetak)
+                themes: [
+                    { id: 'edu', name: 'Tema Biru Edukasi', style: '', class: 'bg-pattern-edu' },
+                    { id: 'tosca', name: 'Tema Mint Tosca', style: '', class: 'bg-pattern-tosca' },
+                    { id: 'clean', name: 'Klasik Putih (Tanpa Pola)', style: '', class: 'bg-pattern-clean' }
+                ],
+
+                // Model data list mapel awal sesuai Tabel Gambar 1
+                mapels: [],
+
+                // Template Jadwal Mingguan
+                schedules: {
+                    'I': [],
+                    'II': [],
+                    'III': [],
+                    'IV': [],
+                    'V': [],
+                    'VI': []
+                },
+
+                initApp() {
+                    try {
+                        const saved = localStorage.getItem('smart_schedule_app_v6');
+                        if (saved) {
+                            const parsed = JSON.parse(saved);
+                            this.identitas = { ...this.identitas, ...parsed.identitas };
+                            this.mapels = parsed.mapels && parsed.mapels.length ? parsed.mapels : this.mapels;
+                            this.schedules = parsed.schedules || this.schedules;
+                            this.selectedKelas = parsed.selectedKelas || 'I';
+                            this.activeTab = parsed.activeTab || 'dashboard';
+                            this.selectedTheme = parsed.selectedTheme || 'pastel-teal';
+                        } else {
+                            this.loadDefaultData();
+                        }
+                    } catch (e) {
+                        console.error("Gagal memuat cache lokal, memuat data default.", e);
+                        this.loadDefaultData();
+                    }
+                },
+
+                loadDefaultData() {
+                    this.resetToDefaultMapels();
+                    this.resetAllSchedulesToDefault();
+                },
+
+                saveState() {
+                    const dataToSave = {
+                        identitas: this.identitas,
+                        mapels: this.mapels,
+                        schedules: this.schedules,
+                        selectedKelas: this.selectedKelas,
+                        activeTab: this.activeTab,
+                        selectedTheme: this.selectedTheme
+                    };
+                    localStorage.setItem('smart_schedule_app_v6', JSON.stringify(dataToSave));
+                },
+
+                resetToDefaultMapels() {
+                    this.mapels = [
+                        { no: 1, nama: 'Pendidikan Agama ... dan Budi Pekerti', singkat: 'PABK', jjp: [3, 3, 3, 3, 3, 3] },
+                        { no: 2, nama: 'Pendidikan Pancasila', singkat: 'P. Pancasila', jjp: [4, 4, 4, 4, 4, 4] },
+                        { no: 3, nama: 'Bahasa Indonesia', singkat: 'B. Indonesia', jjp: [7, 8, 6, 6, 6, 6] },
+                        { no: 4, nama: 'Matematika', singkat: 'Matematika', jjp: [4, 5, 5, 5, 5, 5] },
+                        { no: 5, nama: 'Ilmu Pengetahuan Alam dan Sosial', singkat: 'IPAS', jjp: [0, 0, 5, 5, 5, 5] },
+                        { no: 6, nama: 'Pendidikan Jasmani Olahraga dan Kesehatan', singkat: 'PJOK', jjp: [3, 3, 3, 3, 3, 3] },
+                        { no: 7, nama: 'Seni Budaya', singkat: 'S.Budaya', jjp: [3, 3, 3, 3, 3, 3] },
+                        { no: 8, nama: 'Bahasa Inggris', singkat: 'B. Inggris', jjp: [0, 0, 0, 2, 2, 2] },
+                        { no: 9, nama: 'Koding dan Kecerdasan Artificial', singkat: 'KKA', jjp: [0, 0, 0, 0, 2, 2] },
+                        { no: 10, nama: 'Bahasa dan Aksara Lampung', singkat: 'BAL', jjp: [2, 2, 2, 2, 2, 2] },
+                        { no: 11, nama: 'Pendidikan Anti Korupsi', singkat: 'PAK', jjp: [1, 1, 1, 1, 1, 1] },
+                        { no: 12, nama: '0', singkat: '0', jjp: [0, 0, 0, 0, 0, 0] },
+                        { no: 13, nama: 'Kokurikuler', singkat: 'Kokurikuler', jjp: [6, 6, 7, 7, 7, 7] },
+                        { no: 14, nama: 'Pembiasaan Anak Indonesia Hebat', singkat: 'PAIH', jjp: [0, 0, 0, 0, 0, 0] },
+                        { no: 15, nama: 'Upacara Bendera', singkat: 'U. Bendera', jjp: [2, 2, 2, 2, 2, 2] },
+                        { no: 16, nama: 'Istirahat', singkat: 'Istirahat', jjp: [6, 6, 10, 10, 10, 10] },
+                        { no: 17, nama: '', singkat: '', jjp: [0, 0, 0, 0, 0, 0] }
+                    ];
+                    this.saveState();
+                },
+
+                resetAllSchedulesToDefault() {
+                    // VERSI KELAS I - II (Sesuai Gambar Atas)
+                    const timesVersionA = [
+                        { no: '0', waktu: '07.00 - 07.15', isIstirahat: false, senin: 'U. Bendera', selasa: '', rabu: '', kamis: '', jumat: '', sabtu: '' },
+                        { no: '1', waktu: '07.15 - 07.50', isIstirahat: false, senin: 'U. Bendera', selasa: 'Matematika', rabu: 'Matematika', kamis: 'PJOK', jumat: 'Kokurikuler', sabtu: 'Kokurikuler' },
+                        { no: '2', waktu: '07.50 - 08.25', isIstirahat: false, senin: 'B. Indonesia', selasa: 'Matematika', rabu: 'Matematika', kamis: 'PJOK', jumat: 'BAL', sabtu: 'Kokurikuler' },
+                        { no: '3', waktu: '08.25 - 09.00', isIstirahat: false, senin: 'B. Indonesia', selasa: 'PAK', rabu: 'P. Pancasila', kamis: 'PJOK', jumat: 'BAL', sabtu: 'Kokurikuler' },
+                        { no: '', waktu: '09.00 - 09.25', isIstirahat: true, senin: 'Istirahat', selasa: 'Istirahat', rabu: 'Istirahat', kamis: 'Istirahat', jumat: 'Istirahat', sabtu: 'Istirahat' },
+                        { no: '4', waktu: '09.25 - 10.00', isIstirahat: false, senin: 'PABK', selasa: 'S.Budaya', rabu: 'P. Pancasila', kamis: 'B. Indonesia', jumat: 'P. Pancasila', sabtu: 'Kokurikuler' },
+                        { no: '5', waktu: '10.00 - 10.35', isIstirahat: false, senin: 'PABK', selasa: 'S.Budaya', rabu: 'B. Indonesia', kamis: 'B. Indonesia', jumat: 'P. Pancasila', sabtu: 'Kokurikuler' },
+                        { no: '6', waktu: '10.35 - 11.10', isIstirahat: false, senin: 'PABK', selasa: 'S.Budaya', rabu: 'B. Indonesia', kamis: 'B. Indonesia', jumat: '', sabtu: '' }
+                    ];
+
+                    // VERSI KELAS III - VI (Sesuai Gambar Bawah)
+                    const timesVersionB = [
+                        { no: '0', waktu: '07.00 - 07.15', isIstirahat: false, senin: 'U. Bendera', selasa: '', rabu: '', kamis: '', jumat: '', sabtu: '' },
+                        { no: '1', waktu: '07.15 - 07.50', isIstirahat: false, senin: 'U. Bendera', selasa: '', rabu: '', kamis: '', jumat: '', sabtu: '' },
+                        { no: '2', waktu: '07.50 - 08.25', isIstirahat: false, senin: '', selasa: '', rabu: '', kamis: '', jumat: '', sabtu: '' },
+                        { no: '3', waktu: '08.25 - 09.00', isIstirahat: false, senin: '', selasa: '', rabu: '', kamis: '', jumat: '', sabtu: '' },
+                        { no: '', waktu: '09.00 - 09.25', isIstirahat: true, senin: 'Istirahat', selasa: 'Istirahat', rabu: 'Istirahat', kamis: 'Istirahat', jumat: 'Istirahat', sabtu: 'Istirahat' },
+                        { no: '4', waktu: '09.25 - 10.00', isIstirahat: false, senin: '', selasa: '', rabu: '', kamis: '', jumat: '', sabtu: '' },
+                        { no: '5', waktu: '10.00 - 10.35', isIstirahat: false, senin: '', selasa: '', rabu: '', kamis: '', jumat: '', sabtu: '' },
+                        { no: '', waktu: '10.35 - 11.00', isIstirahat: true, senin: 'Istirahat', selasa: 'Istirahat', rabu: 'Istirahat', kamis: 'Istirahat', jumat: 'Istirahat', sabtu: 'Istirahat' },
+                        { no: '6', waktu: '11.00 - 11.35', isIstirahat: false, senin: '', selasa: '', rabu: '', kamis: '', jumat: '', sabtu: '' },
+                        { no: '7', waktu: '11.35 - 12.10', isIstirahat: false, senin: '', selasa: '', rabu: '', kamis: '', jumat: '', sabtu: '' }
+                    ];
+
+                    ['I', 'II'].forEach(kls => {
+                        this.schedules[kls] = JSON.parse(JSON.stringify(timesVersionA));
+                    });
+
+                    ['III', 'IV', 'V', 'VI'].forEach(kls => {
+                        this.schedules[kls] = JSON.parse(JSON.stringify(timesVersionB));
+                    });
+                    
+                    this.saveState();
+                },
+
+                handleLogoSelect(event) {
+                    const file = event.target.files[0];
+                    if (file) {
+                        this.convertFileToBase64(file);
+                    }
+                },
+
+                handleLogoDrop(event) {
+                    const file = event.dataTransfer.files[0];
+                    if (file) {
+                        this.convertFileToBase64(file);
+                    }
+                },
+
+                convertFileToBase64(file) {
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                        this.identitas.logo = reader.result;
+                        this.saveState();
+                    };
+                    reader.readAsDataURL(file);
+                },
+
+                clearCurrentSchedule() {
+                    const activeRows = this.getActiveScheduleRows();
+                    activeRows.forEach(row => {
+                        if (row.no !== '') {
+                            row.senin = '';
+                            row.selasa = '';
+                            row.rabu = '';
+                            row.kamis = '';
+                            row.jumat = '';
+                            row.sabtu = '';
+                        }
+                    });
+                    this.saveState();
+                },
+
+                getActiveScheduleRows() {
+                    return this.schedules[this.selectedKelas] || [];
+                },
+
+                autoFillRecessAndFlag() {
+                    const activeRows = this.getActiveScheduleRows();
+                    if (activeRows.length > 0) {
+                        const row0 = activeRows.find(r => r.no === '0');
+                        const row1 = activeRows.find(r => r.no === '1');
+                        if (row0) row0.senin = 'U. Bendera';
+                        if (row1) row1.senin = 'U. Bendera';
+                        
+                        activeRows.forEach(row => {
+                            if (row.isIstirahat) {
+                                row.senin = 'Istirahat';
+                                row.selasa = 'Istirahat';
+                                row.rabu = 'Istirahat';
+                                row.kamis = 'Istirahat';
+                                row.jumat = 'Istirahat';
+                                row.sabtu = 'Istirahat';
+                            }
+                        });
+                        this.saveState();
+                    }
+                },
+
+                // Fitur Buka di Tab Baru & Otomatis Cetak (A4 Lanskap) [1]
+                openPrintTab() {
+                    const printElement = document.getElementById('printable-area');
+                    if (!printElement) return;
+
+                    const printHTML = printElement.innerHTML;
+                    const printWindow = window.open('', '_blank');
+
+                    printWindow.document.write(`
+                        <!DOCTYPE html>
+                        <html>
+                        <head>
+                            <title>Jadwal Pelajaran - ${this.identitas.sekolah} (Kelas ${this.selectedKelas})</title>
+                            <script src="https://cdn.tailwindcss.com"><\/script>
+                            <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+                            <style>
+                                body {
+                                    font-family: 'Plus Jakarta Sans', sans-serif;
+                                    background-color: #ffffff;
+                                    margin: 0;
+                                    padding: 0;
+                                    display: flex;
+                                    justify-content: center;
+                                    align-items: center;
+                                    min-height: 100vh;
+                                }
+                                @page {
+                                    size: A4 landscape; /* Memaksa printer menggunakan Lanskap */
+                                    margin: 0;
+                                }
+                                @media print {
+                                    body {
+                                        background: #ffffff !important;
+                                    }
+                                    .print-card-bg {
+                                        border: 2px solid #000000 !important;
+                                        box-shadow: none !important;
+                                        margin: 0 !important;
+                                        padding: 10mm 12mm !important;
+                                        width: 297mm !important; /* Pas Lebar A4 Landscape */
+                                        height: 210mm !important; /* Pas Tinggi A4 Landscape */
+                                        box-sizing: border-box !important;
+                                    }
+                                }
+                                .print-card-bg {
+                                    border: 2px solid #000000 !important;
+                                    width: 285mm;
+                                    height: 198mm;
+                                    padding: 10mm 12mm;
+                                    box-sizing: border-box;
+                                    display: block; /* Menggunakan block agar mengalir alami mendekati tabel */
+                                    background: #ffffff;
+                                }
+                                table {
+                                    width: 100%;
+                                    border-collapse: collapse;
+                                    margin-bottom: 0 !important;
+                                }
+                                th {
+                                    padding: 6px 8px;
+                                    font-size: 11px;
+                                    border: 1px solid #000000;
+                                    text-align: center !important; /* Kepala tabel rata tengah */
+                                }
+                                td {
+                                    padding: 5px 8px;
+                                    font-size: 11px;
+                                    border: 1px solid #000000;
+                                    text-align: left !important; /* Isi tabel rata kiri */
+                                }
+                                td.col-center {
+                                    text-align: center !important; /* No dan Waktu rata tengah */
+                                }
+                            </style>
+                        </head>
+                        <body>
+                            <div class="print-card-bg">
+                                ${printHTML}
+                            </div>
+                            <script>
+                                window.onload = function() {
+                                    setTimeout(function() {
+                                        window.print();
+                                    }, 600);
+                                };
+                            <\/script>
+                        </body>
+                        </html>
+                    `);
+                    printWindow.document.close();
+                },
+
+                getValidationData() {
+                    const currentKelasIdx = ['I', 'II', 'III', 'IV', 'V', 'VI'].indexOf(this.selectedKelas);
+                    const activeRows = this.getActiveScheduleRows();
+                    
+                    const counts = {};
+                    this.mapels.forEach(m => {
+                        if (m.singkat) counts[m.singkat] = 0;
+                    });
+                    counts['Istirahat'] = 0;
+
+                    activeRows.forEach(row => {
+                        ['senin', 'selasa', 'rabu', 'kamis', 'jumat', 'sabtu'].forEach(day => {
+                            const val = row[day];
+                            if (val && counts[val] !== undefined) {
+                                counts[val]++;
+                            }
+                        });
+                    });
+
+                    return this.mapels
+                        .filter(m => m.singkat && m.singkat !== '0')
+                        .map(m => {
+                            const target = m.jjp[currentKelasIdx] || 0;
+                            const current = counts[m.singkat] || 0;
+                            
+                            let status = 'Sesuai';
+                            let statusClass = 'bg-emerald-50 text-emerald-700';
+                            
+                            if (current > target) {
+                                status = 'Melebihi';
+                                statusClass = 'bg-rose-50 text-rose-700';
+                            } else if (current < target) {
+                                status = 'Belum Memenuhi';
+                                statusClass = 'bg-amber-50 text-amber-700';
+                            }
+
+                            return {
+                                nama: m.nama,
+                                singkat: m.singkat,
+                                target: target,
+                                current: current,
+                                status: status,
+                                statusClass: statusClass
+                            };
+                        });
+                }
+            };
+        }
+    </script>
+</body>
+</html>
