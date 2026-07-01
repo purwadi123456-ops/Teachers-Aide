@@ -1,0 +1,2152 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aplikasi Kalender & ATP PROTA PROSEM - Purwadi</title>
+    <!-- Google Fonts & Font Awesome Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Flatpickr CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/dark.css">
+    
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --bg-card: #1e293b;
+            --accent: #3b82f6;
+            --accent-hover: #2563eb;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --success: #10b981;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            overflow-x: hidden;
+            height: 100vh;
+        }
+
+        /* --- HALAMAN HOME --- */
+        #page-home {
+            display: flex;
+            height: 100vh;
+            width: 100vw;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 999;
+            transition: transform 0.6s cubic-bezier(0.77, 0, 0.175, 1);
+        }
+
+        .home-left {
+            width: 35%;
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(10px);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 3rem;
+        }
+
+        .home-left h1 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            line-height: 1.25;
+            margin-bottom: 1rem;
+            color: #ffffff;
+        }
+
+        .home-right {
+            width: 65%;
+            background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        .home-right::before {
+            content: '';
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            background: var(--accent);
+            border-radius: 50%;
+            filter: blur(150px);
+            opacity: 0.3;
+        }
+
+        .brand-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            line-height: 1.2;
+            background: linear-gradient(to right, #fff, var(--text-muted));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .brand-subtitle {
+            color: var(--text-muted);
+            margin-bottom: 3rem;
+            font-size: 1rem;
+        }
+
+        .btn-enter {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s;
+            width: max-content;
+            text-decoration: none;
+        }
+
+        .btn-enter:hover {
+            background: var(--accent-hover);
+            transform: translateX(5px);
+            box-shadow: 0 10px 20px rgba(59, 130, 246, 0.3);
+        }
+
+        /* --- DASHBOARD UTAMA --- */
+        #main-dashboard {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            height: 100vh;
+            visibility: hidden;
+        }
+
+        sidebar {
+            background: var(--bg-card);
+            padding: 2rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .sidebar-header {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .sidebar-logo {
+            width: 32px;
+            height: 32px;
+            object-fit: contain;
+        }
+
+        .nav-menu {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .nav-item {
+            padding: 1rem;
+            border-radius: 10px;
+            color: var(--text-muted);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--accent);
+        }
+
+        .nav-item.active {
+            font-weight: 600;
+            border-left: 4px solid var(--accent);
+            border-radius: 4px 10px 10px 4px;
+        }
+
+        main {
+            padding: 2.5rem;
+            overflow-y: auto;
+            background: #0b0f19;
+        }
+
+        .page-section {
+            display: none;
+        }
+
+        .page-section.active {
+            display: block;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+        }
+
+        /* --- DESAIN HALAMAN BERANDA --- */
+        .beranda-hero {
+            position: relative;
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.9));
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 3rem;
+            overflow: hidden;
+            margin-bottom: 2rem;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+
+        .beranda-hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image: radial-gradient(rgba(59, 130, 246, 0.12) 1.5px, transparent 1.5px);
+            background-size: 24px 24px;
+            pointer-events: none;
+        }
+
+        .beranda-diagonal-texture {
+            position: absolute;
+            bottom: -30px;
+            right: -30px;
+            width: 250px;
+            height: 250px;
+            opacity: 0.08;
+            background: repeating-linear-gradient(45deg, var(--text-main), var(--text-main) 1px, transparent 1px, transparent 10px);
+            mask-image: radial-gradient(circle, black, transparent 70%);
+            -webkit-mask-image: radial-gradient(circle, black, transparent 70%);
+            pointer-events: none;
+        }
+
+        .beranda-glow {
+            position: absolute;
+            width: 350px;
+            height: 350px;
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.18) 0%, transparent 70%);
+            top: -100px;
+            right: -50px;
+            pointer-events: none;
+        }
+
+        .beranda-welcome-text {
+            position: relative;
+            z-index: 2;
+            max-width: 600px;
+        }
+
+        .beranda-welcome-text h1 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            line-height: 1.25;
+            margin-bottom: 1rem;
+            color: #ffffff;
+        }
+
+        .beranda-welcome-text p {
+            color: var(--text-muted);
+            line-height: 1.6;
+            font-size: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .beranda-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .beranda-stat-card {
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1.2rem;
+            backdrop-filter: blur(8px);
+        }
+
+        .beranda-stat-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .beranda-stat-info {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .beranda-stat-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .beranda-stat-val {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        /* --- FORM STYLES --- */
+        .card {
+            background: var(--bg-card);
+            padding: 2rem;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            max-width: 1000px;
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            background: #0f172a;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: white;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        /* --- TABEL ATP PROTA PROSEM --- */
+        .atp-meta-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1.5rem;
+            font-size: 0.95rem;
+        }
+
+        .atp-meta-table td {
+            padding: 0.4rem 0.5rem;
+            border: none;
+        }
+
+        .atp-meta-table td.label-cell {
+            width: 220px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .atp-main-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+            background: #1e293b;
+            color: #f8fafc;
+        }
+
+        .atp-main-table th {
+            background: #334155;
+            color: #ffffff;
+            font-weight: 700;
+            padding: 0.6rem;
+            text-align: center;
+            border: 1px solid #475569;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+        }
+
+        .atp-main-table td {
+            padding: 0.8rem;
+            border: 1px solid #475569;
+            font-size: 0.9rem;
+            vertical-align: top;
+            height: auto;
+        }
+
+        .atp-semester-header {
+            background: #1e3a8a !important;
+            color: #ffffff !important;
+            font-weight: bold;
+            padding: 0.6rem !important;
+            font-size: 0.95rem;
+            text-align: left !important;
+        }
+
+        .atp-editable-cell {
+            width: 100%;
+            min-height: 24px;
+            color: #ffffff;
+            background: transparent;
+            border: none;
+            outline: none;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .atp-editable-cell:focus {
+            background: rgba(59, 130, 246, 0.1);
+            border-radius: 4px;
+            outline: 1px solid var(--accent);
+        }
+
+        .jpp-badge {
+            background: #0284c7;
+            color: white;
+            font-weight: bold;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+        }
+
+        /* Tombol Aksi Hapus Baris */
+        .btn-delete-row {
+            background: var(--danger);
+            color: white;
+            border: none;
+            padding: 0.3rem 0.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: opacity 0.2s;
+        }
+
+        .btn-delete-row:hover {
+            opacity: 0.8;
+        }
+
+        /* --- KALENDER KOP SURAT --- */
+        .kop-surat-banner {
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.6));
+            backdrop-filter: blur(12px);
+            border-radius: 16px;
+            padding: 1.5rem 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 1.8rem;
+            align-items: center;
+            position: relative;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        .kop-surat-banner::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 5px;
+            height: 100%;
+            background: linear-gradient(to bottom, var(--accent), var(--success));
+        }
+
+        .kop-logo-container {
+            width: 90px;
+            height: 90px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            flex-shrink: 0;
+            position: relative;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 8px;
+        }
+
+        .kop-logo-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            transform-origin: center center;
+        }
+
+        .kop-text-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .kop-badge {
+            display: inline-block;
+            background: rgba(59, 130, 246, 0.12);
+            color: var(--accent);
+            padding: 0.25rem 0.8rem;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-bottom: 0.4rem;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            border: 1px solid rgba(59, 130, 246, 0.25);
+            width: max-content;
+        }
+
+        .kop-title-lembaga {
+            font-size: 1.8rem;
+            font-weight: 800;
+            line-height: 1.25;
+            margin-bottom: 0.3rem;
+            color: #ffffff;
+        }
+
+        .kop-alamat-lembaga {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin: 0;
+            line-height: 1.4;
+        }
+
+        .calendar-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 2rem;
+        }
+
+        .month-box {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 1.2rem;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+        }
+
+        .month-title {
+            text-align: center;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--accent);
+            font-size: 1.1rem;
+        }
+
+        .days-grid-header {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            text-align: center;
+            font-weight: 600;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+
+        .days-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 6px;
+        }
+
+        .day-cell {
+            min-height: 40px;
+            padding: 6px 2px;
+            font-size: 0.95rem;
+            border-radius: 6px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.03);
+        }
+
+        .day-number {
+            font-weight: 600;
+        }
+
+        .day-cell.empty {
+            background: transparent;
+            border: none;
+        }
+
+        .day-cell.sunday .day-number {
+            color: var(--danger);
+            font-weight: 700;
+        }
+
+        .day-cell.status-libur {
+            background: transparent !important;
+            border: 1px solid rgba(239, 68, 68, 0.25) !important;
+        }
+        .day-cell.status-libur .day-number {
+            color: var(--danger) !important;
+            font-weight: 800;
+        }
+
+        .month-events-wrapper {
+            margin-top: auto; 
+            padding-top: 12px;
+            margin-top: 12px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            min-height: 50px;
+        }
+
+        /* --- STRUKTUR KALENDER DINDING KOLASE --- */
+        .wall-calendar-sheet {
+            background: var(--bg-card);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            margin-bottom: 2rem;
+        }
+
+        .wall-collage-container {
+            display: grid;
+            grid-template-columns: 2.2fr 1fr;
+            gap: 12px;
+            height: 380px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .wall-photo-large-wrapper {
+            position: relative;
+            height: 100%;
+            overflow: hidden;
+            border-radius: 14px;
+            border: 1px solid rgba(255,255,255,0.1);
+            background: #1e293b;
+        }
+
+        .wall-photo-small-group {
+            display: grid;
+            grid-template-rows: 1fr 1fr;
+            gap: 12px;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .wall-photo-small-wrapper {
+            position: relative;
+            height: 100%;
+            overflow: hidden;
+            border-radius: 14px;
+            border: 1px solid rgba(255,255,255,0.1);
+            background: #1e293b;
+        }
+
+        .wall-photo-img {
+            display: block;
+            width: 100% !important;
+            height: 100% !important;
+            max-height: 100% !important;
+            object-fit: cover !important;
+        }
+
+        .wall-photo-overlay-main {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(15, 23, 42, 0.95) 0%, rgba(15, 23, 42, 0.3) 75%, transparent 100%);
+            padding: 2rem;
+            display: flex;
+            align-items: flex-end;
+            height: 60%;
+            z-index: 2;
+        }
+
+        .wall-school-info h1 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            margin-bottom: 0.3rem;
+            color: #ffffff;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+        }
+
+        .wall-school-info p {
+            color: var(--accent);
+            font-size: 1rem;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+        }
+
+        /* BAR MINGGU EFEKTIF */
+        .wall-weeks-bar {
+            background: rgba(59, 130, 246, 0.08);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 12px;
+            padding: 0.8rem 1.5rem;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            font-weight: 600;
+            color: var(--text-main);
+            font-size: 0.9rem;
+        }
+
+        .wall-weeks-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .wall-weeks-item i {
+            color: var(--accent);
+            font-size: 1.1rem;
+        }
+
+        .wall-weeks-val {
+            color: var(--success);
+            font-weight: 800;
+        }
+
+        .wall-calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.2rem;
+        }
+
+        /* --- RINGKASAN MINGGU EFEKTIF --- */
+        .summary-weeks-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-top: 3rem;
+            margin-bottom: 2rem;
+        }
+        .summary-weeks-card .summary-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .summary-weeks-card .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+        }
+        .summary-weeks-card .summary-item {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 1rem;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .summary-weeks-card .summary-item.highlight {
+            border-color: rgba(16, 185, 129, 0.3);
+            background: rgba(16, 185, 129, 0.05);
+        }
+        .summary-weeks-card .summary-item.highlight .summary-value {
+            color: var(--success);
+        }
+        .summary-weeks-card .summary-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+        .summary-weeks-card .summary-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        /* --- KOLOFON / TANDA TANGAN DOUBLE --- */
+        .kolofon-container-double {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 3rem;
+            padding: 0 1.5rem;
+            color: var(--text-main);
+            page-break-inside: avoid; /* Mencegah tanda tangan terpotong/terpisah sendiri */
+        }
+
+        .kolofon-container {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 3rem;
+            padding-right: 1.5rem;
+            color: var(--text-main);
+            page-break-inside: avoid;
+        }
+
+        .signature-box {
+            width: 280px;
+            display: flex;
+            flex-direction: column;
+            font-size: 0.95rem;
+        }
+
+        .signature-box .date-info {
+            margin-bottom: 0.5rem;
+            color: var(--text-muted);
+        }
+
+        .signature-box .role-info {
+            margin-bottom: 4.5rem;
+            color: var(--text-main);
+            font-weight: 500;
+        }
+
+        .signature-box .name-info {
+            font-weight: 700;
+            margin-bottom: 0.2rem;
+            color: var(--text-main);
+        }
+
+        .signature-box .nip-info {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .btn-print {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-bottom: 2rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+        .btn-print:hover {
+            background: #059669;
+            transform: translateY(-1px);
+        }
+
+        /* --- TOAST NOTIFICATION --- */
+        #toast-notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--success);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 10000;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            opacity: 0;
+            transform: translateY(20px) scale(0.95);
+            pointer-events: none;
+        }
+
+        #toast-notification.toast-show {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            pointer-events: auto;
+        }
+
+        /* Mengikat sisa tabel bagian bawah dengan tanda tangan saat diprint */
+        .atp-document-wrap {
+            page-break-inside: avoid;
+        }
+
+        /* Responsive Layout Grid */
+        @media (max-width: 1200px) {
+            .wall-calendar-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        @media (max-width: 768px) {
+            .wall-calendar-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        /* ================= FORMAT CETAK PORTRAIT A4 HIGH-STRETCH ================= */
+        @media print {
+            @page {
+                size: A4 portrait;
+                margin: 4mm 6mm 4mm 6mm;
+            }
+            html, body {
+                height: auto;
+                overflow: visible !important;
+                background: white !important;
+                color: black !important;
+            }
+            #page-home, sidebar, .btn-print, .no-print, #page-identitas, #page-input-tanggal, .nav-menu {
+                display: none !important;
+            }
+            #main-dashboard {
+                display: block !important;
+                visibility: visible !important;
+                height: auto;
+            }
+            main {
+                padding: 0 !important;
+                background: white !important;
+                height: auto;
+            }
+            .page-section {
+                display: none !important;
+            }
+            
+            .page-section.active {
+                display: block !important;
+                height: auto !important;
+            }
+
+            /* --- CETAK ATP PROTA PROSEM --- */
+            .atp-main-table {
+                background: white !important;
+                color: black !important;
+            }
+
+            .atp-main-table th {
+                background: #f1f5f9 !important;
+                color: black !important;
+                border: 1px solid #94a3b8 !important;
+            }
+
+            .atp-main-table td {
+                color: black !important;
+                border: 1px solid #94a3b8 !important;
+                background: transparent !important;
+                height: auto !important;
+                padding: 0.8rem !important;
+            }
+
+            .atp-semester-header {
+                background: #e2e8f0 !important;
+                color: black !important;
+                border: 1px solid #94a3b8 !important;
+            }
+
+            .atp-editable-cell {
+                color: black !important;
+                min-height: unset !important;
+            }
+
+            .jpp-badge {
+                background: #e2e8f0 !important;
+                color: black !important;
+                border: 1px solid #94a3b8 !important;
+            }
+
+            /* Hilangkan tombol hapus saat cetak */
+            .action-col, .btn-delete-row {
+                display: none !important;
+            }
+
+            /* --- CETAK KALENDER PENDIDIKAN BIASA --- */
+            #page-kalender {
+                height: 100%;
+            }
+            .kop-surat-banner {
+                background: #f1f5f9 !important;
+                border: none !important;
+                border-left: 3px solid #3b82f6 !important;
+                padding: 0.3rem 0.6rem !important;
+                margin-bottom: 0.3rem !important;
+                display: grid !important;
+                grid-template-columns: auto 1fr !important;
+                gap: 0.8rem !important;
+                border-radius: 6px !important;
+                box-shadow: none !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            .kop-logo-container {
+                background: white !important;
+                border: 1px solid #cbd5e1 !important;
+                width: 40px !important;
+                height: 40px !important;
+                padding: 2px !important;
+                border-radius: 4px !important;
+            }
+            .kop-badge {
+                font-size: 0.55rem !important;
+                padding: 0.05rem 0.4rem !important;
+                margin-bottom: 0.1rem !important;
+            }
+            .kop-title-lembaga {
+                font-size: 0.95rem !important;
+                color: #0f172a !important;
+                -webkit-text-fill-color: #0f172a !important;
+                background: none !important;
+                -webkit-background-clip: initial !important;
+                font-weight: 800 !important;
+            }
+            .kop-alamat-lembaga {
+                color: #475569 !important;
+                font-size: 0.6rem !important;
+            }
+
+            /* Kolofon Tanda Tangan Cetak */
+            .kolofon-container-double, .kolofon-container {
+                margin-top: 1.5rem !important;
+                page-break-inside: avoid !important;
+                color: #000000 !important;
+            }
+            
+            .signature-box {
+                width: 180px !important;
+                font-size: 0.65rem !important;
+                color: #000000 !important;
+            }
+            
+            .signature-box .date-info {
+                margin-bottom: 0.1rem !important;
+                color: #334155 !important;
+            }
+            
+            .signature-box .role-info {
+                margin-bottom: 1.4rem !important;
+                color: #000000 !important;
+            }
+            
+            .signature-box .name-info {
+                font-size: 0.65rem !important;
+                color: #000000 !important;
+                font-weight: bold !important;
+            }
+            
+            .signature-box .nip-info {
+                color: #334155 !important;
+                font-size: 0.6rem !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ================= HALAMAN HOME ================= -->
+    <section id="page-home">
+        <div class="home-left">
+            <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 1.5rem;">
+                <img src="https://iili.io/Cd6VTSS.png" alt="Logo" style="height: 50px;">
+                <span style="font-size: 1.5rem; font-weight: 700; color: var(--accent);">Purwadi</span>
+            </div>
+            <h1 class="brand-title">Kalender<br>Pendidikan</h1>
+            <p class="brand-subtitle">Sistem perancangan dan monitoring agenda akademik digital interaktif terintegrasi.</p>
+            <button class="btn-enter" onclick="enterApp()">
+                Masuk Aplikasi <i class="fas fa-arrow-right"></i>
+            </button>
+        </div>
+        <div class="home-right">
+            <div style="text-align: center; z-index: 1;">
+                <i class="fa-solid fa-calendar-days" style="font-size: 8rem; color: var(--accent); margin-bottom: 2rem; filter: drop-shadow(0 0 20px rgba(59,130,246,0.5));"></i>
+                <h2 style="font-size: 2rem; font-weight: 400;">Tahun Pelajaran 2026/2027</h2>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= DASHBOARD UTAMA ================= -->
+    <div id="main-dashboard">
+        <!-- Navigasi Menu Kiri -->
+        <sidebar>
+            <div class="sidebar-header">
+                <img src="https://iili.io/Cd6VTSS.png" class="sidebar-logo" alt="Logo"> 
+                <span>Purwadi</span>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item active" onclick="switchPage('page-beranda', this)">
+                    <i class="fa-solid fa-house"></i> Beranda
+                </li>
+                <li class="nav-item" onclick="switchPage('page-identitas', this)">
+                    <i class="fa-solid fa-user-gear"></i> Input Identitas
+                </li>
+                <li class="nav-item" onclick="switchPage('page-input-tanggal', this)">
+                    <i class="fa-solid fa-calendar-plus"></i> Input Jeda/Libur
+                </li>
+                <li class="nav-item" onclick="switchPage('page-kalender', this)">
+                    <i class="fa-solid fa-calendar-days"></i> Kalender Pendidikan
+                </li>
+                <li class="nav-item" onclick="switchPage('page-kalender-dinding', this)">
+                    <i class="fa-solid fa-image"></i> Kalender Dinding
+                </li>
+                <li class="nav-item" onclick="switchPage('page-atp-prosem', this)">
+                    <i class="fa-solid fa-file-invoice"></i> ATP PROTA PROSEM
+                </li>
+            </ul>
+        </sidebar>
+
+        <!-- Konten Utama -->
+        <main>
+            <!-- 0. Halaman Beranda Utama -->
+            <section id="page-beranda" class="page-section active">
+                <div class="beranda-hero">
+                    <div class="beranda-diagonal-texture"></div>
+                    <div class="beranda-glow"></div>
+                    <div class="beranda-welcome-text">
+                        <h1>Sistem Kalender Akademik</h1>
+                        <p>Selamat datang di portal utama pengelolaan agenda pendidikan digital. Portal ini memfasilitasi integrasi data sekolah, penjadwalan jeda/libur, serta kalkulasi minggu efektif secara otomatis.</p>
+                    </div>
+                </div>
+
+                <!-- Informasi Statistik Beranda -->
+                <div class="beranda-stats-grid">
+                    <div class="beranda-stat-card">
+                        <div class="beranda-stat-icon"><i class="fa-solid fa-school"></i></div>
+                        <div class="beranda-stat-info">
+                            <span class="beranda-stat-label">Nama Sekolah</span>
+                            <span class="beranda-stat-val" id="beranda-school-val">SD NEGERI 03 PENDOWO ASRI</span>
+                        </div>
+                    </div>
+                    <div class="beranda-stat-card">
+                        <div class="beranda-stat-icon"><i class="fa-solid fa-calendar"></i></div>
+                        <div class="beranda-stat-info">
+                            <span class="beranda-stat-label">Tahun Pelajaran</span>
+                            <span class="beranda-stat-val">2026/2027</span>
+                        </div>
+                    </div>
+                    <div class="beranda-stat-card">
+                        <div class="beranda-stat-icon"><i class="fa-solid fa-business-time"></i></div>
+                        <div class="beranda-stat-info">
+                            <span class="beranda-stat-label">Sistem Kerja</span>
+                            <span class="beranda-stat-val" id="beranda-workdays-val">5 Hari Kerja</span>
+                        </div>
+                    </div>
+                    <div class="beranda-stat-card">
+                        <div class="beranda-stat-icon"><i class="fa-solid fa-calendar-check"></i></div>
+                        <div class="beranda-stat-info">
+                            <span class="beranda-stat-label">Agenda Terinput</span>
+                            <span class="beranda-stat-val" id="beranda-total-events-val">0 Agenda</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 1. Halaman Input Identitas -->
+            <section id="page-identitas" class="page-section">
+                <h2><i class="fa-solid fa-user-gear"></i> Pengaturan Identitas Sekolah</h2>
+                <div class="card">
+                    <form id="form-identitas" onsubmit="saveIdentitas(event)">
+                        
+                        <!-- Drag Drop & Upload Logo -->
+                        <div class="form-group">
+                            <label>Logo Satuan Pendidikan</label>
+                            <div class="drop-zone" id="logo-drop-zone" onclick="document.getElementById('logo-file-input').click()">
+                                <i class="fa-solid fa-cloud-arrow-up"></i>
+                                <p>Tarik & lepaskan logo di sini atau <strong>klik untuk mencari</strong></p>
+                                <input type="file" id="logo-file-input" accept="image/*" style="display: none;" onchange="handleLogoUpload(this.files[0])">
+                            </div>
+                            
+                            <!-- Preview dan Slider Kontrol Posisi Logo -->
+                            <div class="logo-preview-container" id="logo-preview-box" style="display: none;">
+                                <div class="logo-preview-wrapper">
+                                    <img src="" id="logo-img-preview" alt="Preview Logo">
+                                </div>
+                                <div class="logo-controls">
+                                    <div>
+                                        <label>Skala / Zoom <span id="val-scale">1.0x</span></label>
+                                        <input type="range" id="control-scale" min="0.5" max="2" step="0.05" value="1" oninput="applyLogoTransform()">
+                                    </div>
+                                    <div>
+                                        <label>Geser Horizontal (X) <span id="val-x">0px</span></label>
+                                        <input type="range" id="control-x" min="-50" max="50" step="1" value="0" oninput="applyLogoTransform()">
+                                    </div>
+                                    <div>
+                                        <label>Geser Vertikal (Y) <span id="val-y">0px</span></label>
+                                        <input type="range" id="control-y" min="-50" max="50" step="1" value="0" oninput="applyLogoTransform()">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Nama Satuan Pendidikan (Sekolah)</label>
+                            <input type="text" id="input-sekolah" value="SD NEGERI 03 PENDOWO ASRI" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Alamat Lengkap Satuan Pendidikan</label>
+                            <textarea id="input-alamat" placeholder="Tuliskan alamat lengkap" required>Jl. Brawijaya Utara no. 4 Kampung Pendowo Asri Kec. Dente Teladas Kab. Tulang Bawang</textarea>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Tahun Pelajaran</label>
+                                <input type="text" id="input-tapel" value="2026/2027" readonly style="background: #334155; cursor: not-allowed;">
+                            </div>
+                            <div class="form-group">
+                                <label>Sistem Hari Kerja</label>
+                                <select id="input-hari-kerja">
+                                    <option value="5" selected>5 Hari Kerja (Senin - Jumat)</option>
+                                    <option value="6">6 Hari Kerja (Senin - Sabtu)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Mata Pelajaran (Default)</label>
+                                <input type="text" id="input-mapel" value="Pendidikan Kepercayaan terhadap TYME dan Budi Pekerti" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Fase / Kelas</label>
+                                <input type="text" id="input-fase-kelas" value="B  /  VI" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Jumlah Jam Intrakurikuler per Minggu</label>
+                                <input type="number" id="input-jam-per-minggu" value="3" min="1" max="10" oninput="syncAtpCalculation()" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Nama Guru Kelas</label>
+                                <input type="text" id="input-guru-kelas" value="Surati, S.Pd." required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>NIP Guru Kelas</label>
+                                <input type="text" id="input-nip-guru" value="19000000 000000 0 000" required>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Kepala Satuan Pendidikan (Kepsek)</label>
+                                <input type="text" id="input-kepsek" value="PURWADI, S.Pd." required>
+                            </div>
+                            <div class="form-group">
+                                <label>NIP Kepala Satuan Pendidikan</label>
+                                <input type="text" id="input-nip" value="19760514 200203 1 003" required>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Tempat Pembuatan Dokumen</label>
+                                <input type="text" id="input-tempat" value="Pendowo Asri" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Tanggal Pembuatan Dokumen</label>
+                                <input type="text" id="input-tanggal-buat" value="17 Juli 2026" required>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn-submit">Simpan Identitas</button>
+                    </form>
+                </div>
+            </section>
+
+            <!-- 2. Halaman Input Jeda/Libur -->
+            <section id="page-input-tanggal" class="page-section">
+                <h2><i class="fa-solid fa-calendar-plus"></i> Input Tanggal Tidak Efektif & Libur</h2>
+                <div class="card" style="max-width: 100%;">
+                    <form id="form-tanggal" onsubmit="addAgenda(event)">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Tanggal Mulai (dd/mm/yyyy)</label>
+                                <input type="text" id="agenda-date-start" placeholder="Pilih Tanggal Mulai" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Tanggal Selesai (Kosongkan jika hanya 1 hari)</label>
+                                <input type="text" id="agenda-date-end" placeholder="Pilih Tanggal Selesai">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Kategori</label>
+                                <select id="agenda-type">
+                                    <option value="libur">Hari Libur Nasional / Cuti Bersama</option>
+                                    <option value="efektif">Hari Tidak Efektif Tatap Muka (Ujian/AKM/Pondok Ramadhan)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Keterangan Acara/Kegiatan (Singkat)</label>
+                                <input type="text" id="agenda-desc" placeholder="Contoh: UTS, LHB" maxlength="20" required>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-submit">Tambah Kegiatan</button>
+                    </form>
+                </div>
+                <!-- List Data -->
+                <div class="card" style="max-width: 100%;">
+                    <h3>Daftar Agenda Terinput</h3>
+                    <div style="overflow-x: auto;">
+                        <table class="data-table">
+                           <thead>
+                               <tr>
+                                   <th>Tanggal</th>
+                                   <th>Kategori</th>
+                                   <th>Keterangan</th>
+                               </tr>
+                           </thead>
+                           <tbody id="agenda-list-table"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 3. Halaman Tampilan Kalender Pendidikan Biasa -->
+            <section id="page-kalender" class="page-section">
+                <button class="btn-print" onclick="window.print()">
+                    <i class="fa-solid fa-print"></i> Cetak Kalender (A4)
+                </button>
+
+                <!-- KOP Surat Resmi -->
+                <div class="kop-surat-banner" id="kop-surat-target">
+                    <div class="kop-logo-container" id="kop-logo-frame">
+                        <img src="https://iili.io/Cd6VTSS.png" id="kop-logo-img" alt="Logo Sekolah">
+                    </div>
+                    <div class="kop-text-container">
+                        <div class="kop-badge">Tahun Pelajaran 2026/2027</div>
+                        <div class="kop-title-lembaga" id="kop-sekolah">SD NEGERI 03 PENDOWO ASRI</div>
+                        <div class="kop-alamat-lembaga" id="kop-alamat">
+                            <i class="fa-solid fa-location-dot"></i> Jl. Brawijaya Utara no. 4 Kampung Pendowo Asri Kec. Dente Teladas Kab. Tulang Bawang
+                        </div>
+                    </div>
+                </div>
+
+                <div class="calendar-container" id="calendar-render-target"></div>
+
+                <!-- Ringkasan Analisis Minggu Efektif -->
+                <div class="summary-weeks-card" id="weeks-summary-box">
+                    <div class="summary-title"><i class="fa-solid fa-chart-simple"></i> Ringkasan Analisis Minggu Efektif</div>
+                    <div class="summary-grid">
+                        <div class="summary-item">
+                            <span class="summary-label">Jumlah Minggu Efektif Semester I (Juli - Desember)</span>
+                            <span class="summary-value" id="val-sem1">0 Minggu</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Jumlah Minggu Efektif Semester II (Januari - Juni)</span>
+                            <span class="summary-value" id="val-sem2">0 Minggu</span>
+                        </div>
+                        <div class="summary-item highlight">
+                            <span class="summary-label">Jumlah Minggu Efektif 1 Tahun Pelajaran</span>
+                            <span class="summary-value" id="val-total-year">0 Minggu</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tanda Tangan Kepala Sekolah -->
+                <div class="kolofon-container">
+                    <div class="signature-box">
+                        <span class="date-info" id="sig-date">Pendowo Asri, 17 Juli 2026</span>
+                        <span class="role-info">Kepala Satuan Pendidikan,</span>
+                        <span class="name-info" id="sig-name">PURWADI, S.Pd.</span>
+                        <span class="nip-info" id="sig-nip">NIP 19760514 200203 1 003</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 4. Halaman Tampilan Kalender Dinding -->
+            <section id="page-kalender-dinding" class="page-section">
+                <div class="no-print" style="margin-bottom: 1.5rem; display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button class="btn-print" style="margin-bottom: 0px;" onclick="window.print()">
+                        <i class="fa-solid fa-print"></i> Cetak Kalender Dinding (A4 Portrait)
+                    </button>
+                </div>
+
+                <div class="wall-calendar-sheet">
+                    <div class="wall-collage-container">
+                        <div class="wall-photo-large-wrapper">
+                            <img id="wall-photo-display-1" class="wall-photo-img" src="https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=1200&auto=format&fit=crop" alt="Foto Sekolah Besar">
+                            <div class="wall-photo-overlay-main">
+                                <div class="wall-school-info">
+                                    <h1 id="wall-title-sekolah">SD NEGERI 03 PENDOWO ASRI</h1>
+                                    <p id="wall-sub-sekolah">Tahun Pelajaran 2026/2027</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="wall-photo-small-group">
+                            <div class="wall-photo-small-wrapper">
+                                <img id="wall-photo-display-2" class="wall-photo-img" src="https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=600&auto=format&fit=crop" alt="Aktivitas Sekolah 1">
+                            </div>
+                            <div class="wall-photo-small-wrapper">
+                                <img id="wall-photo-display-3" class="wall-photo-img" src="https://images.unsplash.com/photo-1509062522246-3755977927d7?q=80&w=600&auto=format&fit=crop" alt="Aktivitas Sekolah 2">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="wall-weeks-bar">
+                        <div class="wall-weeks-item">
+                            <i class="fa-solid fa-calendar-check"></i>
+                            <span>Minggu Efektif Semester I: <strong class="wall-weeks-val" id="wall-val-sem1">0 Minggu</strong></span>
+                        </div>
+                        <div style="width: 1px; height: 18px; background: rgba(255,255,255,0.15);"></div>
+                        <div class="wall-weeks-item">
+                            <i class="fa-solid fa-calendar-check"></i>
+                            <span>Minggu Efektif Semester II: <strong class="wall-weeks-val" id="wall-val-sem2">0 Minggu</strong></span>
+                        </div>
+                        <div style="width: 1px; height: 18px; background: rgba(255,255,255,0.15);"></div>
+                        <div class="wall-weeks-item" style="background: rgba(16, 185, 129, 0.1); padding: 0.2rem 0.6rem; border-radius: 6px;">
+                            <i class="fa-solid fa-chart-line" style="color: var(--success)"></i>
+                            <span>Total Minggu Efektif Setahun: <strong class="wall-weeks-val" style="color: #34d399" id="wall-val-total-year">0 Minggu</strong></span>
+                        </div>
+                    </div>
+
+                    <div class="wall-calendar-grid" id="wall-calendar-render-target"></div>
+                </div>
+            </section>
+
+            <!-- 5. HALAMAN: ATP TERINTEGRASI PROTA PROSEM -->
+            <section id="page-atp-prosem" class="page-section">
+                <div class="no-print" style="margin-bottom: 1.5rem; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; background: #1e293b; padding: 1.2rem; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
+                    <button class="btn-print" style="margin-bottom: 0px;" onclick="window.print()">
+                        <i class="fa-solid fa-print"></i> Cetak ATP PROTA PROSEM (A4)
+                    </button>
+                    <button class="btn-submit" onclick="syncAtpCalculation()">
+                        <i class="fa-solid fa-calculator"></i> Kalkulasi & Sinkronkan JPP
+                    </button>
+                    
+                    <button class="btn-submit" style="background: var(--success);" onclick="addNewRow('ganjil')">
+                        <i class="fa-solid fa-plus"></i> Tambah Baris Ganjil
+                    </button>
+                    <button class="btn-submit" style="background: var(--warning);" onclick="addNewRow('genap')">
+                        <i class="fa-solid fa-plus"></i> Tambah Baris Genap
+                    </button>
+
+                    <!-- Input Intra per Minggu Interaktif -->
+                    <div style="display: flex; align-items: center; gap: 10px; margin-left: auto;">
+                        <label style="margin-bottom: 0; white-space: nowrap; font-size: 0.85rem; color: #ffffff;">Jam Intrakurikuler per Minggu:</label>
+                        <input type="number" id="atp-jam-minggu-input" value="3" min="1" max="10" oninput="syncAtpCalculation()" style="width: 70px; padding: 0.4rem 0.6rem; background: #0f172a; border-radius: 6px;">
+                    </div>
+                </div>
+
+                <!-- Judul Dokumen Resmi -->
+                <div style="text-align: center; margin-bottom: 2rem;">
+                    <h3 style="font-size: 1.2rem; font-weight: 800; text-transform: uppercase; padding-bottom: 5px; display: inline-block;">
+                        ALUR TUJUAN PEMBELAJARAN (ATP) TERINTEGRASI PROTA PROSEM
+                    </h3>
+                </div>
+
+                <!-- Meta Informasi Dokumen -->
+                <table class="atp-meta-table">
+                    <tr>
+                        <td class="label-cell">Nama Satuan Pendidikan</td>
+                        <td>: <strong id="atp-meta-sekolah">SD NEGERI 03 PENDOWO ASRI</strong></td>
+                    </tr>
+                    <tr>
+                        <td class="label-cell">Mata Pelajaran</td>
+                        <td>: <span id="atp-meta-mapel">Pendidikan Kepercayaan terhadap TYME dan Budi Pekerti</span></td>
+                    </tr>
+                    <tr>
+                        <td class="label-cell">Fase / Kelas</td>
+                        <td>: <span id="atp-meta-fase-kelas">B / VI</span></td>
+                    </tr>
+                    <tr>
+                        <td class="label-cell">Tahun Pelajaran</td>
+                        <td>: <span id="atp-meta-tapel">2026/2027</span></td>
+                    </tr>
+                </table>
+
+                <!-- Pembungkus Khusus Menghindari Tanda Tangan Terpisah Sendiri di Halaman Baru -->
+                <div class="atp-document-wrap">
+                    <!-- Tabel Utama ATP -->
+                    <div style="overflow-x: auto;">
+                        <table class="atp-main-table" id="atp-table-content">
+                            <thead>
+                                <tr>
+                                    <th style="width: 5%;">NO</th>
+                                    <th style="width: 25%;">CAPAIAN PEMBELAJARAN & ELEMEN</th>
+                                    <th style="width: 33%;">TUJUAN PEMBELAJARAN</th>
+                                    <th style="width: 22%;">LINGKUP MATERI</th>
+                                    <th style="width: 10%;">JPP</th>
+                                    <th style="width: 5%;" class="action-col no-print">AKSI</th>
+                                </tr>
+                            </thead>
+                            <tbody id="atp-tbody">
+                                <!-- SEMESTER GANJIL HEADER -->
+                                <tr id="row-header-ganjil">
+                                    <td colspan="4" class="atp-semester-header">Semester Ganjil</td>
+                                    <td class="atp-semester-header" style="text-align: center !important;" id="total-jpp-ganjil">63</td>
+                                    <td class="atp-semester-header action-col no-print"></td>
+                                </tr>
+
+                                <!-- SEMESTER GENAP HEADER -->
+                                <tr id="row-header-genap">
+                                    <td colspan="4" class="atp-semester-header">Semester Genap</td>
+                                    <td class="atp-semester-header" style="text-align: center !important;" id="total-jpp-genap">72</td>
+                                    <td class="atp-semester-header action-col no-print"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Kolofon Pengesahan Bersama -->
+                    <div class="kolofon-container-double">
+                        <div class="signature-box" style="text-align: left;">
+                            <span class="date-info">&nbsp;</span>
+                            <span class="role-info" style="margin-bottom: 5rem; text-align: left;">Mengetahui<br>Kepala Satuan Pendidikan,</span>
+                            <span class="name-info" id="atp-sig-kepsek" style="text-align: left;">PURWADI, S.Pd.</span>
+                            <span class="nip-info" id="atp-sig-nip-kepsek" style="text-align: left;">NIP 19760514 200203 1 003</span>
+                        </div>
+                        <div class="signature-box" style="text-align: left;">
+                            <span class="date-info" id="atp-sig-date" style="text-align: left;">Pendowo Asri, 17 Juli 2026</span>
+                            <span class="role-info" style="margin-bottom: 5rem; text-align: left;">Guru Kelas,</span>
+                            <span class="name-info" id="atp-sig-guru" style="text-align: left;">Surati, S.Pd.</span>
+                            <span class="nip-info" id="atp-sig-nip-guru" style="text-align: left;">NIP 19000000 000000 0 000</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Sistem Custom Toast -->
+    <div id="toast-notification">
+        <i class="fa-solid fa-circle-check" id="toast-icon"></i>
+        <span id="toast-message">Notifikasi</span>
+    </div>
+
+    <!-- Pustaka Flatpickr JS -->
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/id.js"></script>
+
+    <!-- ================= JAVASCRIPT LOGIC ================= -->
+    <script>
+        let identitas = {
+            sekolah: "SD NEGERI 03 PENDOWO ASRI",
+            alamat: "Jl. Brawijaya Utara no. 4 Kampung Pendowo Asri Kec. Dente Teladas Kab. Tulang Bawang",
+            tapel: "2026/2027",
+            kepsek: "PURWADI, S.Pd.",
+            nip: "19760514 200203 1 003",
+            tempat: "Pendowo Asri",
+            tanggalBuat: "17 Juli 2026",
+            hariKerja: 5,
+            mapel: "Pendidikan Kepercayaan terhadap TYME dan Budi Pekerti",
+            faseKelas: "B  /  VI",
+            jamPerMinggu: 3,
+            guruKelas: "Surati, S.Pd.",
+            nipGuru: "19000000 000000 0 000"
+        };
+
+        let databaseAgenda = {}; 
+        let logoBase64 = "https://iili.io/Cd6VTSS.png";
+
+        let wallPhotos = {
+            1: "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=1200&auto=format&fit=crop",
+            2: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=600&auto=format&fit=crop",
+            3: "https://images.unsplash.com/photo-1509062522246-3755977927d7?q=80&w=600&auto=format&fit=crop"
+        };
+
+        let calculatedWeeks = {
+            sem1: 21,
+            sem2: 24
+        };
+
+        let defaultAtpGanjil = [
+            { elemen: "aaaaa", tp: "Efg\nHij", lingkup: "" },
+            { elemen: "sdffg", tp: "Klmn", lingkup: "" },
+            { elemen: "adddddd", tp: "Klmn", lingkup: "" },
+            { elemen: "", tp: "", lingkup: "" },
+            { elemen: "", tp: "", lingkup: "" }
+        ];
+
+        let defaultAtpGenap = [
+            { elemen: "fgfgg", tp: "mmmm\nmmmmnnnn", lingkup: "" },
+            { elemen: "sddd", tp: "abc1", lingkup: "" },
+            { elemen: "dfffgggddffghh", tp: "abc14", lingkup: "" },
+            { elemen: "dfhghhj", tp: "abc24", lingkup: "" },
+            { elemen: "", tp: "", lingkup: "" }
+        ];
+
+        document.addEventListener("DOMContentLoaded", function() {
+            initDefaultAtpRows();
+            
+            dateStartPicker = flatpickr("#agenda-date-start", {
+                dateFormat: "d/m/Y",
+                allowInput: true,
+                minDate: "01/07/2026",
+                maxDate: "30/06/2027",
+                locale: "id"
+            });
+
+            dateEndPicker = flatpickr("#agenda-date-end", {
+                dateFormat: "d/m/Y",
+                allowInput: true,
+                minDate: "01/07/2026",
+                maxDate: "30/06/2027",
+                locale: "id"
+            });
+        });
+
+        function initDefaultAtpRows() {
+            const tbody = document.getElementById('atp-tbody');
+            defaultAtpGanjil.forEach((item, idx) => {
+                insertRowHtml('ganjil', idx + 1, item.elemen, item.tp, item.lingkup);
+            });
+            defaultAtpGenap.forEach((item, idx) => {
+                insertRowHtml('genap', idx + 1, item.elemen, item.tp, item.lingkup);
+            });
+        }
+
+        // Penambahan kolom Hapus Baris ("no-print")
+        function insertRowHtml(semester, number, elemen, tp, lingkup) {
+            const tbody = document.getElementById('atp-tbody');
+            const newTr = document.createElement('tr');
+            newTr.className = `row-atp-${semester}`;
+            
+            newTr.innerHTML = `
+                <td style="text-align: center;" class="atp-row-num">${number}</td>
+                <td><div class="atp-editable-cell ${semester}-elemen" contenteditable="true" oninput="syncAtpCalculation()">${elemen}</div></td>
+                <td><div class="atp-editable-cell" contenteditable="true">${tp}</div></td>
+                <td><div class="atp-editable-cell" contenteditable="true">${lingkup}</div></td>
+                <td style="text-align: center; vertical-align: middle;"><span class="jpp-badge jpp-${semester}-val">-</span></td>
+                <td class="action-col no-print" style="text-align: center; vertical-align: middle;">
+                    <button class="btn-delete-row" onclick="deleteRow(this)"><i class="fa-solid fa-trash-can"></i></button>
+                </td>
+            `;
+
+            if (semester === 'ganjil') {
+                const headerGenap = document.getElementById('row-header-genap');
+                tbody.insertBefore(newTr, headerGenap);
+            } else {
+                tbody.appendChild(newTr);
+            }
+        }
+
+        function addNewRow(semester) {
+            const currentRows = document.getElementsByClassName(`row-atp-${semester}`);
+            const nextNumber = currentRows.length + 1;
+            insertRowHtml(semester, nextNumber, "", "", "");
+            reIndexRowNumbers();
+            syncAtpCalculation();
+            triggerNotification(`Baris baru berhasil ditambahkan pada semester ${semester}!`);
+        }
+
+        // Fitur Delete Row Dinamis
+        function deleteRow(buttonElement) {
+            const row = buttonElement.closest('tr');
+            row.remove();
+            reIndexRowNumbers();
+            syncAtpCalculation();
+            triggerNotification('Baris berhasil dihapus!');
+        }
+
+        function reIndexRowNumbers() {
+            ['ganjil', 'genap'].forEach(semester => {
+                const rows = document.getElementsByClassName(`row-atp-${semester}`);
+                for (let i = 0; i < rows.length; i++) {
+                    rows[i].querySelector('.atp-row-num').innerText = i + 1;
+                }
+            });
+        }
+
+        function handleLogoUpload(file) {
+            if (file && file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onloadend = function() {
+                    logoBase64 = reader.result;
+                    document.getElementById('logo-img-preview').src = logoBase64;
+                    document.getElementById('logo-preview-box').style.display = 'flex';
+                    triggerNotification('Logo berhasil dimuat!');
+                }
+            }
+        }
+
+        function triggerNotification(message, isError = false) {
+            const toast = document.getElementById('toast-notification');
+            const toastMsg = document.getElementById('toast-message');
+            const toastIcon = document.getElementById('toast-icon');
+
+            toastMsg.innerText = message;
+            if (isError) {
+                toast.style.background = 'var(--danger)';
+                toastIcon.className = "fa-solid fa-circle-exclamation";
+            } else {
+                toast.style.background = 'var(--success)';
+                toastIcon.className = "fa-solid fa-circle-check";
+            }
+
+            toast.classList.add('toast-show');
+            setTimeout(() => {
+                toast.classList.remove('toast-show');
+            }, 3000);
+        }
+
+        function parseIndonesianDate(dateStr) {
+            const parts = dateStr.split('/');
+            if (parts.length === 3) {
+                return new Date(parts[2], parts[1] - 1, parts[0]);
+            }
+            return null;
+        }
+
+        function formatToIndonesianDate(dateString) {
+            if (!dateString) return '';
+            const parts = dateString.split('-');
+            if (parts.length === 3) {
+                return `${parts[2]}/${parts[1]}/${parts[0]}`;
+            }
+            return dateString;
+        }
+
+        function enterApp() {
+            document.getElementById('page-home').style.transform = 'translateY(-100%)';
+            document.getElementById('main-dashboard').style.visibility = 'visible';
+            updateBannerView();
+            renderCalendar();
+            syncAtpCalculation();
+        }
+
+        function switchPage(pageId, element) {
+            document.querySelectorAll('.page-section').forEach(section => section.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            
+            document.getElementById(pageId).classList.add('active');
+            element.classList.add('active');
+
+            updateBannerView();
+            if (pageId === 'page-kalender' || pageId === 'page-beranda') {
+                renderCalendar();
+            } else if (pageId === 'page-kalender-dinding') {
+                renderWallCalendar();
+            } else if (pageId === 'page-atp-prosem') {
+                syncAtpCalculation();
+            }
+        }
+
+        function saveIdentitas(e) {
+            e.preventDefault();
+            identitas.sekolah = document.getElementById('input-sekolah').value;
+            identitas.alamat = document.getElementById('input-alamat').value;
+            identitas.kepsek = document.getElementById('input-kepsek').value;
+            identitas.nip = document.getElementById('input-nip').value;
+            identitas.tempat = document.getElementById('input-tempat').value;
+            identitas.tanggalBuat = document.getElementById('input-tanggal-buat').value;
+            identitas.hariKerja = parseInt(document.getElementById('input-hari-kerja').value);
+            
+            identitas.mapel = document.getElementById('input-mapel').value;
+            identitas.faseKelas = document.getElementById('input-fase-kelas').value;
+            identitas.jamPerMinggu = parseInt(document.getElementById('input-jam-per-minggu').value);
+            identitas.guruKelas = document.getElementById('input-guru-kelas').value;
+            identitas.nipGuru = document.getElementById('input-nip-guru').value;
+
+            document.getElementById('atp-jam-minggu-input').value = identitas.jamPerMinggu;
+
+            updateBannerView();
+            syncAtpCalculation();
+            triggerNotification('Identitas berhasil diselaraskan!');
+        }
+
+        function updateBannerView() {
+            document.getElementById('kop-sekolah').innerText = identitas.sekolah;
+            document.getElementById('kop-alamat').innerHTML = `<i class="fa-solid fa-location-dot"></i> ${identitas.alamat}`;
+            document.getElementById('kop-logo-img').src = logoBase64;
+
+            document.getElementById('wall-title-sekolah').innerText = identitas.sekolah;
+            document.getElementById('wall-sub-sekolah').innerText = `Tahun Pelajaran ${identitas.tapel}`;
+
+            const nipClean = identitas.nip.replace(/\./g, '');
+            const nipGuruClean = identitas.nipGuru.replace(/\./g, '');
+
+            document.getElementById('sig-date').innerText = `${identitas.tempat}, ${identitas.tanggalBuat}`;
+            document.getElementById('sig-name').innerText = identitas.kepsek;
+            document.getElementById('sig-nip').innerText = `NIP ${nipClean}`;
+
+            document.getElementById('atp-meta-sekolah').innerText = identitas.sekolah;
+            document.getElementById('atp-meta-mapel').innerText = identitas.mapel;
+            document.getElementById('atp-meta-fase-kelas').innerText = identitas.faseKelas;
+            document.getElementById('atp-meta-tapel').innerText = identitas.tapel;
+
+            document.getElementById('atp-sig-date').innerText = `${identitas.tempat}, ${identitas.tanggalBuat}`;
+            document.getElementById('atp-sig-kepsek').innerText = identitas.kepsek;
+            document.getElementById('atp-sig-nip-kepsek').innerText = `NIP ${nipClean}`;
+            document.getElementById('atp-sig-guru').innerText = identitas.guruKelas;
+            document.getElementById('atp-sig-nip-guru').innerText = `NIP ${nipGuruClean}`;
+
+            document.getElementById('beranda-school-val').innerText = identitas.sekolah;
+            document.getElementById('beranda-workdays-val').innerText = `${identitas.hariKerja} Hari Kerja`;
+            const totalAgenda = Object.keys(databaseAgenda).length;
+            document.getElementById('beranda-total-events-val').innerText = `${totalAgenda} Agenda`;
+        }
+
+        function addAgenda(e) {
+            e.preventDefault();
+            const startInput = document.getElementById('agenda-date-start').value;
+            let endInput = document.getElementById('agenda-date-end').value;
+            const type = document.getElementById('agenda-type').value;
+            const desc = document.getElementById('agenda-desc').value;
+
+            if(!startInput) return;
+            if(!endInput) endInput = startInput;
+
+            let currentDate = parseIndonesianDate(startInput);
+            const endDate = parseIndonesianDate(endInput);
+
+            while(currentDate <= endDate) {
+                const yyyy = currentDate.getFullYear();
+                const mm = String(currentDate.getMonth() + 1).padStart(2, '0');
+                const dd = String(currentDate.getDate()).padStart(2, '0');
+                const dateString = `${yyyy}-${mm}-${dd}`;
+
+                databaseAgenda[dateString] = { type, desc };
+                currentDate.setDate(currentDate.getDate() + 1);
+            }
+
+            refreshAgendaTable();
+            document.getElementById('form-tanggal').reset();
+            dateStartPicker.clear();
+            dateEndPicker.clear();
+            triggerNotification('Agenda disimpan!');
+            syncAtpCalculation();
+        }
+
+        function refreshAgendaTable() {
+            const tbody = document.getElementById('agenda-list-table');
+            tbody.innerHTML = '';
+            const sortedDates = Object.keys(databaseAgenda).sort();
+            sortedDates.forEach(date => {
+                const item = databaseAgenda[date];
+                const tr = document.createElement('tr');
+                const badge = item.type === 'libur' ? 
+                    `<span class="badge-libur">Libur</span>` : 
+                    `<span class="badge-efektif">Tidak Efektif</span>`;
+
+                tr.innerHTML = `
+                    <td>${formatToIndonesianDate(date)}</td>
+                    <td>${badge}</td>
+                    <td>${item.desc}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function calculateWeeks() {
+            const systemHariKerja = identitas.hariKerja || 5;
+
+            function getSemesterWeeks(startStr, endStr) {
+                let curr = new Date(startStr);
+                let end = new Date(endStr);
+                let weeks = {};
+
+                while (curr <= end) {
+                    let dayOfWeek = curr.getDay();
+                    let sunday = new Date(curr);
+                    sunday.setDate(curr.getDate() - dayOfWeek);
+                    let sundayStr = sunday.toISOString().split('T')[0];
+
+                    if (!weeks[sundayStr]) {
+                        weeks[sundayStr] = { activeDays: 0, totalPotential: 0 };
+                    }
+
+                    const maxWorkDay = (systemHariKerja === 5) ? 5 : 6;
+
+                    if (dayOfWeek >= 1 && dayOfWeek <= maxWorkDay) {
+                        weeks[sundayStr].totalPotential++;
+                        
+                        let yyyy = curr.getFullYear();
+                        let mm = String(curr.getMonth() + 1).padStart(2, '0');
+                        let dd = String(curr.getDate()).padStart(2, '0');
+                        let dateKey = `${yyyy}-${mm}-${dd}`;
+                        
+                        let isHoliday = databaseAgenda[dateKey] ? true : false;
+                        if (!isHoliday) {
+                            weeks[sundayStr].activeDays++;
+                        }
+                    }
+                    curr.setDate(curr.getDate() + 1);
+                }
+
+                let effectiveWeeksCount = 0;
+                const threshold = (systemHariKerja === 5) ? 3 : 4;
+
+                for (let sun in weeks) {
+                    if (weeks[sun].activeDays >= threshold) {
+                        effectiveWeeksCount++;
+                    }
+                }
+                return effectiveWeeksCount;
+            }
+
+            calculatedWeeks.sem1 = getSemesterWeeks("2026-07-01", "2026-12-31");
+            calculatedWeeks.sem2 = getSemesterWeeks("2027-01-01", "2027-06-30");
+
+            if (calculatedWeeks.sem1 === 0) calculatedWeeks.sem1 = 21;
+            if (calculatedWeeks.sem2 === 0) calculatedWeeks.sem2 = 24;
+
+            document.getElementById('val-sem1').innerText = `${calculatedWeeks.sem1} Minggu`;
+            document.getElementById('val-sem2').innerText = `${calculatedWeeks.sem2} Minggu`;
+            document.getElementById('val-total-year').innerText = `${calculatedWeeks.sem1 + calculatedWeeks.sem2} Minggu`;
+
+            document.getElementById('wall-val-sem1').innerText = `${calculatedWeeks.sem1} Minggu`;
+            document.getElementById('wall-val-sem2').innerText = `${calculatedWeeks.sem2} Minggu`;
+            document.getElementById('wall-val-total-year').innerText = `${calculatedWeeks.sem1 + calculatedWeeks.sem2} Minggu`;
+        }
+
+        function syncAtpCalculation() {
+            calculateWeeks();
+            
+            const jamIntra = parseInt(document.getElementById('atp-jam-minggu-input').value) || 3;
+            identitas.jamPerMinggu = jamIntra;
+            document.getElementById('input-jam-per-minggu').value = jamIntra;
+
+            const jppSemesterGanjil = calculatedWeeks.sem1 * jamIntra;
+            const jppSemesterGenap = calculatedWeeks.sem2 * jamIntra;
+
+            document.getElementById('total-jpp-ganjil').innerText = jppSemesterGanjil;
+            document.getElementById('total-jpp-genap').innerText = jppSemesterGenap;
+
+            distributeSemesterJpp('ganjil-elemen', 'jpp-ganjil-val', jppSemesterGanjil);
+            distributeSemesterJpp('genap-elemen', 'jpp-genap-val', jppSemesterGenap);
+        }
+
+        function distributeSemesterJpp(inputClass, targetBadgeClass, totalJpp) {
+            const inputs = document.getElementsByClassName(inputClass);
+            const badges = document.getElementsByClassName(targetBadgeClass);
+            
+            let activeIndices = [];
+            for (let i = 0; i < inputs.length; i++) {
+                if (inputs[i].innerText.trim() !== "") {
+                    activeIndices.push(i);
+                } else {
+                    badges[i].innerText = "-";
+                }
+            }
+
+            const totalActive = activeIndices.length;
+
+            if (totalActive > 0) {
+                const baseShare = Math.floor(totalJpp / totalActive);
+                const remainder = totalJpp % totalActive;
+
+                activeIndices.forEach(idx => {
+                    badges[idx].innerText = baseShare;
+                });
+
+                for (let r = 0; r < remainder; r++) {
+                    const targetIndex = activeIndices[totalActive - 1 - r];
+                    if (targetIndex !== undefined) {
+                        badges[targetIndex].innerText = baseShare + 1;
+                    }
+                }
+            }
+        }
+
+        function generateMonthBoxes(targetElementId) {
+            const container = document.getElementById(targetElementId);
+            if (!container) return;
+            container.innerHTML = '';
+
+            const timelineBulan = [
+                { year: 2026, month: 6, name: "Juli 2026" },
+                { year: 2026, month: 7, name: "Agustus 2026" },
+                { year: 2026, month: 8, name: "September 2026" },
+                { year: 2026, month: 9, name: "Oktober 2026" },
+                { year: 2026, month: 10, name: "November 2026" },
+                { year: 2026, month: 11, name: "Desember 2026" },
+                { year: 2027, month: 0, name: "Januari 2027" },
+                { year: 2027, month: 1, name: "Februari 2027" },
+                { year: 2027, month: 2, name: "Maret 2027" },
+                { year: 2027, month: 3, name: "April 2027" },
+                { year: 2027, month: 4, name: "Mei 2027" },
+                { year: 2027, month: 5, name: "Juni 2027" }
+            ];
+
+            const namaHari = ['M', 'S', 'S', 'R', 'K', 'J', 'S'];
+
+            timelineBulan.forEach(item => {
+                const monthBox = document.createElement('div');
+                monthBox.className = 'month-box';
+
+                const title = document.createElement('div');
+                title.className = 'month-title';
+                title.innerText = item.name;
+                monthBox.appendChild(title);
+
+                const headerGrid = document.createElement('div');
+                headerGrid.className = 'days-grid-header';
+                namaHari.forEach(h => {
+                    const hCell = document.createElement('div');
+                    hCell.innerText = h;
+                    if(h === 'M') hCell.style.color = 'var(--danger)';
+                    headerGrid.appendChild(hCell);
+                });
+                monthBox.appendChild(headerGrid);
+
+                const daysGrid = document.createElement('div');
+                daysGrid.className = 'days-grid';
+
+                const firstDayIndex = new Date(item.year, item.month, 1).getDay();
+                const totalDays = new Date(item.year, item.month + 1, 0).getDate();
+
+                for (let i = 0; i < firstDayIndex; i++) {
+                    const emptyCell = document.createElement('div');
+                    emptyCell.className = 'day-cell empty';
+                    daysGrid.appendChild(emptyCell);
+                }
+
+                let monthlyEvents = [];
+                let currentEvent = null;
+
+                for (let day = 1; day <= totalDays; day++) {
+                    const dayCell = document.createElement('div');
+                    dayCell.className = 'day-cell';
+
+                    const numSpan = document.createElement('span');
+                    numSpan.className = 'day-number';
+                    numSpan.innerText = day;
+                    dayCell.appendChild(numSpan);
+
+                    const currentFullDate = new Date(item.year, item.month, day);
+                    const dayOfWeek = currentFullDate.getDay();
+                    
+                    const yyyy = currentFullDate.getFullYear();
+                    const mm = String(currentFullDate.getMonth() + 1).padStart(2, '0');
+                    const dd = String(currentFullDate.getDate()).padStart(2, '0');
+                    const stringKey = `${yyyy}-${mm}-${dd}`;
+
+                    if(dayOfWeek === 0) {
+                        dayCell.classList.add('sunday');
+                    }
+
+                    if(databaseAgenda[stringKey]) {
+                        const agendaData = databaseAgenda[stringKey];
+                        
+                        if(agendaData.type === 'libur') {
+                            dayCell.classList.add('status-libur');
+                        } else if(agendaData.type === 'efektif') {
+                            dayCell.classList.add('status-efektif');
+                            const dynamicColor = getActivityColor(agendaData.desc);
+                            dayCell.style.background = `rgba(${hexToRgb(dynamicColor)}, 0.15)`;
+                            dayCell.style.borderColor = dynamicColor;
+                            dayCell.querySelector('.day-number').style.color = dynamicColor;
+                        }
+
+                        const eventColor = agendaData.type === 'libur' ? 'var(--danger)' : getActivityColor(agendaData.desc);
+                        
+                        if (currentEvent && currentEvent.desc === agendaData.desc && currentEvent.type === agendaData.type) {
+                            currentEvent.endDay = day;
+                        } else {
+                            if (currentEvent) {
+                                monthlyEvents.push(currentEvent);
+                            }
+                            currentEvent = {
+                                startDay: day,
+                                endDay: day,
+                                desc: agendaData.desc,
+                                type: agendaData.type,
+                                color: eventColor
+                            };
+                        }
+                    } else {
+                        if (currentEvent) {
+                            monthlyEvents.push(currentEvent);
+                            currentEvent = null;
+                        }
+                    }
+
+                    daysGrid.appendChild(dayCell);
+                }
+
+                if (currentEvent) {
+                    monthlyEvents.push(currentEvent);
+                }
+
+                monthBox.appendChild(daysGrid);
+
+                const eventsWrapper = document.createElement('div');
+                eventsWrapper.className = 'month-events-wrapper';
+
+                if (monthlyEvents.length > 0) {
+                    monthlyEvents.forEach(evt => {
+                        const eventItem = document.createElement('div');
+                        eventItem.className = 'month-event-item';
+
+                        const dot = document.createElement('span');
+                        dot.className = 'event-dot';
+                        dot.style.backgroundColor = evt.color;
+
+                        const dateRange = evt.startDay === evt.endDay ? `${evt.startDay}` : `${evt.startDay}-${evt.endDay}`;
+
+                        const text = document.createElement('span');
+                        text.className = 'event-text';
+                        text.innerHTML = `<strong>Tgl ${dateRange}:</strong> ${evt.desc}`;
+
+                        eventItem.appendChild(dot);
+                        eventItem.appendChild(text);
+                        eventsWrapper.appendChild(eventItem);
+                    });
+                }
+
+                monthBox.appendChild(eventsWrapper);
+                container.appendChild(monthBox);
+            });
+        }
+
+        function renderCalendar() {
+            generateMonthBoxes('calendar-render-target');
+            calculateWeeks();
+        }
+
+        function renderWallCalendar() {
+            generateMonthBoxes('wall-calendar-render-target');
+            calculateWeeks();
+        }
+    </script>
+</body>
+</html>
