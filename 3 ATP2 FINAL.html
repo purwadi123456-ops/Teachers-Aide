@@ -1,0 +1,2005 @@
+
+
+<!doctype html>
+<html lang="id">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aplikasi Perangkat ATP</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght=600;700&amp;family=Source+Sans+Pro:wght=400;600;700&amp;display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --navy:#12345b;
+      --green:#6e9f64;
+      --mint:#e7f0e4;
+      --ink:#20303f;
+      --line:#d8e0dc;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:'Source Sans Pro',sans-serif;color:var(--ink);background:#edf2ef;}
+    .title-font{font-family:'Fraunces',serif}
+    .app-shell{min-height:100vh;display:flex;overflow:hidden}
+    .paper{
+      width:100%;
+      max-width:794px;
+      min-height:1123px;
+      background:#fff;
+      box-shadow:0 24px 60px rgba(16,42,67,.16);
+      margin:auto;
+      position:relative;
+      overflow:hidden;
+    }
+    .paper.halaman-beranda {
+      min-height: 561.5px !important;
+    }
+    .page-panel{display:none}
+    .page-panel.active{display:block}
+    .nav-item{cursor:pointer;transition:.2s ease;}
+    .nav-item.active{background:#eaf1ee;color:#12345b;border-left:4px solid #6e9f64}
+    .field{
+      width:100%;
+      border:1px solid #cfd8d2;
+      border-radius:8px;
+      padding:.7rem .8rem;
+      background:#fff;
+      outline:none;
+      transition:.2s ease;
+      font-size:14px;
+    }
+    .field:focus{border-color:#6e9f64;box-shadow:0 0 0 3px rgba(110,159,100,.14)}
+    .label{
+      font-size:12px;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+      color:#5d6d67;
+      font-weight:700;
+      margin-bottom:.35rem;
+      display:block;
+    }
+    .doc-table{width:100%;border-collapse:collapse;font-size:12px}
+    .doc-table th,.doc-table td{border:1px solid #8ea09a;padding:8px 8px;vertical-align:top}
+    .doc-table th{background:#e7f0e4;color:#17374d;font-weight:700}
+    
+    .info-table{width:100%;border-collapse:collapse;font-size:14px}
+    .info-table td{padding:3px 0;vertical-align:top;border:none}
+
+    /* ATP Spreadsheet Styling */
+    .atp-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: 'Source Sans Pro', sans-serif;
+      table-layout: fixed;
+    }
+    .atp-table th {
+      border: 1px solid #4a5568;
+      background-color: #f3f4f6;
+      color: #1a202c;
+      font-weight: bold;
+      text-align: center;
+      padding: 6px;
+    }
+    .atp-table td {
+      border: 1px solid #cbd5e1;
+      padding: 6px;
+      vertical-align: top;
+      min-height: 28px;
+    }
+    .divider-row td {
+      border: 1px solid #4a5568 !important;
+      background-color: #d1e7dd !important; /* Soft green */
+      color: #0f5132 !important;
+    }
+
+    /* Live Edit Visual Indicator (Untuk Sel Teks Panjang) */
+    .editable-cell {
+      position: relative;
+      outline: none;
+      min-width: 24px;
+      min-height: 1.5em;
+      padding-right: 22px !important; /* Spasi pengaman agar ikon pensil tidak menutupi teks */
+      transition: background-color 0.2s, box-shadow 0.2s;
+    }
+    .editable-cell:hover {
+      background-color: #f8fafc;
+      box-shadow: 0 0 0 1px #cbd5e1;
+      border-radius: 4px;
+      cursor: text;
+    }
+    .editable-cell::after {
+      content: '✏️';
+      position: absolute;
+      top: 50%;
+      right: 4px;
+      transform: translateY(-50%);
+      font-size: 10px;
+      opacity: 0;
+      transition: opacity 0.2s;
+      pointer-events: none;
+    }
+    .editable-cell:hover::after {
+      opacity: 0.6;
+    }
+    .editable-cell:focus {
+      background-color: #ffffff;
+      box-shadow: 0 0 0 2px #6e9f64 !important;
+      border-radius: 4px;
+    }
+
+    /* Live Edit Visual Indicator (Spesifik Kolom Angka JJP & No Agar Tidak Terlipat) */
+    .editable-cell-center {
+      position: relative;
+      outline: none;
+      min-width: 24px;
+      min-height: 1.5em;
+      text-align: center;
+      transition: background-color 0.2s, box-shadow 0.2s;
+    }
+    .editable-cell-center:hover {
+      background-color: #f8fafc;
+      box-shadow: 0 0 0 1px #cbd5e1;
+      border-radius: 4px;
+      cursor: text;
+    }
+    .editable-cell-center:focus {
+      background-color: #ffffff;
+      box-shadow: 0 0 0 2px #6e9f64 !important;
+      border-radius: 4px;
+    }
+
+    .bg-ornamen {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 1;
+    }
+    .ornamen-circle-1 {
+      position: absolute;
+      top: -80px;
+      right: -80px;
+      width: 420px;
+      height: 420px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, rgba(110, 159, 100, 0.12), rgba(18, 52, 91, 0.04));
+    }
+    .ornamen-circle-2 {
+      position: absolute;
+      bottom: -120px;
+      left: -120px;
+      width: 320px;
+      height: 320px;
+      border-radius: 50%;
+      background: linear-gradient(45deg, rgba(18, 52, 91, 0.08), rgba(231, 240, 228, 0.5));
+    }
+    .ornamen-lines {
+      position: absolute;
+      top: 25%;
+      right: 12%;
+      width: 140px;
+      height: 8px;
+      background: rgba(110, 159, 100, 0.3);
+      border-radius: 99px;
+      transform: rotate(-12deg);
+    }
+    .ornamen-lines::after {
+      content: '';
+      position: absolute;
+      top: 18px;
+      right: -20px;
+      width: 90px;
+      height: 6px;
+      background: rgba(18, 52, 91, 0.15);
+      border-radius: 99px;
+    }
+    .ornamen-dots {
+      position: absolute;
+      bottom: 20%;
+      right: 8%;
+      width: 60px;
+      height: 60px;
+      background-image: radial-gradient(rgba(18, 52, 91, 0.2) 15%, transparent 15%);
+      background-size: 12px 12px;
+      opacity: 0.7;
+    }
+
+    @media(max-width:1024px){
+      .paper{max-width:100%;min-height:auto}
+      .desktop-sidebar{display:none}
+    }
+    @media(max-width:700px){
+      .workspace{padding:12px!important}
+      .paper{min-height:auto}
+      .form-grid{grid-template-columns:1fr!important}
+      .paper-pad{padding-left:20px!important;padding-right:20px!important}
+      .doc-table, .atp-table{font-size:11px}
+      .doc-table th, .doc-table td, .atp-table th, .atp-table td{padding:4px}
+    }
+    @media print{
+      body{background:#fff!important}
+      .desktop-sidebar,.print-hide{display:none!important}
+      .workspace{padding:0!important}
+      .paper{box-shadow:none!important;max-width:none!important;width:100%!important;min-height:auto!important}
+      
+      /* Mengatur margin kertas cetak agar ruang optimal */
+      @page{
+        size:A4 portrait;
+        margin:8mm 10mm;
+      }
+      
+      /* Reset style edit visual saat cetak */
+      .editable-cell, .editable-cell-center {
+        padding-right: 0px !important;
+      }
+      .editable-cell::after {
+        content: none !important;
+        display: none !important;
+      }
+      .editable-cell:hover, .editable-cell-center:hover {
+        background-color: transparent !important;
+        box-shadow: none !important;
+      }
+
+      /* Pengaturan cetak agar tanda tangan selalu melekat erat di bawah tabel */
+      .atp-table {
+        page-break-inside: auto;
+      }
+      tr {
+        page-break-inside: avoid;
+        page-break-after: auto;
+      }
+      .print\:break-inside-avoid {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+      }
+      
+      /* Mempersempit ruang kosong tanda tangan saat dicetak */
+      .mt-8 { margin-top: 1.5rem !important; }
+      .mt-6 { margin-top: 0.75rem !important; }
+      .mt-12 { margin-top: 2rem !important; }
+      .mb-16 { margin-bottom: 2.75rem !important; }
+    }
+  </style>
+ </head>
+ <body>
+  <div class="app-shell flex w-full">
+   <!-- Sidebar Navigasi Utama -->
+   <aside class="desktop-sidebar w-64 bg-white border-r border-[#dce5df] min-h-screen p-5 flex flex-col text-sm print-hide">
+    <div class="flex items-center gap-3 mb-8">
+     <div class="w-11 h-11 rounded-xl bg-[#12345b] flex items-center justify-center text-white">
+       <i data-lucide="graduation-cap" class="w-6 h-6"></i>
+     </div>
+     <div>
+      <p class="text-[11px] tracking-[.16em] uppercase text-[#6c7a74] font-bold">Aplikasi</p>
+      <h2 class="text-sm font-bold text-[#12345b] leading-tight">Perangkat CP & ATP</h2>
+     </div>
+    </div>
+    <nav class="space-y-2">
+      <button type="button" data-page="1" class="nav-item active w-full text-left px-3 py-3 rounded-lg flex items-center gap-3 text-sm font-semibold transition"><i data-lucide="home" class="w-4 h-4"></i><span>Halaman 1: Beranda</span></button>
+      <button type="button" data-page="2" class="nav-item w-full text-left px-3 py-3 rounded-lg flex items-center gap-3 text-sm font-semibold text-[#60706a] transition"><i data-lucide="file-text" class="w-4 h-4"></i><span>Halaman 2: Identitas</span></button>
+      <button type="button" data-page="3" class="nav-item w-full text-left px-3 py-3 rounded-lg flex items-center gap-3 text-sm font-semibold text-[#60706a] transition"><i data-lucide="table" class="w-4 h-4"></i><span>Halaman 3: CP Elemen</span></button>
+      <button type="button" data-page="4" class="nav-item w-full text-left px-3 py-3 rounded-lg flex items-center gap-3 text-sm font-semibold text-[#60706a] transition"><i data-lucide="table" class="w-4 h-4"></i><span>Halaman 4: Matriks ATP</span></button>
+    </nav>
+   </aside>
+
+   <div class="workspace flex-1 w-full overflow-y-auto p-6">
+    <!-- BERANDA (HALAMAN 1) -->
+    <section id="page1" class="page-panel active">
+     <main class="paper halaman-beranda">
+      <div class="bg-ornamen">
+        <div class="ornamen-circle-1"></div>
+        <div class="ornamen-circle-2"></div>
+        <div class="ornamen-lines"></div>
+        <div class="ornamen-dots"></div>
+      </div>
+
+      <div class="absolute top-0 left-0 right-0 h-3 bg-[#6e9f64] z-10"></div>
+      <div class="relative z-10 px-14 py-12 h-full paper-pad flex flex-col justify-between" style="min-height: 561.5px;">
+       <header class="flex justify-between items-center mb-8">
+        <div class="flex items-center gap-3">
+         <div class="w-12 h-12 flex items-center justify-center overflow-hidden">
+          <img src="https://iili.io/Cd6VTSS.png" alt="Icon Buku" class="w-full h-full object-contain">
+         </div>
+         <div>
+          <p class="text-[10px] uppercase tracking-[.18em] text-[#6c7a74] font-bold">Halaman 1 &bull; Kurikulum Merdeka</p>
+          <p class="text-sm font-bold text-[#12345b]">Penyusun Perangkat Pembelajaran</p>
+         </div>
+        </div>
+       </header>
+       <div class="my-auto grid grid-cols-1 gap-6 items-center">
+        <div>
+         <h1 class="title-font text-[#12345b] text-4xl font-bold leading-[1.08] mb-5">Alur Tujuan Pembelajaran SD</h1>
+         <p class="text-gray-600 mb-8 max-w-md">Pemetaan target Capaian Pembelajaran dan Pembuatan Alur Tujuan Pembelajaran Sekolah Dasar secara otomatis.</p>
+         <button type="button" id="startBtn" class="inline-flex items-center gap-3 px-5 py-3 rounded-xl bg-[#12345b] text-white font-bold transition hover:bg-[#1a4473]">
+          <span>Mulai Susun Sekarang</span><i data-lucide="move-right" class="w-4 h-4"></i>
+         </button>
+        </div>
+       </div>
+      </div>
+     </main>
+    </section>
+
+    <!-- FORM IDENTITAS SEKOLAH (HALAMAN 2) -->
+    <section id="page2" class="page-panel">
+     <main class="paper">
+      <header class="h-[58px] bg-[#12345b] text-white flex justify-between items-center px-8">
+       <h1 class="font-bold tracking-wide text-lg">Input Data Identitas Komponen</h1>
+       <span class="text-xs font-bold uppercase tracking-widest bg-white/20 px-3 py-1 rounded">Halaman 2</span>
+      </header>
+      <div class="px-8 py-7 paper-pad">
+       <form id="schoolForm">
+        <div class="grid grid-cols-2 gap-4 mb-5 form-grid">
+         <div class="col-span-2"><label class="label">Nama Satuan Pendidikan</label><input id="schoolName" class="field" type="text" value="SD Negeri 03 Pendowo Asri"></div>
+         <div><label class="label">Pilih Fase & Kelas</label>
+           <select id="phaseSelect" class="field">
+             <option value="Fase A" selected>Fase A (Kelas I dan II SD)</option>
+             <option value="Fase B">Fase B (Kelas III dan IV SD)</option>
+             <option value="Fase C">Fase C (Kelas V dan VI SD)</option>
+           </select>
+         </div>
+         <div><label class="label">Mata Pelajaran</label>
+           <select id="subjectSelect" class="field">
+             <option value="Pendidikan Agama Islam" selected>Pendidikan Agama Islam dan Budi Pekerti</option>
+             <option value="Pendidikan Pancasila">Pendidikan Pancasila</option>
+             <option value="Bahasa Indonesia">Bahasa Indonesia</option>
+             <option value="Matematika">Matematika</option>
+             <option value="IPAS">IPAS (Ilmu Pengetahuan Alam dan Sosial)</option>
+             <option value="Seni Musik">Seni Musik</option>
+             <option value="Seni Rupa">Seni Rupa</option>
+             <option value="Seni Tari">Seni Tari</option>
+             <option value="Seni Teater">Seni Teater</option>
+             <option value="PJOK">Pendidikan Jasmani Olah Raga dan Kesehatan</option>
+             <option value="Bahasa Inggris">Bahasa Inggris</option>
+             <option value="Koding dan AI">Koding dan Kecerdasan Artificial</option>
+             <option value="Bahasa dan Aksara Lampung">Muatan Lokal: Bahasa dan Aksara Lampung</option>
+             <option value="Pendidikan Anti Korupsi">Pendidikan Anti Korupsi (PAK)</option>
+           </select>
+         </div>
+         <div><label class="label">Tahun Pelajaran</label><input id="schoolYear" class="field" type="text" value="2026/2027"></div>
+         <div><label class="label">Tempat, Tanggal Dokumen</label><input id="placeDate" class="field" type="text" value="Pendowo Asri, 17 Juli 2026"></div>
+         <div class="col-span-2"><label class="label">Alamat Sekolah</label><textarea id="schoolAddress" class="field h-16 resize-none">Jl. Brawijaya Utara No. 2 Kampung Pendowo Asri</textarea></div>
+        </div>
+
+        <!-- INPUT JAM PELAJARAN & MINGGU EFEKTIF 4 SEMESTER -->
+        <div class="border-t border-[#dce5df] pt-5 mb-5">
+         <h3 class="font-bold text-[#12345b] mb-3">Alokasi JP & Minggu Efektif (Matriks ATP)</h3>
+         <div class="grid grid-cols-2 gap-4 form-grid text-xs">
+          <!-- Semester 1 -->
+          <div class="border border-[#cfd8d2] p-3 rounded-lg bg-gray-50/50">
+            <p class="font-bold text-[#12345b] mb-2">Semester 1 (Ganjil - Kelas Ganjil)</p>
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="label !text-[10px] !mb-1">JP / Minggu</label>
+                <input id="jpSem1" class="field !py-1 text-xs" type="number" value="3">
+              </div>
+              <div>
+                <label class="label !text-[10px] !mb-1">Mgg Efektif</label>
+                <input id="meSem1" class="field !py-1 text-xs" type="number" value="18">
+              </div>
+            </div>
+          </div>
+          <!-- Semester 2 -->
+          <div class="border border-[#cfd8d2] p-3 rounded-lg bg-gray-50/50">
+            <p class="font-bold text-[#12345b] mb-2">Semester 2 (Genap - Kelas Ganjil)</p>
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="label !text-[10px] !mb-1">JP / Minggu</label>
+                <input id="jpSem2" class="field !py-1 text-xs" type="number" value="3">
+              </div>
+              <div>
+                <label class="label !text-[10px] !mb-1">Mgg Efektif</label>
+                <input id="meSem2" class="field !py-1 text-xs" type="number" value="18">
+              </div>
+            </div>
+          </div>
+          <!-- Semester 3 -->
+          <div class="border border-[#cfd8d2] p-3 rounded-lg bg-gray-50/50">
+            <p class="font-bold text-[#12345b] mb-2">Semester 3 (Ganjil - Kelas Genap)</p>
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="label !text-[10px] !mb-1">JP / Minggu</label>
+                <input id="jpSem3" class="field !py-1 text-xs" type="number" value="3">
+              </div>
+              <div>
+                <label class="label !text-[10px] !mb-1">Mgg Efektif</label>
+                <input id="meSem3" class="field !py-1 text-xs" type="number" value="18">
+              </div>
+            </div>
+          </div>
+          <!-- Semester 4 -->
+          <div class="border border-[#cfd8d2] p-3 rounded-lg bg-gray-50/50">
+            <p class="font-bold text-[#12345b] mb-2">Semester 4 (Genap - Kelas Genap)</p>
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="label !text-[10px] !mb-1">JP / Minggu</label>
+                <input id="jpSem4" class="field !py-1 text-xs" type="number" value="3">
+              </div>
+              <div>
+                <label class="label !text-[10px] !mb-1">Mgg Efektif</label>
+                <input id="meSem4" class="field !py-1 text-xs" type="number" value="18">
+              </div>
+            </div>
+          </div>
+         </div>
+        </div>
+
+        <div class="border-t border-[#dce5df] pt-5 mb-5">
+         <h3 class="font-bold text-[#12345b] mb-3">Data Kepala Sekolah</h3>
+         <div class="grid grid-cols-2 gap-4 form-grid">
+          <div><label class="label">Nama Kepala Sekolah</label><input id="principalName" class="field" type="text" value="DIGETRA, S.Pd."></div>
+          <div><label class="label">NIP Kepala Sekolah</label><input id="principalNip" class="field" type="text" value="19111111 111111 1 001"></div>
+         </div>
+        </div>
+        <div class="border-t border-[#dce5df] pt-5">
+         <h3 class="font-bold text-[#12345b] mb-3">Data Guru Kelas</h3>
+         <div class="grid grid-cols-2 gap-3 form-grid">
+          <div><label class="label">Nama Guru Kelas Ganjil (I/III/V)</label><input id="teacherA" class="field" type="text" value="SIHKA, S.Pd.SD"></div>
+          <div><label class="label">NIP Guru</label><input id="nipA" class="field" type="text" value="19111111 111111 1 001"></div>
+          <div><label class="label">Nama Guru Kelas Genap (II/IV/VI)</label><input id="teacherB" class="field" type="text" value="WINKA, S.Pd."></div>
+          <div><label class="label">NIP Guru</label><input id="nipB" class="field" type="text" value="19111111 111113 1 001"></div>
+         </div>
+        </div>
+        <div class="flex justify-end mt-6">
+         <button type="submit" class="inline-flex items-center gap-2 px-5 py-3 rounded-lg bg-[#12345b] text-white font-bold transition hover:bg-[#1a4473]">
+          <span>Lihat Capaian Pembelajaran</span><i data-lucide="move-right" class="w-4 h-4"></i>
+         </button>
+        </div>
+       </form>
+      </div>
+     </main>
+    </section>
+
+    <!-- CAPAIAN PEMBELAJARAN (HALAMAN 3) -->
+    <section id="page3" class="page-panel">
+     <main class="paper">
+      <header class="h-[58px] bg-[#12345b] text-white flex justify-between items-center px-8 print-hide">
+       <h1 class="font-bold tracking-wide">Capaian Pembelajaran Elemen Mata Pelajaran</h1>
+       <span class="text-xs font-bold uppercase tracking-widest bg-white/20 px-3 py-1 rounded">Halaman 3</span>
+      </header>
+      <div class="px-8 py-8 paper-pad">
+       <div class="mb-6 pb-4 border-b border-[#dbe6dc]">
+        <h2 class="title-font text-[#12345b] text-2xl font-bold mb-4 text-center">CAPAIAN PEMBELAJARAN (CP) ELEMEN</h2>
+        <div class="grid grid-cols-2 gap-4 text-sm">
+          <div>
+            <table class="info-table">
+              <tr><td class="w-44 font-semibold">Nama Satuan Pendidikan</td><td>:</td><td id="cpDocSchool" class="font-bold"></td></tr>
+              <tr><td class="font-semibold">Mata Pelajaran</td><td>:</td><td id="cpDocSubject"></td></tr>
+              <tr><td class="font-semibold">Alamat Sekolah</td><td>:</td><td id="cpDocAddress" class="text-xs"></td></tr>
+            </table>
+          </div>
+          <div>
+            <table class="info-table">
+              <tr><td class="w-44 font-semibold">Fase / Kelas</td><td>:</td><td id="cpDocPhase" class="font-bold"></td></tr>
+              <tr><td class="font-semibold">Tahun Pelajaran</td><td>:</td><td id="cpDocYear"></td></tr>
+            </table>
+          </div>
+        </div>
+       </div>
+
+       <table class="doc-table">
+        <thead>
+         <tr>
+          <th class="w-12 text-center">No</th>
+          <th class="w-44 text-center">Elemen</th>
+          <th class="text-center">Capaian Pembelajaran (CP)</th>
+         </tr>
+        </thead>
+        <tbody id="cpTableBody"></tbody>
+       </table>
+
+       <!-- Area Tanda Tangan Dokumen Halaman 3 -->
+       <div class="mt-8 text-sm print:break-inside-avoid" style="page-break-inside: avoid; break-inside: avoid;">
+         <div class="grid grid-cols-2 gap-12 text-center mt-2">
+           <!-- Kolom Kiri -->
+           <div>
+            <div class="h-6"></div> 
+            <p id="teacherLabelLeft" class="font-semibold"></p>
+            <p id="sigTeacherLeft" class="font-bold text-[#17374d] mt-12"></p>
+            <p id="nipTeacherLeft" class="text-xs text-gray-500"></p>
+           </div>
+           <!-- Kolom Kanan -->
+           <div>
+            <div id="placeDateCp" class="text-center font-semibold text-gray-700 h-6"></div>
+            <p id="teacherLabelRight" class="font-semibold"></p>
+            <p id="sigTeacherRight" class="font-bold text-[#17374d] mt-12"></p>
+            <p id="nipTeacherRight" class="text-xs text-gray-500"></p>
+           </div>
+         </div>
+         <div class="flex justify-center mt-6 text-center">
+           <div>
+            <p class="font-semibold mb-16">Kepala Satuan Pendidikan</p>
+            <p id="sigPrincipal" class="font-bold text-[#17374d]"></p>
+            <p id="nipPrincipal" class="text-xs text-gray-500"></p>
+           </div>
+         </div>
+       </div>
+
+       <div class="flex justify-between mt-6 print-hide">
+        <button type="button" id="backToForm" class="px-4 py-2 rounded-lg border border-[#cfd9d2] bg-white hover:bg-gray-50">Kembali</button>
+        <button type="button" id="toAtpPage" class="px-5 py-2 rounded-lg bg-[#12345b] text-white font-bold hover:bg-[#1a4473]">Susun Matriks ATP</button>
+       </div>
+      </div>
+     </main>
+    </section>
+
+    <!-- MATRIKS ALUR TUJUAN PEMBELAJARAN (HALAMAN 4) -->
+    <section id="page4" class="page-panel">
+     <main class="paper">
+      <header class="h-[58px] bg-[#12345b] text-white flex justify-between items-center px-8 print-hide">
+       <h1 class="font-bold tracking-wide">Matriks Alur Tujuan Pembelajaran (ATP)</h1>
+       <span class="text-xs font-bold uppercase tracking-widest bg-white/20 px-3 py-1 rounded">Halaman 4</span>
+      </header>
+      <div class="px-8 py-7 paper-pad">
+       <div class="mb-4 pb-2 border-b border-gray-200">
+        <h2 class="text-center font-bold text-base tracking-wide uppercase">ALUR TUJUAN PEMBELAJARAN (ATP)</h2>
+        <div class="grid grid-cols-2 gap-4 text-xs mt-3">
+          <div>
+            <table class="info-table text-[11px]">
+              <tr><td class="w-32 font-semibold">Nama Satuan Pendidikan</td><td>:</td><td id="atpSchoolName" class="font-bold uppercase"></td></tr>
+              <tr><td class="font-semibold">Mata Pelajaran</td><td>:</td><td id="atpSubjectName"></td></tr>
+            </table>
+          </div>
+          <div>
+            <table class="info-table text-[11px]">
+              <tr><td class="w-32 font-semibold">Fase/Kelas</td><td>:</td><td id="atpPhaseClass" class="font-bold"></td></tr>
+              <tr><td class="font-semibold">Tahun Pelajaran</td><td>:</td><td id="atpYear"></td></tr>
+            </table>
+          </div>
+        </div>
+       </div>
+
+       <table class="atp-table text-[11px]">
+        <thead>
+         <tr>
+          <th style="width: 5%;">NO</th>
+          <th style="width: 35%;">ELEMEN & CAPAIAN PEMBELAJARAN</th>
+          <th style="width: 45%;">TUJUAN PEMBELAJARAN</th>
+          <th style="width: 11%;">LINGKUP MATERI</th>
+          <th style="width: 6%;">JJP</th>
+         </tr>
+        </thead>
+        
+        <!-- Semester 1 -->
+        <tbody id="sem1-header">
+          <tr class="divider-row">
+            <td colspan="4" class="text-left font-bold px-2 py-1" id="sem1-title">Semester Ganjil</td>
+            <td class="text-center font-bold text-lg">
+              <div id="totalJjpSem1" class="editable-cell-center text-center" contenteditable="true">54</div>
+            </td>
+          </tr>
+        </tbody>
+        <tbody id="sem1-body"></tbody>
+        
+        <!-- Semester 2 -->
+        <tbody id="sem2-header">
+          <tr class="divider-row">
+            <td colspan="4" class="text-left font-bold px-2 py-1" id="sem2-title">Semester Genap</td>
+            <td class="text-center font-bold text-lg">
+              <div id="totalJjpSem2" class="editable-cell-center text-center" contenteditable="true">54</div>
+            </td>
+          </tr>
+        </tbody>
+        <tbody id="sem2-body"></tbody>
+
+        <!-- Semester 3 -->
+        <tbody id="sem3-header">
+          <tr class="divider-row">
+            <td colspan="4" class="text-left font-bold px-2 py-1" id="sem3-title">Semester Ganjil</td>
+            <td class="text-center font-bold text-lg">
+              <div id="totalJjpSem3" class="editable-cell-center text-center" contenteditable="true">54</div>
+            </td>
+          </tr>
+        </tbody>
+        <tbody id="sem3-body"></tbody>
+
+        <!-- Semester 4 -->
+        <tbody id="sem4-header">
+          <tr class="divider-row">
+            <td colspan="4" class="text-left font-bold px-2 py-1" id="sem4-title">Semester Genap</td>
+            <td class="text-center font-bold text-lg">
+              <div id="totalJjpSem4" class="editable-cell-center text-center" contenteditable="true">54</div>
+            </td>
+          </tr>
+        </tbody>
+        <tbody id="sem4-body"></tbody>
+       </table>
+
+       <!-- Baris Kontrol Dinamis untuk Tambah & Hapus Baris -->
+       <div class="mt-4 p-3 bg-gray-50 border border-dashed border-gray-300 rounded-lg flex flex-col gap-3 print-hide">
+         <span class="text-xs font-bold text-gray-500 w-full text-center">Atur Baris Tabel Semester:</span>
+         <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+           <!-- Sem 1 -->
+           <div class="flex flex-col gap-1 border border-gray-200 p-2 rounded bg-white text-center">
+             <span class="text-[10px] font-bold text-[#12345b]">Semester 1</span>
+             <div class="flex gap-1 justify-center">
+               <button type="button" onclick="addBlankRow(1)" class="px-2 py-1 bg-green-600 text-white rounded text-xs font-semibold hover:bg-green-700 flex items-center gap-0.5"><i data-lucide="plus" class="w-3 h-3"></i>Tambah</button>
+               <button type="button" onclick="deleteLastRow(1)" class="px-2 py-1 bg-red-600 text-white rounded text-xs font-semibold hover:bg-red-700 flex items-center gap-0.5"><i data-lucide="trash-2" class="w-3 h-3"></i>Hapus</button>
+             </div>
+           </div>
+           <!-- Sem 2 -->
+           <div class="flex flex-col gap-1 border border-gray-200 p-2 rounded bg-white text-center">
+             <span class="text-[10px] font-bold text-[#12345b]">Semester 2</span>
+             <div class="flex gap-1 justify-center">
+               <button type="button" onclick="addBlankRow(2)" class="px-2 py-1 bg-green-600 text-white rounded text-xs font-semibold hover:bg-green-700 flex items-center gap-0.5"><i data-lucide="plus" class="w-3 h-3"></i>Tambah</button>
+               <button type="button" onclick="deleteLastRow(2)" class="px-2 py-1 bg-red-600 text-white rounded text-xs font-semibold hover:bg-red-700 flex items-center gap-0.5"><i data-lucide="trash-2" class="w-3 h-3"></i>Hapus</button>
+             </div>
+           </div>
+           <!-- Sem 3 -->
+           <div class="flex flex-col gap-1 border border-gray-200 p-2 rounded bg-white text-center">
+             <span class="text-[10px] font-bold text-[#12345b]">Semester 3</span>
+             <div class="flex gap-1 justify-center">
+               <button type="button" onclick="addBlankRow(3)" class="px-2 py-1 bg-green-600 text-white rounded text-xs font-semibold hover:bg-green-700 flex items-center gap-0.5"><i data-lucide="plus" class="w-3 h-3"></i>Tambah</button>
+               <button type="button" onclick="deleteLastRow(3)" class="px-2 py-1 bg-red-600 text-white rounded text-xs font-semibold hover:bg-red-700 flex items-center gap-0.5"><i data-lucide="trash-2" class="w-3 h-3"></i>Hapus</button>
+             </div>
+           </div>
+           <!-- Sem 4 -->
+           <div class="flex flex-col gap-1 border border-gray-200 p-2 rounded bg-white text-center">
+             <span class="text-[10px] font-bold text-[#12345b]">Semester 4</span>
+             <div class="flex gap-1 justify-center">
+               <button type="button" onclick="addBlankRow(4)" class="px-2 py-1 bg-green-600 text-white rounded text-xs font-semibold hover:bg-green-700 flex items-center gap-0.5"><i data-lucide="plus" class="w-3 h-3"></i>Tambah</button>
+               <button type="button" onclick="deleteLastRow(4)" class="px-2 py-1 bg-red-600 text-white rounded text-xs font-semibold hover:bg-red-700 flex items-center gap-0.5"><i data-lucide="trash-2" class="w-3 h-3"></i>Hapus</button>
+             </div>
+           </div>
+         </div>
+       </div>
+
+       <!-- Tanda Tangan ATP -->
+       <div class="mt-8 text-[11px] print:break-inside-avoid" style="page-break-inside: avoid; break-inside: avoid;">
+         <div class="grid grid-cols-2 gap-12 text-center mt-2">
+           <!-- Kolom Kiri -->
+           <div>
+            <div class="h-5"></div> <!-- Penyeimbang posisi vertikal -->
+            <p id="atpTeacherLabelLeft" class="font-semibold"></p>
+            <p id="atpSigTeacherLeft" class="font-bold text-gray-900 mt-12"></p>
+            <p id="atpNipTeacherLeft" class="text-[10px] text-gray-500"></p>
+           </div>
+           <!-- Kolom Kanan -->
+           <div>
+            <div id="atpPlaceDate" class="text-center font-semibold text-gray-700 h-5"></div>
+            <p id="atpTeacherLabelRight" class="font-semibold"></p>
+            <p id="atpSigTeacherRight" class="font-bold text-gray-900 mt-12"></p>
+            <p id="atpNipTeacherRight" class="text-[10px] text-gray-500"></p>
+           </div>
+         </div>
+         <div class="flex justify-center mt-6 text-center">
+           <div>
+            <p class="font-semibold mb-16">Kepala Satuan Pendidikan</p>
+            <p id="atpSigPrincipal" class="font-bold text-gray-900"></p>
+            <p id="atpNipPrincipal" class="text-[10px] text-gray-500"></p>
+           </div>
+         </div>
+       </div>
+
+       <div class="flex justify-between mt-8 print-hide">
+        <button type="button" id="backToPage3" class="px-4 py-2 rounded-lg border border-[#cfd9d2] bg-white hover:bg-gray-50">Kembali</button>
+        <button type="button" id="printAtpBtn" class="px-5 py-2 rounded-lg bg-[#6e9f64] text-white font-bold hover:bg-[#5a8a54]">Cetak Dokumen ATP</button>
+       </div>
+      </div>
+     </main>
+    </section>
+   </div>
+  </div>
+
+  <script>
+    // DATA CAPAIAN PEMBELAJARAN (Sesuai CP Nomor 020 Tahun 2026)
+    const cpData = {
+      "Pendidikan Agama Islam": {
+        "Fase A": [
+          ["Al-Qur'an dan Hadis", "Peserta didik mampu mengenal huruf hijaiah dan harakatnya, huruf hijaiah bersambung, membaca surah-surah pendek Al-Qur'an (al-Fatihah, al-Ikhlas, al-Falaq, an-Nas) serta hadis tentang kebersihan dengan baik dan benar sesuai kaidah sederhana."],
+          ["Akidah", "Peserta didik mampu mengenal rukun iman kepada Allah Swt. melalui nama-nama-Nya yang agung (Asmaulhusna: al-Ahad, as-Samad) serta mengenal rukun iman lainnya seperti iman kepada malaikat, kitab, rasul, hari akhir, serta qada dan qadar."],
+          ["Akhlak", "Peserta didik terbiasa mempraktikkan akhlak mulia dalam kehidupan sehari-hari, diawali dengan menyayangi diri sendiri, menghormati keluarga (orang tua, saudara), guru, teman, serta merawat lingkungan sekitar."],
+          ["Fikih", "Peserta didik mampu mengenal rukun Islam dan kalimat syahadatain, memahami dan menerapkan tata cara bersuci (wudu, tayamum, istinja) serta melaksanakan salat fardu secara tertib."],
+          ["Sejarah Peradaban Islam", "Peserta didik mampu menceritakan kisah keteladanan Nabi Muhammad saw. pada masa kanak-kanak dan masa remaja, serta meneladani perilaku jujur dan amanah beliau dalam kehidupan."]
+        ],
+        "Fase B": [
+          ["Al-Qur'an dan Hadis", "Peserta didik mampu membaca, menulis, dan menghafal beberapa surah pendek Al-Qur'an (al-Buruj, al-Fil, al-Ma'un, at-Takasur) serta memahami hadis tentang keragaman dan hadis tentang persaudaraan dengan baik."],
+          ["Akidah", "Peserta didik mampu memahami sifat-sifat wajib bagi Allah Swt., beberapa Asmaulhusna (al-Malik, al-Aziz, al-Quddus, as-Salam, al-Mu'min), serta rukun iman kepada kitab-kitab Allah Swt. dan nabi dan rasul."],
+          ["Akhlak", "Peserta didik mampu memahami dan membiasakan perilaku terpuji seperti ikhlas, sabar, syukur, jujur, menunjukkan sikap berbakti kepada orang tua dan guru, menghargai sesama manusia, serta menjaga kelestarian lingkungan."],
+          ["Fikih", "Peserta didik mampu memahami ketentuan puasa Ramadan, salat tarawih, witir, zakat fitrah, infak, sedekah, serta tata cara pelaksanaan salat Jumat, salat duha, dan salat tahajud."],
+          ["Sejarah Peradaban Islam", "Peserta didik mampu menceritakan kisah keteladanan Nabi Muhammad saw. pada masa dewasa, awal kerasulan, peristiwa hijrah ke Habasyah dan Taif, serta meneladani kesabaran beliau."]
+        ],
+        "Fase C": [
+          ["Al-Qur'an dan Hadis", "Peserta didik mampu membaca, menulis, menghafal, dan memahami makna ayat Al-Qur'an serta hadis tentang toleransi, persaudaraan, dan moderasi beragama dengan baik."],
+          ["Akidah", "Peserta didik memahami rukun iman lainnya seperti iman kepada qada dan qadar, serta menguatkan keyakinan melalui bukti kebesaran Allah Swt."],
+          ["Akhlak", "Peserta didik memahami dan membiasakan perilaku mulia (akhlak karimah) seperti integritas, kerja keras, tanggung jawab, peduli lingkungan, dan toleransi."],
+          ["Fikih", "Peserta didik memahami ketentuan zakat, infak, sedekah, serta tata cara pelaksanaan ibadah haji, umrah, dan prinsip muamalah sederhana."],
+          ["Sejarah Peradaban Islam", "Peserta didik mampu menceritakan kisah keteladanan para tokoh Islam, perkembangan peradaban Islam klasik, serta kontribusi Islam bagi peradaban dunia."]
+        ]
+      },
+      "Pendidikan Pancasila": {
+        "Fase A": [
+          ["Pancasila", "Peserta didik mengenal dan menceritakan simbol dan sila-sila Pancasila dalam lambang negara Garuda Pancasila; menterjemahkan nilai-nilai Pancasila di lingkungan keluarga dan sekolah."],
+          ["Undang-Undang Dasar NRI 1945", "Peserta didik mengenal aturan di lingkungan keluarga dan sekolah; menceritakan contoh sikap mematuhi dan tidak mematuhi aturan; menyampaikan pendapat di kelas."],
+          ["Bhinneka Tunggal Ika", "Peserta didik menyebutkan identitas dirinya sesuai dengan jenis kelamin, ciri-ciri fisik, dan hobi; menceritakan karakteristik fisik dan nonfisik orang dan benda di lingkungan rumah dan sekolah."],
+          ["NKRI", "Peserta didik mengenal karakteristik lingkungan tempat tinggal dan sekolah; menyebutkan contoh perilaku menjaga lingkungan rumah dan sekolah."]
+        ],
+        "Fase B": [
+          ["Pancasila", "Peserta didik memahami dan menjelaskan makna sila-sila Pancasila serta menceritakan hubungan simbol dengan sila-sila dalam lambang negara Garuda Pancasila; menerapkan nilai-nilai Pancasila."],
+          ["Undang-Undang Dasar NRI 1945", "Peserta didik mengidentifikasi hak dan kewajiban sebagai anggota keluarga dan sebagai peserta didik di sekolah; melaksanakan hak dan kewajiban tersebut."],
+          ["Bhinneka Tunggal Ika", "Peserta didik menjelaskan identitas diri, keluarga, dan teman-temannya sesuai budaya, minat, dan perilakunya; mengenali bentuk-bentuk keberagaman suku bangsa, sosial, dan budaya."],
+          ["NKRI", "Peserta didik menceritakan lingkungan tempat tinggal and sekolah sebagai bagian dari wilayah Negara Kesatuan Republik Indonesia; mempraktikkan sikap kerja sama."]
+        ],
+        "Fase C": [
+          ["Pancasila", "Peserta didik menganalisis kronologi lahirnya Pancasila; memahami dan menyajikan makna nilai-nilai Pancasila sebagai dasar negara, pandangan hidup bangsa, dan ideologi negara."],
+          ["Undang-Undang Dasar NRI 1945", "Peserta didik menganalisis norma dan aturan yang berlaku di masyarakat; mengidentifikasi hak dan kewajiban sebagai warga negara; mempraktikkan musyawarah."],
+          ["Bhinneka Tunggal Ika", "Peserta didik menyajikan keragaman budaya di Indonesia; menampilkan tindakan yang menghargai keberagaman; mengidentifikasi faktor penentu persatuan dan kesatuan."],
+          ["NKRI", "Peserta didik menampilkan perilaku menjaga keutuhan Negara Kesatuan Republik Indonesia; mengidentifikasi struktur pemerintahan dari tingkat desa/kelurahan hingga pusat."]
+        ]
+      },
+      "Bahasa Indonesia": {
+        "Fase A": [
+          ["Menyimak", "Memahami informasi dari teks nonsastra berbentuk teks aural (teks yang dibacakan dan/atau didengarkan) berupa percakapan yang berkaitan dengan diri, keluarga, dan/atau lingkungan sekitar; dan memahami pesan teks sastra berbentuk teks aural."],
+          ["Berbicara dan Mempresentasikan", "Merespons dengan bertanya tentang sesuatu, menjawab, dan menanggapi komentar orang lain dengan baik dan santun dalam suatu percakapan tentang diri, keluarga, kesehatan, dan/atau lingkungan sekitar; mengungkapkan perasaan dan gagasan secara lisan dengan atau tanpa bantuan gambar; dan menceritakan kembali isi berbagai tipe teks yang dibaca, dipirsa, atau didengar."],
+          ["Membaca dan Memirsa", "Membaca kata-kata sederhana dengan fasih dari bacaan dan/atau tayangan yang dipirsa tentang diri, keluarga, kesehatan, dan/atau lingkungan sekitar; dan memahami isi bacaan dan/atau tayangan yang dipirsa tentang diri, keluarga, kesehatan, dan/atau lingkungan sekitar."],
+          ["Menulis", "Menulis permulaan dengan benar di atas kertas dan/atau melalui media digital; menulis kata-kata sederhana yang berkaitan dengan diri, keluarga, kesehatan, dan/atau lingkungan sekitar; dan menulis kalimat sederhana untuk menyampaikan informasi tentang diri, keluarga, kesehatan, dan/atau lingkungan sekitar."]
+        ],
+        "Fase B": [
+          ["Menyimak", "Peserta didik memahami ide pokok dan ide pendukung pada teks informatif; memahami instruksi lisan dan informasi dari media audio atau teks aural."],
+          ["Berbicara dan Mempresentasikan", "Peserta didik berbicara dengan pilihan kata dan sikap tubuh/gestur yang santun; menceritakan kembali suatu informasi; berpartisipasi aktif dalam diskusi kelompok."],
+          ["Membaca dan Memirsa", "Peserta didik memahami pesan dan informasi tentang kehidupan sehari-hari, teks narasi, dan puisi anak dalam bentuk cetak atau elektronik; membaca kata-kata baru."],
+          ["Menulis", "Peserta didik menulis teks narasi, deskripsi, rekaan, dan prosedur dengan rangkaian kalimat yang beragam; menggunakan tanda baca dan ejaan yang tepat."]
+        ],
+        "Fase C": [
+          ["Menyimak", "Peserta didik menganalisis informasi berupa fakta, prosedur, dan opini dari teks pendengaran; mengidentifikasi makna kata baru dari teks yang disimak."],
+          ["Berbicara dan Mempresentasikan", "Peserta didik menyampaikan informasi secara fasih; mempresentasikan laporan hasil pengamatan atau wawancara dengan runtut; mempertahankan pendapat dalam diskusi."],
+          ["Membaca dan Memirsa", "Peserta didik membaca kata-kata dengan fasih; memahami informasi dan kosakata baru dalam teks eksplanasi, rekaan, dan infografis; mengidentifikasi ide pokok."],
+          ["Menulis", "Peserta didik menulis various jenis teks (narasi, eksposisi, argumentasi) secara kreatif dan terstruktur; merevisi and menyunting tulisan sendiri."]
+        ]
+      },
+      "Matematika": {
+        "Fase A": [
+          ["Bilangan", "Peserta didik menunjukkan pemahaman dan memiliki intuisi bilangan pada bilangan cacah sampai 100; melakukan operasi penjumlahan dan pengurangan menggunakan benda konkret."],
+          ["Aljabar", "Peserta didik menunjukkan pemahaman pola gambar atau objek sederhana yang membesar dan mengecil; menyelesaikan persamaan sederhana menggunakan benda konkret."],
+          ["Pengukuran", "Peserta didik membandingkan panjang dan berat benda secara langsung, dan mengestimasi panjang dan berat benda menggunakan satuan tidak baku."],
+          ["Geometri", "Peserta didik mengenal various bangun datar (segitiga, segiempat, lingkaran) and bangun ruang (balok, kubus) berdasarkan karakteristik fisiknya."],
+          ["Analisis Data & Peluang", "Peserta didik mengurutkan, menyortir, mengelompokkan, dan menyajikan data objek sederhana menggunakan turus and piktogram paling banyak dua kategori."]
+        ],
+        "Fase B": [
+          ["Bilangan", "Peserta didik menunjukkan pemahaman dan intuisi bilangan pada bilangan cacah sampai 10.000; melakukan operasi hitung perkalian dan pembagian; memahami pecahan senilai."],
+          ["Aljabar", "Peserta didik mengidentifikasi, meniru, dan mengembangkan pola gambar atau objek sederhana; menyelesaikan kalimat matematika dengan penjumlahan dan pengurangan."],
+          ["Pengukuran", "Peserta didik mengukur panjang dan berat benda menggunakan satuan baku; mengestimasi durasi waktu and mengukur luas menggunakan satuan tidak baku."],
+          ["Geometri", "Peserta didik mendeskripsikan ciri-ciri various bentuk bangun datar; mengenali garis sejajar dan garis berpotongan; mengidentifikasi simetri lipat dan putar."],
+          ["Analisis Data & Peluang", "Peserta didik mengurutkan, membandingkan, dan menyajikan data dari lingkungan dalam bentuk tabel, diagram batang, dan diagram gambar (piktogram)."]
+        ],
+        "Fase C": [
+          ["Bilangan", "Peserta didik melakukan operasi hitung bilangan cacah sampai 1.000.000; menyatakan bilangan desimal dan persen; melakukan operasi hitung campuran dan FPB/KPK."],
+          ["Aljabar", "Peserta didik menyatakan situasi sehari-hari ke dalam bentuk aljabar; menggunakan penalaran rasio dan proporsi untuk menyelesaikan masalah matematika."],
+          ["Pengukuran", "Peserta didik menghitung keliling dan luas various bentuk bangun datar; menghitung volume bangun ruang (kubus dan balok) menggunakan satuan baku."],
+          ["Geometri", "Peserta didik mengonstruksi dan mengurai bangun ruang; menggambarkan jaring-jaring bangun ruang; memahami sistem koordinat Kartesius sederhana."],
+          ["Analisis Data & Peluang", "Peserta didik mengumpulkan, mengorganisasikan, membandingkan, dan menyajikan data dalam bentuk diagram lingkaran atau garis; menentukan peluang kejadian sederhana."]
+        ]
+      },
+      "IPAS": {
+        "Fase A": [],
+        "Fase B": [
+          ["Pemahaman IPAS", "Peserta didik menganalisis hubungan antara bentuk serta fungsi bagian tubuh pada manusia/hewan; siklus hidup makhluk hidup; wujud zat dan perubahannya; gaya dan energi."],
+          ["Keterampilan Proses", "Peserta didik mengamati fenomena; membuat pertanyaan; merencanakan dan melakukan penyelidikan; mengorganisasikan data; menarik kesimpulan; mengomunikasikan hasil."]
+        ],
+        "Fase C": [
+          ["Pemahaman IPAS", "Peserta didik melakukan simulasi menggunakan gambar/bagan tentang sistem organ tubuh; mengaitkan ancaman krisis energi; usaha manusia menjaga kelestarian lingkungan."],
+          ["Keterampilan Proses", "Peserta didik mengamati secara detail; mengajukan pertanyaan prediktif; merencanakan penyelidikan terstruktur; mengevaluasi kesimpulan; menyajikan hasil ilmiah."]
+        ]
+      },
+      "Seni Musik": {
+        "Fase A": [
+          ["Mengalami", "Peserta didik mengidentifikasi dan meniru various macam bunyi musik, ritme, timbre, dan melodi sederhana dari lingkungan sekitar."],
+          ["Menciptakan", "Peserta didik menghasilkan bunyi atau pola ritme sederhana secara vokal maupun instrumen perkusi buatan sendiri."],
+          ["Merefleksikan", "Peserta didik mengekspresikan rasa suka atau tidak suka terhadap pertunjukan musik pendek dengan bahasa atau gerak tubuh yang sederhana."],
+          ["Berpikir & Bekerja Artistik", "Peserta didik mengeksplorasi sumber bunyi, memainkan instrumen musik sederhana dengan tertib di dalam kelompok."],
+          ["Berdampak", "Peserta didik menjalankan kebiasaan baik dalam bernyanyi dan bermain musik bersama sehingga menumbuhkan rasa percaya diri."]
+        ],
+        "Fase B": [
+          ["Mengalami", "Peserta didik mengenali dan membedakan unsur-unsur musik (nada, ritme, tempo, dinamika) dalam ragam lagu anak dan lagu daerah."],
+          ["Menciptakan", "Peserta didik menyusun frasa melodi atau pola irama sederhana untuk mengiringi lagu pendek."],
+          ["Merefleksikan", "Peserta didik memberikan tanggapan atau saran sederhana atas keindahan penampilan musik sendiri maupun teman sekelas."],
+          ["Berpikir & Bekerja Artistik", "Peserta didik membaca notasi angka atau simbol musik praktis dasar dan menerapkannya dalam instrumen musik sekolah."],
+          ["Berdampak", "Peserta didik bekerja sama menyajikan pertunjukan musik yang harmonis di lingkungan sekolah."]
+        ],
+        "Fase C": [
+          ["Mengalami", "Peserta didik menganalisis struktur lagu, bentuk vokal, aransemen instrumen musik tradisional dan modern Nusantara."],
+          ["Menciptakan", "Peserta didik mengombinasikan dan membuat komposisi musik sederhana secara kreatif menggunakan media digital atau konvensional."],
+          ["Merefleksikan", "Peserta didik menulis ulasan apresiatif tentang makna, pesan, dan nilai estetis dari pagelaran musik secara kritis."],
+          ["Berpikir & Bekerja Artistik", "Peserta didik mengolaborasikan various ragam teknik vokal dan permainan alat musik ansambel secara padu."],
+          ["Berdampak", "Peserta didik menggelar pertunjukan musik komunitas yang melestarikan kekayaan budaya lokal Nusantara."]
+        ]
+      },
+      "Seni Rupa": {
+        "Fase A": [
+          ["Mengalami", "Peserta didik mengamati, mengenali, dan membedakan jenis-jenis garis, bentuk geometri, dan warna primer dari objek di alam."],
+          ["Menciptakan", "Peserta didik membuat karya seni rupa dua dimensi menggunakan teknik menggambar, mewarnai, atau menggunting secara bebas."],
+          ["Merefleksikan", "Peserta didik menyebutkan bagian atau elemen rupa yang paling menarik dari hasil karyanya sendiri."],
+          ["Berpikir & Bekerja Artistik", "Peserta didik memilih dan menggunakan alat-alat rupa dasar (pensil, krayon, kertas) dengan aman dan mandiri."],
+          ["Berdampak", "Peserta didik menciptakan keindahan dekoratif sederhana pada ruang belajar sekitar."]
+        ],
+        "Fase B": [
+          ["Mengalami", "Peserta didik mengidentifikasi fokus kontras, tekstur, ruang, dan keseimbangan warna sekunder pada suatu karya seni rupa."],
+          ["Menciptakan", "Peserta didik membuat karya seni rupa cetak, anyaman, atau cetak tinggi berdasarkan rancangan sketsa yang dibuat."],
+          ["Merefleksikan", "Peserta didik mendeskripsikan kaitan tema lukisan dengan bahan media rupa yang diaplikasikan secara logis."],
+          ["Berpikir & Bekerja Artistik", "Peserta didik bereksperimen menggabungkan some jenis media campuran dalam membuat objek karya rupa baru."],
+          ["Berdampak", "Peserta didik merespons kebersihan lingkungan melalui pembuatan tempat sampah kreatif atau poster visual."]
+        ],
+        "Fase C": [
+          ["Mengalami", "Peserta didik menganalisis perspektif garis, gelap terang, gradasi warna, dan proporsi anatomi pada objek tiga dimensi."],
+          ["Menciptakan", "Peserta didik merancang konstruksi maket atau kriya nusantara dengan keahlian teknik pangkat, jahit, atau ikat yang rapi."],
+          ["Merefleksikan", "Peserta didik mengevaluasi penyampaian pesan sosial dari suatu pameran seni rupa sekolah secara komprehensif."],
+          ["Berpikir & Bekerja Artistik", "Peserta didik mengonsepkan muatan lokal budaya daerah ke dalam konsep karya seni rupa kontemporer."],
+          ["Berdampak", "Peserta didik memproduksi karya seni rupa bernilai fungsi pakai tinggi yang menumbuhkan kemandirian ekonomi kreatif."]
+        ]
+      },
+      "Seni Tari": {
+        "Fase A": [
+          ["Mengalami", "Peserta didik mengamati, meniru, dan mengeksplorasi gerak makrawi/alam (hewan, tumbuhan, angin) menjadi gerak tari."],
+          ["Menciptakan", "Peserta didik merangkai gerak tubuh sederhana berdasarkan ketukan tempo lambat maupun cepat."],
+          ["Merefleksikan", "Peserta didik mengungkapkan kegembiraan setelah melakukan gerakan tari bersama teman."],
+          ["Berpikir & Bekerja Artistik", "Peserta didik mengoordinasikan gerakan tangan, kepala, dan kaki secara serasi mengikuti bunyi pengiring."],
+          ["Berdampak", "Peserta didik melatih kelenturan tubuh serta meningkatkan kedisiplinan fisik berkelompok."]
+        ],
+        "Fase B": [
+          ["Mengalami", "Peserta didik mengidentifikasi arah hadap, level gerak (tinggi/rendah), dan ruang tari tradisi daerah setempat."],
+          ["Menciptakan", "Peserta didik menyusun ragam gerak tari kreasi baru sederhana dengan kombinasi pola lantai linear."],
+          ["Merefleksikan", "Peserta didik menjelaskan keunikan tata rias, busana, dan properti tari tradisional daerah yang diamati."],
+          ["Berpikir & Bekerja Artistik", "Peserta didik memperagakan gerak tari daerah secara ekspresif dengan penghayatan karakter musik."],
+          ["Berdampak", "Peserta didik menumbuhkan rasa bangga terhadap khazanah budaya bangsa melalui tarian lokal."]
+        ],
+        "Fase C": [
+          ["Mengalami", "Peserta didik membedakan dinamika gerak, transisi, dan nilai filosofis pada pertunjukan tari klasik Nusantara."],
+          ["Menciptakan", "Peserta didik mengoreografi tari kelompok bertema cerita rakyat dengan struktur pola lantai melingkar/diagonal."],
+          ["Merefleksikan", "Peserta didik mengkritisi keselarasan antara wiraga, wirama, and wirasa pada pementasan tari tunggal."],
+          ["Berpikir & Bekerja Artistik", "Peserta didik mendesain properti dan iringan musik tari inovatif berbasis teknologi digital audio."],
+          ["Berdampak", "Peserta didik menyelenggarakan pertunjukan seni tari kolosal untuk mengampanyekan nilai persatuan."]
+        ]
+      },
+      "Seni Teater": {
+        "Fase A": [
+          ["Mengalami", "Peserta didik melakukan permainan imajinasi, meniru suara, mimik wajah, dan laku fisik tokoh di sekitarnya."],
+          ["Menciptakan", "Peserta didik memeragakan dialog pendek atau pantomim sederhana berdurasi singkat tentang kehidupan sehari-hari."],
+          ["Merefleksikan", "Peserta didik mengekspresikan rasa suka atau tidak suka terhadap pertunjukan teater pendek dengan bahasa atau gerak tubuh yang sederhana."]
+        ],
+        "Fase B": [
+          ["Mengalami", "Peserta didik membaca naskah drama anak dengan intonasi artikulasi vokal yang jelas dan lantang."],
+          ["Menciptakan", "Peserta didik menyusun tata panggung/dekorasi latar pertunjukan menggunakan barang bekas sekolah."],
+          ["Merefleksikan", "Peserta didik mengulas alur cerita konflik drama yang dimainkan and memetik amanah kebaikan didalamnya."],
+          ["Berpikir & Bekerja Artistik", "Peserta didik mengeksplorasi bloking perpindahan posisi gerak di atas area panggung akting."],
+          ["Berdampak", "Peserta didik membangun kemitraan tim kerja teater (pemeran dan kru panggung) secara harmonis."]
+        ],
+        "Fase C": [
+          ["Mengalami", "Peserta didik membedakan gaya akting realis, komedi, maupun teatrikal puisi secara mendalam."],
+          ["Menciptakan", "Peserta didik menulis naskah drama adatasi orisinal dan menyutradarai pementasan teater mini."],
+          ["Merefleksikan", "Peserta didik menganalisis efektivitas pencahayaan, efek bunyi, dan kostum dalam memperkuat esensi cerita."],
+          ["Berpikir & Bekerja Artistik", "Peserta didik mengoordinasikan manajemen produksi pertunjukan teater sekolah dari hulu ke hilir."],
+          ["Berdampak", "Peserta didik mementaskan drama teatrikal bertema isu sosial/lingkungan yang menginspirasi khalayak luas."]
+        ]
+      },
+      "PJOK": {
+        "Fase A": [
+          ["Keterampilan Gerak", "Peserta didik menunjukkan kemampuan dalam meniru aktivitas pola gerak dasar lokomotor, non-lokomotor, dan manipulatif secara mandiri."],
+          ["Pengetahuan Gerak", "Peserta didik memahami dan menyebutkan prosedur variasi pola gerak dasar lokomotor, non-lokomotor, dan manipulatif."],
+          ["Pemanfaatan Gerak", "Peserta didik memahami prosedur menjaga kebersihan tubuh dan memilih makanan bergizi untuk kesehatan."],
+          ["Pengembangan Karakter", "Peserta didik menunjukkan perilaku bertanggung jawab, mendengarkan arahan guru, serta mau berbagi alat olahraga bersama teman."]
+        ],
+        "Fase B": [
+          ["Keterampilan Gerak", "Peserta didik menunjukkan kemampuan dalam mempraktikkan variasi pola gerak dasar lokomotor, non-lokomotor, dan manipulatif dalam permainan sederhana."],
+          ["Pengetahuan Gerak", "Peserta didik menganalisis prosedur variasi dan kombinasi pola gerak dasar dalam berbagai aktivitas jasmani."],
+          ["Pemanfaatan Gerak", "Peserta didik mempraktikkan latihan kebugaran jasmani dasar dan memahami jenis cedera ringan saat beraktivitas."],
+          ["Pengembangan Karakter", "Peserta didik menunjukkan perilaku disiplin, bekerja sama dalam tim, serta menjunjung tinggi sportivitas bermain."]
+        ],
+        "Fase C": [
+          ["Keterampilan Gerak", "Peserta didik menerapkan kombinasi gerak dasar ke dalam keterampilan olahraga tradisional, permainan bola besar/kecil, dan aktivitas senam berirama."],
+          ["Pengetahuan Gerak", "Peserta didik mengevaluasi fakta, konsep, dan prosedur kombinasi pola gerak dalam cabang olahraga modifikasi."],
+          ["Pemanfaatan Gerak", "Peserta didik menghitung denyut nadi, mengukur tingkat kbugaran personal, and memahami pencegahan bahaya narkoba serta merokok."],
+          ["Pengembangan Karakter", "Peserta didik memamerkan inisiatif kepemimpinan kelompok, adaptif pada peran tim, dan menaati etika keselamatan olahraga."]
+        ]
+      },
+      "Bahasa Inggris": {
+        "Fase A": [
+          ["Menyimak - Berbicara", "Peserta didik merespons instruksi lisan sederhana dengan gerakan tubuh; menyebutkan objek akrab sehari-hari secara lisan."],
+          ["Membaca - Memirsa", "Peserta didik mengenali hubungan bunyi-huruf dasar visual, memahami kata-kata bergambar pendek tentang diri sendiri."]
+        ],
+        "Fase B": [
+          ["Menyimak-Berbicara", "Peserta didik berinteraksi menggunakan kalimat pendek untuk menyapa, meminta izin, dan menceritakan rutinitas harian di kelas."],
+          ["Membaca-Memirsa", "Peserta didik memahami gagasan pokok dari teks naratif visual pendek and mengidentifikasi detail deskriptif teks."],
+          ["Menulis-Mempresentasikan", "Peserta didik menyusun kata menjadi kalimat sederhana terstruktur dengan ejaan dasar terbimbing."]
+        ],
+        "Fase C": [
+          ["Menyimak-Berbicara", "Peserta didik berdiskusi menggunakan beragam kalimat sederhana untuk menyampaikan kemauan, prediksi, dan opini kasual."],
+          ["Membaca-Memirsa", "Peserta didik mengekstrak informasi spesifik dari infografis, petunjuk tertulis, dan cerita fiksi anak berbahasa Inggris."],
+          ["Menulis-Mempresentasikan", "Peserta didik menulis paragraf deskriptif mandiri dan mempresentasikan proyek visual/digital kreatif di depan kelas."]
+        ]
+      },
+      "Koding dan AI": {
+        "Fase A": [], 
+        "Fase B": [], 
+        "Fase C": [
+          ["Berpikir Komputasional", "Peserta didik mampu menerapkan berpikir komputasional dalam menyelesaikan persoalan sehari-hari secara sistematis, mengidentifikasi pola, dekomposisi, abstraksi, dan menyusun algoritma sederhana."],
+          ["Literasi Digital", "Peserta didik mampu menggunakan perangkat digital, internet, dan media sosial secara aman, sehat, dan bertanggung jawab serta menjaga keamanan data pribadi."],
+          ["Koding", "Peserta didik mampu menyusun alur logika pemrograman visual, menggunakan perintah sekuensial, percabangan, dan perulangan untuk membuat karya digital kreatif."],
+          ["Analisis Data", "Peserta didik mampu mengumpulkan, mengelompokkan, mengolah, menyajikan, dan menafsirkan data sederhana dari lingkungan sekitar dalam bentuk tabel atau grafik."],
+          ["Dampak Sosial Informatika", "Peserta didik mampu menyadari dan menjelaskan dampak sosial penggunaan teknologi digital, etika berkomunikasi di dunia maya, serta hak digital."],
+          ["Kecerdasan Artifisial", "Peserta didik mampu mengenal konsep dasar kecerdasan artifisial (AI), mengidentifikasi penerapannya di sekitar mereka, serta menggunakannya secara etis."]
+        ]
+      },
+      "Bahasa dan Aksara Lampung": {
+        "Fase A": [
+          ["Menyimak", "Peserta didik memahami bunyi bahasa, kata, frasa, dialek, dan kalimat bahasa Lampung melalui pelafalan lambang bunyi aksara serta teks lisan sederhana."],
+          ["Membaca dan Memirsa", "Peserta didik membaca nyaring kata, kalimat pendek, dan teks sederhana yang ditulis dalam aksara Lampung maupun huruf latin dengan intonasi yang tepat."],
+          ["Berbicara dan Mempresentasikan", "Peserta didik melafalkan huruf aksara Lampung (Kelabai Surat dan Anak Surat), mengucapkan salam, memperkenalkan diri, dan menanyakan kabar secara santun."],
+          ["Menulis", "Peserta didik menuliskan lambang huruf aksara Lampung (20 kelabai surat) beserta anak surat secara tepat melalui teknik menyalin atau mendikte kata."]
+        ],
+        "Fase B": [
+          ["Menyimak", "Peserta didik memahami isi teks dongeng/legenda, teks instruksi, dan percakapan sehari-hari dalam berbagai dialek bahasa Lampung yang diperdengarkan."],
+          ["Membaca dan Memirsa", "Peserta didik membaca dan memahami isi teks narasi pendek, cerita rakyat Lampung, serta konversi teks latin ke dalam tulisan aksara Lampung dengan benar."],
+          ["Berbicara dan Mempresentasikan", "Peserta didik melakukan percakapan sederhana, menceritakan pengalaman pribadi, dan mengungkapkan keinginan menggunakan bahasa Lampung yang komunikatif."],
+          ["Menulis", "Peserta didik menulis kalimat beraksara Lampung secara berangkai; menyusun karangan deskriptif pendek bertema lingkungan rumah dan sekolah."]
+        ],
+        "Fase C": [
+          ["Menyimak", "Peserta didik memahami ragam bahasa Lampung (Sakai Sambayan/pergaulan) and pidato adat serta pesan moral dari sastra lisan (padiw/tetimbay) yang disimak."],
+          ["Membaca dan Memirsa", "Peserta didik membaca, menelaah, dan menginterpretasikan makna teks sastra cetak, naskah kuno Lampung, serta hukum adat tertulis secara mandiri."],
+          ["Berbicara dan Mempresentasikan", "Peserta didik berpidato adat sederhana (sesanti), ber-dialektika dalam forum informal/formal, serta berbalas pantun (adi-adi/muwayang) sesuai tata krama Lampung."],
+          ["Menulis", "Peserta didik menulis karya kreatif berbentuk puisi Lampung (Saget/Tangguh), teks pidato, serta mengubah teks panjang latin ke dalam aksara Lampung secara sistematis."]
+        ]
+      },
+      "Pendidikan Anti Korupsi": {
+        "Fase A": [
+          ["Ketaatan pada Aturan", "Peserta didik mengenal, mematuhi, dan membiasakan diri mengikuti aturan dasar di rumah dan di sekolah secara konsisten (disiplin dan tanggung jawab)."],
+          ["Konsep Kepemilikan", "Peserta didik membedakan barang milik pribadi dengan milik orang lain; meminta izin sebelum meminjam and mengembalikan barang secara utuh (jujur)."],
+          ["Menjaga Amanah", "Peserta didik melaksanakan tugas sederhana dari guru atau orang tua dengan penuh tanggung jawab; menyampaikan pesan atau titipan dengan jujur."],
+          ["Pengelolaan Dilema Etis", "Peserta didik mengenali situasi benar dan salah dalam kehidupan sehari-hari; memilih untuk berbuat jujur meskipun ada godaan atau rasa takut."],
+          ["Membangun Budaya Antikorupsi", "Peserta didik mempraktikkan sikap saling menghargai, berkata jujur, peduli pada teman, dan berani mengakui kesalahan diri sendiri di lingkungan terdekat."]
+        ],
+        "Fase B": [
+          ["Ketaatan pada Aturan", "Peserta didik mengidentifikasi pentingnya kesepakatan bersama; menerapkan kepatuhan terhadap regulasi kelas dan sekolah tanpa pengawasan."],
+          ["Konsep Kepemilikan", "Peserta didik memahami hak kepemilikan bersama di fasilitas umum/sekolah; menjaga barang publik agar tidak rusak dan tidak mengambil yang bukan haknya."],
+          ["Menjaga Amanah", "Peserta didik mengemban tugas kelompok atau peran kepemimpinan kecil di kelas; menjaga rahasia kebaikan dan menepati janji yang dibuat."],
+          ["Pengelolaan Dilema Etis", "Peserta didik mengidentifikasi pilihan-pilihan tindakan ketika dihadapkan pada situasi sulit; berani menolak ajakan berbuat curang (seperti menyontek)."],
+          ["Membangun Budaya Antikorupsi", "Peserta didik merancang tindakan pencegahan kecurangan di kelas; mengajak teman berperilaku adil, bekerja keras, hidup sederhana, dan gotong royong."]
+        ],
+        "Fase C": [
+          ["Ketaatan pada Aturan", "Peserta didik menganalisis dampak pelanggaran aturan terhadap ketertiban bersama; menegakkan aturan dalam kelompok secara adil dan transparan."],
+          ["Konsep Kepemilikan", "Peserta didik menginternalisasi pentingnya integritas atas kepemilikan; menolak segala bentuk pemanfaatan barang milik orang lain/negara demi keuntungan pribadi."],
+          ["Menjaga Amanah", "Peserta didik mempertanggungjawabkan pengelolaan sumber daya kecil (misal: uang kas kelas); bertindak jujur dan dapat dipercaya dalam setiap amanah."],
+          ["Pengelolaan Dilema Etis", "Peserta didik mengambil keputusan etis yang tepat saat terjadi benturan kepentingan; mengutamakan nilai kebenaran dan keadilan di atas kepentingan kelompok."],
+          ["Membangun Budaya Antikorupsi", "Peserta didik mengampanyekan nilai-nilai integritas (sembilan nilai antikorupsi) melalui karya kreatif; berani melaporkan atau menegur tindakan tidak jujur di sekolah."]
+        ]
+      }
+    };
+
+    // KAMUS DATA KHUSUS BAHASA INDONESIA FASE A
+    const dataBhsIndoFaseA = {
+      1: [ // Semester 1
+        { no: "1", elemen: "Menyimak", cp: "Memahami informasi dari teks nonsastra berbentuk teks aural (teks yang dibacakan dan/atau didengarkan) berupa percakapan yang berkaitan dengan diri, keluarga, dan/atau lingkungan sekitar; dan memahami pesan teks sastra berbentuk teks aural.", tp: "TP 1 Mengidentifikasi informasi sederhana tentang diri, keluarga, dan lingkungan sekitar dari percakapan, cerita, atau instruksi yang didengar.", lingkup: "Teks nonsastra/aural" },
+        { no: "2", elemen: "Berbicara dan Mempresentasikan", cp: "Merespons dengan bertanya tentang sesuatu, menjawab, dan menanggapi komentar orang lain dengan baik dan santun dalam suatu percakapan tentang diri, keluarga, kesehatan, dan/atau lingkungan sekitar; mengungkapkan perasaan dan gagasan secara lisan dengan atau tanpa bantuan gambar; dan menceritakan kembali isi berbagai tipe teks yang dibaca, dipirsa, atau didengar.", tp: "TP 2 Memperkenalkan diri, mengungkapkan perasaan, bertanya, dan menjawab pertanyaan sederhana secara santun tentang diri dan lingkungan sekitar.", lingkup: "Perkenalan diri" },
+        { no: "3", elemen: "Membaca dan Memirsa", cp: "Membaca kata-kata sederhana dengan fasih dari bacaan dan/atau tayangan yang dipirsa tentang diri, keluarga, kesehatan, dan/atau lingkungan sekitar; dan memahami isi bacaan dan/atau tayangan yang dipirsa tentang diri, keluarga, kesehatan, dan/atau lingkungan sekitar.", tp: "TP 3 Mengenali bunyi bahasa, huruf vokal, dan huruf konsonan melalui kegiatan bermain dan eksplorasi.", lingkup: "Bunyi bahasa" },
+        { no: "4", elemen: "Membaca dan Memirsa", cp: "Membaca kata-kata sederhana dengan fasih dari bacaan and/atau tayangan yang dipirsa tentang diri, keluarga, kesehatan, dan/atau lingkungan sekitar; dan memahami isi bacaan and/atau tayangan yang dipirsa tentang diri, keluarga, kesehatan, dan/atau lingkungan sekitar.", tp: "TP 4 Membaca suku kata dan kata sederhana yang berkaitan dengan diri, keluarga, and lingkungan sekitar.", lingkup: "Suku kata" },
+        { no: "5", elemen: "Menulis", cp: "Menulis permulaan dengan benar di atas kertas dan/atau melalui media digital; menulis kata-kata sederhana yang berkaitan dengan diri, keluarga, kesehatan, dan/atau lingkungan sekitar; dan menulis kalimat sederhana untuk menyampaikan informasi tentang diri, keluarga, kesehatan, dan/atau lingkungan sekitar.", tp: "TP 5 Menulis huruf, suku kata, dan kata sederhana dengan bentuk yang benar.", lingkup: "Menulis" },
+        { no: "6", elemen: "Menulis", cp: "Menulis permulaan dengan benar di atas kertas dan/atau melalui media digital; menulis kata-kata sederhana yang berkaitan dengan diri, keluarga, kesehatan, dan/atau lingkungan sekitar; dan menulis kalimat sederhana untuk menyampaikan informasi tentang diri, keluarga, kesehatan, dan/atau lingkungan sekitar.", tp: "TP 6 Menulis kata dan kalimat sederhana tentang diri dan lingkungan sekitar dengan bantuan gambar atau contoh.", lingkup: "Kalimat" }
+      ],
+      2: [ // Semester 2
+        { no: "1", elemen: "Menyimak", cp: "Memahami informasi dari teks nonsastra berbentuk teks aural (teks yang dibacakan dan/atau didengarkan) berupa percakapan yang berkaitan dengan diri, keluarga, dan/atau lingkungan sekitar; dan memahami pesan teks sastra berbentuk teks aural.", tp: "TP 7 Menentukan informasi penting dari cerita atau percakapan yang didengar.", lingkup: "Info lisan" },
+        { no: "2", elemen: "Berbicara dan Mempresentasikan", cp: "Merespons dengan bertanya tentang sesuatu, menjawab, dan menanggapi komentar orang lain dengan baik and santun dalam suatu percakapan tentang diri, keluarga, kesehatan, dan/atau lingkungan sekitar; mengungkapkan perasaan dan gagasan secara lisan dengan atau tanpa bantuan gambar; dan menceritakan kembali isi various tipe teks yang dibaca, dipirsa, atau didengar.", tp: "TP 8 Menceritakan kembali pengalaman atau isi cerita sederhana secara runtut dan santun.", lingkup: "Cerita" },
+        { no: "3", elemen: "Membaca dan Memirsa", cp: "Membaca kata-kata sederhana dengan fasih dari bacaan and/atau tayangan yang dipirsa tentang diri, keluarga, kesehatan, dan/atau lingkungan sekitar; dan memahami isi bacaan and/atau tayangan yang dipirsa tentang diri, keluarga, kesehatan, dan/atau lingkungan sekitar.", tp: "TP 9 Membaca kalimat sederhana dengan lancar dan menemukan informasi yang terdapat dalam bacaan atau tayangan sederhana.", lingkup: "Kalimat" },
+        { no: "4", elemen: "Membaca dan Memirsa", cp: "Membaca kata-kata sederhana dengan fasih dari bacaan and/atau tayangan yang dipirsa tentang diri, keluarga, kesehatan, dan/atau lingkungan sekitar; dan memahami isi bacaan and/atau tayangan yang dipirsa tentang diri, keluarga, kesehatan, dan/atau lingkungan sekitar.", tp: "TP 10 Memahami isi bacaan sederhana tentang diri, keluarga, kesehatan, dan lingkungan sekitar.", lingkup: "Pemahaman" },
+        { no: "5", elemen: "Menulis", cp: "Menulis permulaan dengan benar di atas kertas dan/atau melalui media digital; menulis kata-kata sederhana yang berkaitan dengan diri, keluarga, kesehatan, dan/atau lingkungan sekitar; dan menulis kalimat sederhana untuk menyampaikan informasi tentang diri, keluarga, kesehatan, dan/atau lingkungan sekitar.", tp: "TP 11 Menulis kalimat sederhana untuk menyampaikan informasi dan pengalaman pribadi.", lingkup: "Ekspositori" }
+      ],
+      3: [ // Semester 3 (Kelas II Sem 1)
+        { no: "1", elemen: "Menyimak", cp: "Memahami informasi dari teks nonsastra berbentuk teks aural (teks yang dibacakan dan/atau didengarkan) berupa percakapan yang berkaitan dengan diri, keluarga, dan/atau lingkungan sekitar; dan memahami pesan teks sastra berbentuk teks aural.", tp: "TP 12 Menentukan informasi penting dan pesan dari teks yang didengar.", lingkup: "Pesan teks" },
+        { no: "2", elemen: "Berbicara dan Mempresentasikan", cp: "Merespons dengan bertanya tentang sesuatu, menjawab, dan menanggapi komentar orang lain dengan baik dan santun dalam suatu percakapan tentang diri, keluarga, kesehatan, dan/atau lingkungan sekitar; mengungkapkan perasaan dan gagasan secara lisan dengan atau tanpa bantuan gambar; dan menceritakan kembali isi berbagai tipe teks yang dibaca, dipirsa, atau didengar.", tp: "TP 13 Menyampaikan tanggapan, pendapat, dan pengalaman secara lisan dengan santun.", lingkup: "Tanggapan" },
+        { no: "3", elemen: "Membaca dan Memirsa", cp: "Membaca kata-kata sederhana dengan fasih dari bacaan and/atau tayangan yang dipirsa tentang diri, keluarga, kesehatan, dan/atau lingkungan sekitar; dan memahami isi bacaan and/atau tayangan yang dipirsa tentang diri, keluarga, kesehatan, dan/atau lingkungan sekitar.", tp: "TP 14 Membaca teks sederhana dengan lancar serta menemukan informasi tersurat dalam bacaan.", lingkup: "Teks narasi" },
+        { no: "4", elemen: "Membaca dan Memirsa", cp: "Membaca kata-kata sederhana dengan fasih dari bacaan and/atau tayangan yang dipirsa tentang diri, keluarga, kesehatan, dan/atau lingkungan sekitar; dan memahami isi bacaan and/atau tayangan yang dipirsa tentang diri, keluarga, kesehatan, dan/atau lingkungan sekitar.", tp: "TP 15 Memahami isi dan pesan bacaan atau tayangan sederhana.", lingkup: "Pesan bacaan" },
+        { no: "5", elemen: "Menulis", cp: "Menulis permulaan dengan benar di atas kertas dan/atau melalui media digital; menulis kata-kata sederhana yang berkaitan dengan diri, keluarga, kesehatan, dan/atau lingkungan sekitar; dan menulis kalimat sederhana untuk menyampaikan informasi tentang diri, keluarga, kesehatan, dan/atau lingkungan sekitar.", tp: "TP 16 Menulis beberapa kalimat yang saling berhubungan untuk menyampaikan informasi sederhana.", lingkup: "Deskriptif" }
+      ],
+      4: [ // Semester 4 (Kelas II Sem 2)
+        { no: "1", elemen: "Menyimak", cp: "Memahami informasi dari teks nonsastra berbentuk teks aural (teks yang dibacakan dan/atau didengarkan) berupa percakapan yang berkaitan dengan diri, keluarga, dan/atau lingkungan sekitar; dan memahami pesan teks sastra berbentuk teks aural.", tp: "TP 17 Menyimpulkan informasi sederhana dari teks yang didengar.", lingkup: "Kesimpulan" },
+        { no: "2", elemen: "Berbicara dan Mempresentasikan", cp: "Merespons dengan bertanya tentang sesuatu, menjawab, dan menanggapi komentar orang lain dengan baik dan santun dalam suatu percakapan tentang diri, keluarga, kesehatan, dan/atau lingkungan sekitar; mengungkapkan perasaan dan gagasan secara lisan dengan atau tanpa bantuan gambar; dan menceritakan kembali isi berbagai tipe teks yang dibaca, dipirsa, atau didengar.", tp: "TP 18 Mempresentasikan hasil pengamatan atau pengalaman sederhana secara runtut.", lingkup: "Presentasi" },
+        { no: "3", elemen: "Membaca dan Memirsa", cp: "Membaca kata-kata sederhana dengan fasih dari bacaan and/atau tayangan yang dipirsa tentang diri, keluarga, kesehatan, dan/atau lingkungan sekitar; dan memahami isi bacaan and/atau tayangan yang dipirsa tentang diri, keluarga, kesehatan, dan/atau lingkungan sekitar.", tp: "TP 19 Menafsirkan informasi dan pesan dalam teks atau tayangan sederhana.", lingkup: "Interpretasi" },
+        { no: "4", elemen: "Menulis", cp: "Menulis permulaan dengan benar di atas kertas and/atau melalui media digital; menulis kata-kata sederhana yang berkaitan dengan diri, keluarga, kesehatan, dan/atau lingkungan sekitar; dan menulis kalimat sederhana untuk menyampaikan informasi tentang diri, keluarga, kesehatan, dan/atau lingkungan sekitar.", tp: "TP 20 Menulis teks sederhana yang runtut untuk mengomunikasikan gagasan dan informasi.", lingkup: "Naratif" }
+      ]
+    };
+
+    // KAMUS DATA KHUSUS MATEMATIKA FASE A (Kelas I & II)
+    const dataMatematikaFaseA = {
+      1: [ // Kelas I Semester 1
+        { no: "1", elemen: "Bilangan", cp: "Peserta didik menunjukkan pemahaman dan memiliki intuisi bilangan pada bilangan cacah sampai 100; melakukan operasi penjumlahan dan pengurangan menggunakan benda konkret.", tp: "Mengenal dan membilang banyak benda sampai 20.", lingkup: "Bilangan 1-10" },
+        { no: "2", elemen: "Bilangan", cp: "Peserta didik menunjukkan pemahaman dan memiliki intuisi bilangan pada bilangan cacah sampai 100; melakukan operasi penjumlahan dan pengurangan menggunakan benda konkret.", tp: "Membilang, mengurutkan, dan membandingkan bilangan sampai 20.", lingkup: "Bilangan 11-20" },
+        { no: "3", elemen: "Bilangan", cp: "Peserta didik menunjukkan pemahaman dan memiliki intuisi bilangan pada bilangan cacah sampai 100; melakukan operasi penjumlahan dan pengurangan menggunakan benda konkret.", tp: "Menentukan nilai bilangan berdasarkan banyak benda.", lingkup: "Lambang" },
+        { no: "4", elemen: "Aljabar", cp: "Peserta didik menunjukkan pemahaman pola gambar atau objek sederhana yang membesar dan mengecil; menyelesaikan persamaan sederhana menggunakan benda konkret.", tp: "Mengenali pola berulang sederhana.", lingkup: "Pola" },
+        { no: "5", elemen: "Pengukuran", cp: "Peserta didik membandingkan panjang dan berat benda secara langsung, dan mengestimasi panjang dan berat benda menggunakan satuan tidak baku.", tp: "Membandingkan panjang benda secara langsung.", lingkup: "Panjang" },
+        { no: "6", elemen: "Pengukuran", cp: "Peserta didik membandingkan panjang dan berat benda secara langsung, dan mengestimasi panjang dan berat benda menggunakan satuan tidak baku.", tp: "Membandingkan berat benda secara langsung.", lingkup: "Berat" },
+        { no: "7", elemen: "Geometri", cp: "Peserta didik mengenal various bangun datar (segitiga, segiempat, lingkaran) and bangun ruang (balok, kubus) berdasarkan karakteristik fisiknya.", tp: "Mengenali bangun datar sederhana.", lingkup: "Bangun datar" }
+      ],
+      2: [ // Kelas I Semester 2
+        { no: "1", elemen: "Bilangan", cp: "Peserta didik menunjukkan pemahaman dan memiliki intuisi bilangan pada bilangan cacah sampai 100; melakukan operasi penjumlahan dan pengurangan menggunakan benda konkret.", tp: "Menentukan nilai tempat puluhan dan satuan.", lingkup: "Nilai tempat" },
+        { no: "2", elemen: "Bilangan", cp: "Peserta didik menunjukkan pemahaman dan memiliki intuisi bilangan pada bilangan cacah sampai 100; melakukan operasi penjumlahan dan pengurangan menggunakan benda konkret.", tp: "Melakukan penjumlahan sampai 20.", lingkup: "Penjumlahan" },
+        { no: "3", elemen: "Bilangan", cp: "Peserta didik menunjukkan pemahaman dan memiliki intuisi bilangan pada bilangan cacah sampai 100; melakukan operasi penjumlahan dan pengurangan menggunakan benda konkret.", tp: "Melakukan pengurangan sampai 20.", lingkup: "Pengurangan" },
+        { no: "4", elemen: "Aljabar", cp: "Peserta didik menunjukkan pemahaman pola gambar atau objek sederhana yang membesar dan mengecil; menyelesaikan persamaan sederhana menggunakan benda konkret.", tp: "Melanjutkan pola berulang sederhana.", lingkup: "Pola" },
+        { no: "5", elemen: "Pengukuran", cp: "Peserta didik membandingkan panjang dan berat benda secara langsung, dan mengestimasi panjang dan berat benda menggunakan satuan tidak baku.", tp: "Mengukur panjang menggunakan satuan tidak baku.", lingkup: "Satuan" },
+        { no: "6", elemen: "Geometri", cp: "Peserta didik mengenal various bangun datar (segitiga, segiempat, lingkaran) and bangun ruang (balok, kubus) berdasarkan karakteristik fisiknya.", tp: "Mengelompokkan bangun datar berdasarkan ciri sederhana.", lingkup: "Ciri" },
+        { no: "7", elemen: "Analisis Data & Peluang", cp: "Peserta didik mengurutkan, menyortir, mengelompokkan, dan menyajikan data objek sederhana menggunakan turus and piktogram paling banyak dua kategori.", tp: "Mengumpulkan data sederhana dari lingkungan sekitar.", lingkup: "Data" }
+      ],
+      3: [ // Kelas II Semester 1
+        { no: "1", elemen: "Bilangan", cp: "Peserta didik menunjukkan pemahaman dan memiliki intuisi bilangan pada bilangan cacah sampai 100; melakukan operasi penjumlahan dan pengurangan menggunakan benda konkret.", tp: "Melakukan penjumlahan dan pengurangan sampai 100.", lingkup: "Hitung" },
+        { no: "2", elemen: "Bilangan", cp: "Peserta didik menunjukkan pemahaman dan memiliki intuisi bilangan pada bilangan cacah sampai 100; melakukan operasi penjumlahan dan pengurangan menggunakan benda konkret.", tp: "Menyelesaikan masalah sehari-hari yang melibatkan penjumlahan dan pengurangan.", lingkup: "Soal" },
+        { no: "3", elemen: "Aljabar", cp: "Peserta didik menunjukkan pemahaman pola gambar atau objek sederhana yang membesar dan mengecil; menyelesaikan persamaan sederhana menggunakan benda konkret.", tp: "Membuat pola berulang menggunakan benda konkret.", lingkup: "Pola" },
+        { no: "4", elemen: "Pengukuran", cp: "Peserta didik membandingkan panjang dan berat benda secara langsung, dan mengestimasi panjang dan berat benda menggunakan satuan tidak baku.", tp: "Menentukan waktu dalam kegiatan sehari-hari.", lingkup: "Jam" },
+        { no: "5", elemen: "Pengukuran", cp: "Peserta didik membandingkan panjang dan berat benda secara langsung, dan mengestimasi panjang dan berat benda menggunakan satuan tidak baku.", tp: "Mengenal dan menggunakan nilai uang.", lingkup: "Uang" },
+        { no: "6", elemen: "Geometri", cp: "Peserta didik mengenal various bangun datar (segitiga, segiempat, lingkaran) and bangun ruang (balok, kubus) berdasarkan karakteristik fisiknya.", tp: "Mengenali bangun ruang sederhana.", lingkup: "Ruang" },
+        { no: "7", elemen: "Analisis Data & Peluang", cp: "Peserta didik mengurutkan, menyortir, mengelompokkan, dan menyajikan data objek sederhana menggunakan turus and piktogram paling banyak dua kategori.", tp: "Menyajikan data dalam tabel sederhana.", lingkup: "Tabel" }
+      ],
+      4: [ // Kelas II Semester 2
+        { no: "1", elemen: "Bilangan", cp: "Peserta didik menunjukkan pemahaman dan memiliki intuisi bilangan pada bilangan cacah sampai 100; melakukan operasi penjumlahan and pengurangan menggunakan benda konkret.", tp: "Menggunakan operasi hitung dalam pemecahan masalah.", lingkup: "Aplikasi" },
+        { no: "2", elemen: "Aljabar", cp: "Peserta didik menunjukkan pemahaman pola gambar atau objek sederhana yang membesar dan mengecil; menyelesaikan persamaan sederhana menggunakan benda konkret.", tp: "Menjelaskan aturan pola sederhana.", lingkup: "Aturan" },
+        { no: "3", elemen: "Pengukuran", cp: "Peserta didik membandingkan panjang dan berat benda secara langsung, dan mengestimasi panjang dan berat benda menggunakan satuan tidak baku.", tp: "Menggunakan pengukuran panjang, berat, dan kapasitas dalam kehidupan sehari-hari.", lingkup: "Kapasitas" },
+        { no: "4", elemen: "Geometri", cp: "Peserta didik mengenal various bangun datar (segitiga, segiempat, lingkaran) and bangun ruang (balok, kubus) berdasarkan karakteristik fisiknya.", tp: "Menentukan posisi dan arah benda.", lingkup: "Arah" },
+        { no: "5", elemen: "Analisis Data & Peluang", cp: "Peserta didik mengurutkan, menyortir, mengelompokkan, dan menyajikan data objek sederhana menggunakan turus and piktogram paling banyak dua kategori.", tp: "Membaca dan menafsirkan data sederhana.", lingkup: "Diagram" }
+      ]
+    };
+
+    // KAMUS DATA KHUSUS BAHASA INGGRIS FASE B (Kelas III & IV)
+    const dataBhsInggrisFaseB = {
+      1: [ // Kelas III Semester 1
+        { no: "1", elemen: "Menyimak-Berbicara", cp: "Peserta didik berinteraksi menggunakan kalimat pendek untuk menyapa, meminta izin, dan menceritakan rutinitas harian di kelas.", tp: "Mengidentifikasi dan merespons salam, sapaan, serta ungkapan perkenalan diri dalam interaksi sederhana.", lingkup: "Greetings" },
+        { no: "2", elemen: "Menyimak-Berbicara", cp: "Peserta didik berinteraksi menggunakan kalimat pendek untuk menyapa, meminta izin, dan menceritakan rutinitas harian di kelas.", tp: "Mengikuti instruksi sederhana yang digunakan dalam kegiatan pembelajaran.", lingkup: "Instructions" },
+        { no: "3", elemen: "Membaca-Memirsa", cp: "Peserta didik memahami gagasan pokok dari teks naratif visual pendek and mengidentifikasi detail deskriptif teks.", tp: "Mengenali makna kosakata sederhana melalui teks dan gambar.", lingkup: "My Vocab" },
+        { no: "4", elemen: "Menulis-Mempresentasikan", cp: "Peserta didik menyusun kata menjadi kalimat sederhana terstruktur dengan ejaan dasar terbimbing.", tp: "Menyalin dan menulis kata atau frasa sederhana tentang identitas diri.", lingkup: "Identity" }
+      ],
+      2: [ // Kelas III Semester 2
+        { no: "1", elemen: "Menyimak-Berbicara", cp: "Peserta didik berinteraksi menggunakan kalimat pendek untuk menyapa, meminta izin, dan menceritakan rutinitas harian di kelas.", tp: "Menyampaikan informasi sederhana tentang keluarga, teman, dan lingkungan sekitar.", lingkup: "My Family" },
+        { no: "2", elemen: "Menyimak-Berbicara", cp: "Peserta didik berinteraksi menggunakan kalimat pendek untuk menyapa, meminta izin, dan menceritakan rutinitas harian di kelas.", tp: "Mengajukan dan menjawab pertanyaan sederhana tentang informasi pribadi.", lingkup: "Questions" },
+        { no: "3", elemen: "Membaca-Memirsa", cp: "Peserta didik memahami gagasan pokok dari teks naratif visual pendek and mengidentifikasi detail deskriptif teks.", tp: "Memahami informasi tersurat dalam teks pendek yang disertai ilustrasi.", lingkup: "Short Text" },
+        { no: "4", elemen: "Menulis-Mempresentasikan", cp: "Peserta didik menyusun kata menjadi kalimat sederhana terstruktur dengan ejaan dasar terbimbing.", tp: "Menulis kalimat sederhana menggunakan kosakata yang telah dipelajari.", lingkup: "Simple Sentences" }
+      ],
+      3: [ // Kelas IV Semester 1
+        { no: "1", elemen: "Menyimak-Berbicara", cp: "Peserta didik berinteraksi menggunakan kalimat pendek untuk menyapa, meminta izin, dan menceritakan rutinitas harian di kelas.", tp: "Menggunakan ungkapan sehari-hari dalam interaksi sederhana secara santun.", lingkup: "Expressions" },
+        { no: "2", elemen: "Menyimak-Berbicara", cp: "Peserta didik berinteraksi menggunakan kalimat pendek untuk menyapa, meminta izin, dan menceritakan rutinitas harian di kelas.", tp: "Menjelaskan kegiatan dan kebiasaan sehari-hari secara sederhana.", lingkup: "Activities" },
+        { no: "3", elemen: "Membaca-Memirsa", cp: "Peserta didik memahami gagasan pokok dari teks naratif visual pendek and mengidentifikasi detail deskriptif teks.", tp: "Mengidentifikasi informasi penting dalam teks deskriptif sederhana.", lingkup: "Descriptive" },
+        { no: "4", elemen: "Menulis-Mempresentasikan", cp: "Peserta didik menyusun kata menjadi kalimat sederhana terstruktur dengan ejaan dasar terbimbing.", tp: "Menulis deskripsi sederhana tentang orang, benda, atau tempat.", lingkup: "Description" }
+      ],
+      4: [ // Kelas IV Semester 2
+        { no: "1", elemen: "Menyimak-Berbicara", cp: "Peserta didik berinteraksi menggunakan kalimat pendek untuk menyapa, meminta izin, dan menceritakan rutinitas harian di kelas.", tp: "Berpartisipasi dalam percakapan sederhana terkait pengalaman dan aktivitas sehari-hari.", lingkup: "Conversation" },
+        { no: "2", elemen: "Menyimak-Berbicara", cp: "Peserta didik berinteraksi menggunakan kalimat pendek untuk menyapa, meminta izin, dan menceritakan rutinitas harian di kelas.", tp: "Menyampaikan informasi sederhana berdasarkan gambar atau situasi yang diamati.", lingkup: "Picture Desc" },
+        { no: "3", elemen: "Membaca-Memirsa", cp: "Peserta didik memahami gagasan pokok dari teks naratif visual pendek and mengidentifikasi detail deskriptif teks.", tp: "Menemukan gagasan utama dalam teks pendek sederhana.", lingkup: "Functional" },
+        { no: "4", elemen: "Menulis-Mempresentasikan", cp: "Peserta didik menyusun kata menjadi kalimat sederhana terstruktur dengan ejaan dasar terbimbing.", tp: "Menulis paragraf sederhana menggunakan kalimat yang saling berkaitan.", lingkup: "Paragraph" }
+      ]
+    };
+
+    // KAMUS DATA KHUSUS BAHASA INGGRIS FASE C (Kelas V & VI)
+    const dataBhsInggrisFaseC = {
+      1: [ // Kelas V Semester 1
+        { no: "1", elemen: "Menyimak-Berbicara", cp: "Peserta didik berdiskusi menggunakan beragam kalimat sederhana untuk menyampaikan kemauan, prediksi, dan opini kasual.", tp: "Memahami informasi utama dari percakapan dan paparan lisan sederhana.", lingkup: "Info" },
+        { no: "2", elemen: "Menyimak-Berbicara", cp: "Peserta didik berdiskusi menggunakan beragam kalimat sederhana untuk menyampaikan kemauan, prediksi, dan opini kasual.", tp: "Menyampaikan pendapat, kesukaan, dan ketidaksukaan secara sederhana.", lingkup: "Likes" },
+        { no: "3", elemen: "Membaca-Memirsa", cp: "Peserta didik mengekstrak informasi spesifik dari infografis, petunjuk tertulis, dan cerita fiksi anak berbahasa Inggris.", tp: "Mengidentifikasi informasi rinci dalam teks deskriptif sederhana.", lingkup: "Description" },
+        { no: "4", elemen: "Menulis-Mempresentasikan", cp: "Peserta didik menulis paragraf deskriptif mandiri dan mempresentasikan proyek visual/digital kreatif di depan kelas.", tp: "Menulis teks deskriptif sederhana dengan struktur yang tepat.", lingkup: "Favorite" }
+      ],
+      2: [ // Kelas V Semester 2
+        { no: "1", elemen: "Menyimak-Berbicara", cp: "Peserta didik berdiskusi menggunakan beragam kalimat sederhana untuk menyampaikan kemauan, prediksi, dan opini kasual.", tp: "Memahami dan menceritakan kembali pengalaman sederhana secara lisan.", lingkup: "Experiences" },
+        { no: "2", elemen: "Menyimak-Berbicara", cp: "Peserta didik berdiskusi menggunakan beragam kalimat sederhana untuk menyampaikan kemauan, prediksi, dan opini kasual.", tp: "Menyampaikan informasi berdasarkan gambar, video, atau media sederhana.", lingkup: "Multimodal" },
+        { no: "3", elemen: "Membaca-Memirsa", cp: "Peserta didik mengekstrak informasi spesifik dari infografis, petunjuk tertulis, dan cerita fiksi anak berbahasa Inggris.", tp: "Memahami informasi dalam teks naratif sederhana.", lingkup: "Narrative" },
+        { no: "4", elemen: "Menulis-Mempresentasikan", cp: "Peserta didik menulis paragraf deskriptif mandiri dan mempresentasikan proyek visual/digital kreatif di depan kelas.", tp: "Menulis teks pengalaman sederhana secara runtut.", lingkup: "Recount" }
+      ],
+      3: [ // Kelas VI Semester 1
+        { no: "1", elemen: "Menyimak-Berbicara", cp: "Peserta didik berdiskusi menggunakan beragam kalimat sederhana untuk menyampaikan kemauan, prediksi, dan opini kasual.", tp: "Memahami ide pokok dan informasi rinci dari berbagai teks lisan sederhana.", lingkup: "Information" },
+        { no: "2", elemen: "Menyimak-Berbicara", cp: "Peserta didik berdiskusi menggunakan beragam kalimat sederhana untuk menyampaikan kemauan, prediksi, dan opini kasual.", tp: "Menyampaikan informasi dan pendapat secara runtut dan jelas.", lingkup: "Giving Info" },
+        { no: "3", elemen: "Membaca-Memirsa", cp: "Peserta didik mengekstrak informasi spesifik dari infografis, petunjuk tertulis, dan cerita fiksi anak berbahasa Inggris.", tp: "Menafsirkan informasi tersurat dalam berbagai jenis teks sederhana.", lingkup: "Comprehension" },
+        { no: "4", elemen: "Menulis-Mempresentasikan", cp: "Peserta didik menulis paragraf deskriptif mandiri dan mempresentasikan proyek visual/digital kreatif di depan kelas.", tp: "Menulis teks informatif sederhana sesuai tujuan komunikasi.", lingkup: "Informative" }
+      ],
+      4: [ // Kelas VI Semester 2
+        { no: "1", elemen: "Menyimak-Berbicara", cp: "Peserta didik berdiskusi menggunakan beragam kalimat sederhana untuk menyampaikan kemauan, prediksi, dan opini kasual.", tp: "Memahami dan merespons berbagai teks lisan dan multimodal tentang topik kehidupan sehari-hari.", lingkup: "Topics" },
+        { no: "2", elemen: "Menyimak-Berbicara", cp: "Peserta didik berdiskusi menggunakan beragam kalimat sederhana untuk menyampaikan kemauan, prediksi, dan opini kasual.", tp: "Mempresentasikan gagasan, informasi, dan pengalaman secara sederhana.", lingkup: "Presentation" },
+        { no: "3", elemen: "Membaca-Memirsa", cp: "Peserta didik mengekstrak informasi spesifik dari infografis, petunjuk tertulis, dan cerita fiksi anak berbahasa Inggris.", tp: "Menganalisis informasi penting dan hubungan antargagasan dalam teks sederhana.", lingkup: "Types" },
+        { no: "4", elemen: "Menulis-Mempresentasikan", cp: "Peserta didik menulis paragraf deskriptif mandiri dan mempresentasikan proyek visual/digital kreatif di depan kelas.", tp: "Menghasilkan berbagai teks sederhana untuk menyampaikan ide, informasi, dan pengalaman.", lingkup: "Project" }
+      ]
+    };
+
+    // KAMUS DATA KHUSUS KODING DAN AI (KKA) FASE C (Kelas V & VI)
+    const dataKodingAiFaseC = {
+      1: [ // Kelas V Semester 1
+        { no: "1", elemen: "Berpikir Komputasional", cp: "Peserta didik mampu menerapkan berpikir komputasional dalam menyelesaikan persoalan sehari-hari secara sistematis, mengidentifikasi pola, dekomposisi, abstraksi, dan menyusun algoritma sederhana.", tp: "Mengidentifikasi masalah sederhana dan menyusunnya menjadi langkah-langkah terurut.", lingkup: "Algoritma" },
+        { no: "2", elemen: "Berpikir Komputasional", cp: "Peserta didik mampu menerapkan berpikir komputasional dalam menyelesaikan persoalan sehari-hari secara sistematis, mengidentifikasi pola, dekomposisi, abstraksi, dan menyusun algoritma sederhana.", tp: "Menggunakan pola dan pengelompokan untuk menyelesaikan masalah sehari-hari.", lingkup: "Struktur" },
+        { no: "3", elemen: "Literasi Digital", cp: "Peserta didik mampu menggunakan perangkat digital, internet, dan media sosial secara aman, sehat, dan bertanggung jawab serta menjaga keamanan data pribadi.", tp: "Menggunakan perangkat digital secara aman dan bertanggung jawab.", lingkup: "Keamanan" },
+        { no: "4", elemen: "Koding", cp: "Peserta didik mampu menyusun alur logika pemrograman visual, menggunakan perintah sekuensial, percabangan, dan perulangan untuk membuat karya digital kreatif.", tp: "Membuat urutan perintah sederhana menggunakan pemrograman visual.", lingkup: "Block" },
+        { no: "5", elemen: "Koding", cp: "Peserta didik mampu menyusun alur logika pemrograman visual, menggunakan perintah sekuensial, percabangan, dan perulangan untuk membuat karya digital kreatif.", tp: "Menguji dan memperbaiki kesalahan sederhana pada program.", lingkup: "Debug" }
+      ],
+      2: [ // Kelas V Semester 2
+        { no: "1", elemen: "Berpikir Komputasional", cp: "Peserta didik mampu menerapkan berpikir komputasional dalam menyelesaikan persoalan sehari-hari secara sistematis, mengidentifikasi pola, dekomposisi, abstraksi, dan menyusun algoritma sederhana.", tp: "Menyusun solusi masalah menggunakan diagram alur sederhana.", lingkup: "Flowchart" },
+        { no: "2", elemen: "Koding", cp: "Peserta didik mampu menyusun alur logika pemrograman visual, menggunakan perintah sekuensial, percabangan, dan perulangan untuk membuat karya digital kreatif.", tp: "Menggunakan percabangan dalam program visual.", lingkup: "Cabang" },
+        { no: "3", elemen: "Koding", cp: "Peserta didik mampu menyusun alur logika pemrograman visual, menggunakan perintah sekuensial, percabangan, dan perulangan untuk membuat karya digital kreatif.", tp: "Menggunakan pengulangan untuk menyederhanakan program.", lingkup: "Loop" },
+        { no: "4", elemen: "Analisis Data", cp: "Peserta didik mampu mengumpulkan, mengelompokkan, mengolah, menyajikan, dan menafsirkan data sederhana dari lingkungan sekitar dalam bentuk tabel atau grafik.", tp: "Menggunakan pola untuk dekomposisi pengolahan data.", lingkup: "Data" },
+        { no: "5", elemen: "Dampak Sosial Informatika", cp: "Peserta didik mampu menyadari dan menjelaskan dampak sosial penggunaan teknologi digital, etika berkomunikasi di dunia maya, serta hak digital.", tp: "Menjelaskan etika penggunaan teknologi digital dalam kehidupan sehari-hari.", lingkup: "Etika" }
+      ],
+      3: [ // Kelas VI Semester 1
+        { no: "1", elemen: "Berpikir Komputasional", cp: "Peserta didik mampu menerapkan berpikir komputasional dalam menyelesaikan persoalan sehari-hari secara sistematis, mengidentifikasi pola, dekomposisi, abstraksi, dan menyusun algoritma sederhana.", tp: "Memecahkan masalah menggunakan dekomposisi dan algoritma yang lebih kompleks.", lingkup: "Dekomposisi" },
+        { no: "2", elemen: "Koding", cp: "Peserta didik mampu menyusun alur logika pemrograman visual, menggunakan perintah sekuensial, percabangan, dan perulangan untuk membuat karya digital kreatif.", tp: "Mengembangkan program visual yang menggabungkan urutan, percabangan, dan pengulangan.", lingkup: "Project" },
+        { no: "3", elemen: "Analisis Data", cp: "Peserta didik mampu mengumpulkan, mengelompokkan, mengolah, menyajikan, dan menafsirkan data sederhana dari lingkungan sekitar dalam bentuk tabel atau grafik.", tp: "Menyajikan data dalam tabel dan grafik sederhana.", lingkup: "Visualisasi" },
+        { no: "4", elemen: "Kecerdasan Artifisial", cp: "Peserta didik mampu mengenal konsep dasar kecerdasan artifisial (AI), mengidentifikasi penerapannya di sekitar mereka, serta menggunakannya secara etis.", tp: "Menjelaskan konsep dasar AI dan penerapannya dalam kehidupan sehari-hari.", lingkup: "AI" },
+        { no: "5", elemen: "Kecerdasan Artifisial", cp: "Peserta didik mampu mengenal konsep dasar kecerdasan artifisial (AI), mengidentifikasi penerapannya di sekitar mereka, serta menggunakannya secara etis.", tp: "Mengidentifikasi contoh teknologi berbasis AI di sekitar peserta didik.", lingkup: "Aplikasi AI" }
+      ],
+      4: [ // Kelas VI Semester 2
+        { no: "1", elemen: "Berpikir Komputasional", cp: "Peserta didik mampu menerapkan berpikir komputasional dalam menyelesaikan persoalan sehari-hari secara sistematis, mengidentifikasi pola, dekomposisi, abstraksi, dan menyusun algoritma sederhana.", tp: "Merancang solusi digital sederhana untuk menyelesaikan masalah nyata.", lingkup: "Solusi" },
+        { no: "2", elemen: "Koding", cp: "Peserta didik mampu menyusun alur logika pemrograman visual, menggunakan perintah sekuensial, percabangan, dan perulangan untuk membuat karya digital kreatif.", tp: "Membuat proyek digital sederhana menggunakan pemrograman visual.", lingkup: "Proyek" },
+        { no: "3", elemen: "Analisis Data", cp: "Peserta didik mampu mengumpulkan, mengelompokkan, mengolah, menyajikan, dan menafsirkan data sederhana dari lingkungan sekitar dalam bentuk tabel atau grafik.", tp: "Menafsirkan informasi berdasarkan data yang diperoleh.", lingkup: "Interpretasi" },
+        { no: "4", elemen: "Kecerdasan Artifisial", cp: "Peserta didik mampu mengenal konsep dasar kecerdasan artifisial (AI), mengidentifikasi penerapannya di sekitar mereka, serta menggunakannya secara etis.", tp: "Menggunakan alat AI sederhana secara etis dan bertanggung jawab.", lingkup: "Alat AI" },
+        { no: "5", elemen: "Dampak Sosial Informatika", cp: "Peserta didik mampu menyadari dan menjelaskan dampak sosial penggunaan teknologi digital, etika berkomunikasi di dunia maya, serta hak digital.", tp: "Menganalisis manfaat dan risiko penggunaan AI dalam kehidupan sehari-hari.", lingkup: "Dampak AI" }
+      ]
+    };
+
+    // KAMUS DATA KHUSUS BAHASA DAN AKSARA LAMPUNG FASE A
+    const dataLampungFaseA = {
+      1: [ // Kelas I Semester 1
+        { no: "1", elemen: "Menyimak", cp: "Peserta didik memahami bunyi bahasa, kata, frasa, dialek, dan kalimat bahasa Lampung melalui pelafalan lambang bunyi aksara serta teks lisan sederhana.", tp: "Mengenali bunyi kosakata sederhana dalam Bahasa Lampung.", lingkup: "Salam" },
+        { no: "2", elemen: "Membaca dan Memirsa", cp: "Peserta didik membaca nyaring kata, kalimat pendek, dan teks sederhana yang ditulis dalam aksara Lampung maupun huruf latin dengan intonasi yang tepat.", tp: "Mengenali gambar dan kosakata sederhana dalam Bahasa Lampung.", lingkup: "Diri" },
+        { no: "3", elemen: "Berbicara dan Mempresentasikan", cp: "Peserta didik melafalkan huruf aksara Lampung (Kelabai Surat dan Anak Surat), mengucapkan salam, memperkenalkan diri, dan menanyakan kabar secara santun.", tp: "Mengucapkan salam dan memperkenalkan diri secara sederhana.", lingkup: "Perkenalan" },
+        { no: "4", elemen: "Menulis", cp: "Peserta didik menuliskan lambang huruf aksara Lampung (20 kelabai surat) beserta anak surat secara tepat melalui teknik menyalin atau mendikte kata.", tp: "Menebalkan dan menyalin kosakata sederhana.", lingkup: "Menulis" }
+      ],
+      2: [ // Kelas I Semester 2
+        { no: "1", elemen: "Menyimak", cp: "Peserta didik memahami bunyi bahasa, kata, frasa, dialek, dan kalimat bahasa Lampung melalui pelafalan lambang bunyi aksara serta teks lisan sederhana.", tp: "Memahami instruksi sederhana dalam Bahasa Lampung.", lingkup: "Perintah" },
+        { no: "2", elemen: "Membaca dan Memirsa", cp: "Peserta didik membaca nyaring kata, kalimat pendek, dan teks sederhana yang ditulis dalam aksara Lampung maupun huruf latin dengan intonasi yang tepat.", tp: "Membaca kata sederhana yang sering digunakan.", lingkup: "Sekitar" },
+        { no: "3", elemen: "Berbicara dan Mempresentasikan", cp: "Peserta didik melafalkan huruf aksara Lampung (Kelabai Surat dan Anak Surat), mengucapkan salam, memperkenalkan diri, dan menanyakan kabar secara santun.", tp: "Menyebutkan nama anggota keluarga dan benda sekitar.", lingkup: "Keluarga" },
+        { no: "4", elemen: "Menulis", cp: "Peserta didik menuliskan lambang huruf aksara Lampung (20 kelabai surat) beserta anak surat secara tepat melalui teknik menyalin atau mendikte kata.", tp: "Menulis kosakata sederhana tentang lingkungan sekitar.", lingkup: "Lingkungan" }
+      ],
+      3: [ // Kelas II Semester 1
+        { no: "1", elemen: "Menyimak", cp: "Peserta didik memahami bunyi bahasa, kata, frasa, dialek, dan kalimat bahasa Lampung melalui pelafalan lambang bunyi aksara serta teks lisan sederhana.", tp: "Memahami cerita pendek sederhana tentang kehidupan sehari-hari.", lingkup: "Cerita" },
+        { no: "2", elemen: "Membaca dan Memirsa", cp: "Peserta didik membaca nyaring kata, kalimat pendek, dan teks sederhana yang ditulis dalam aksara Lampung maupun huruf latin dengan intonasi yang tepat.", tp: "Membaca kalimat sederhana dengan lafal yang tepat.", lingkup: "Kalimat" },
+        { no: "3", elemen: "Berbicara dan Mempresentasikan", cp: "Peserta didik melafalkan huruf aksara Lampung (Kelabai Surat dan Anak Surat), mengucapkan salam, memperkenalkan diri, dan menanyakan kabar secara santun.", tp: "Menceritakan pengalaman sederhana secara lisan.", lingkup: "Pengalaman" },
+        { no: "4", elemen: "Menulis", cp: "Peserta didik menuliskan lambang huruf aksara Lampung (20 kelabai surat) beserta anak surat secara tepat melalui teknik menyalin atau mendikte kata.", tp: "Menulis kalimat sederhana menggunakan kosakata Lampung.", lingkup: "Dasar" }
+      ],
+      4: [ // Kelas II Semester 2
+        { no: "1", elemen: "Menyimak", cp: "Peserta didik memahami bunyi bahasa, kata, frasa, dialek, dan kalimat bahasa Lampung melalui pelafalan lambang bunyi aksara serta teks lisan sederhana.", tp: "Mengidentifikasi pesan sederhana dari cerita rakyat Lampung.", lingkup: "Dongeng" },
+        { no: "2", elemen: "Membaca dan Memirsa", cp: "Peserta didik membaca nyaring kata, kalimat pendek, dan teks sederhana yang ditulis dalam aksara Lampung maupun huruf latin dengan intonasi yang tepat.", tp: "Mengenal bentuk dasar induk aksara Lampung.", lingkup: "Induk" },
+        { no: "3", elemen: "Berbicara dan Mempresentasikan", cp: "Peserta didik melafalkan huruf aksara Lampung (Kelabai Surat dan Anak Surat), mengucapkan salam, memperkenalkan diri, dan menanyakan kabar secara santun.", tp: "Menceritakan kembali isi cerita secara sederhana.", lingkup: "Rakyat" },
+        { no: "4", elemen: "Menulis", cp: "Peserta didik menuliskan lambang huruf aksara Lampung (20 kelabai surat) beserta anak surat secara tepat melalui teknik menyalin atau mendikte kata.", tp: "Menyalin bentuk induk aksara Lampung dengan benar.", lingkup: "Aksara" }
+      ]
+    };
+
+    // KAMUS DATA KHUSUS BAHASA DAN AKSARA LAMPUNG FASE B
+    const dataLampungFaseB = {
+      1: [ // Kelas III Semester 1
+        { no: "1", elemen: "Menyimak", cp: "Peserta didik memahami isi teks dongeng/legenda, teks instruksi, dan percakapan sehari-hari dalam various dialek bahasa Lampung yang diperdengarkan.", tp: "Memahami ide pokok dongeng atau cerita rakyat Lampung.", lingkup: "Fabel" },
+        { no: "2", elemen: "Membaca dan Memirsa", cp: "Peserta didik membaca dan memahami isi teks narasi pendek, cerita rakyat Lampung, serta konversi teks latin ke dalam tulisan aksara Lampung dengan benar.", tp: "Membaca teks deskripsi sederhana dengan lancar.", lingkup: "Deskripsi" },
+        { no: "3", elemen: "Berbicara dan Mempresentasikan", cp: "Peserta didik melakukan percakapan sederhana, menceritakan pengalaman pribadi, dan mengungkapkan keinginan menggunakan bahasa Lampung yang komunikatif.", tp: "Menyampaikan kembali isi dongeng secara runtut.", lingkup: "Retelling" },
+        { no: "4", elemen: "Menulis", cp: "Peserta didik menulis kalimat beraksara Lampung secara berangkai; menyusun karangan deskriptif pendek bertema lingkungan rumah dan sekolah.", tp: "Menulis kalimat sederhana menggunakan Bahasa Lampung.", lingkup: "SPOK" }
+      ],
+      2: [ // Kelas III Semester 2
+        { no: "1", elemen: "Menyimak", cp: "Peserta didik memahami isi teks dongeng/legenda, teks instruksi, dan percakapan sehari-hari dalam various dialek bahasa Lampung yang diperdengarkan.", tp: "Mengidentifikasi tokoh dan pesan moral cerita rakyat.", lingkup: "Piil" },
+        { no: "2", elemen: "Membaca dan Memirsa", cp: "Peserta didik membaca dan memahami isi teks narasi pendek, cerita rakyat Lampung, serta konversi teks latin ke dalam tulisan aksara Lampung dengan benar.", tp: "Mengenali anak huruf aksara Lampung kelompok atas.", lingkup: "Anak" },
+        { no: "3", elemen: "Berbicara dan Mempresentasikan", cp: "Peserta didik melakukan percakapan sederhana, menceritakan pengalaman pribadi, dan mengungkapkan keinginan menggunakan bahasa Lampung yang komunikatif.", tp: "Berpartisipasi dalam diskusi sederhana menggunakan Bahasa Lampung.", lingkup: "Diskusi" },
+        { no: "4", elemen: "Menulis", cp: "Peserta didik menulis kalimat beraksara Lampung secara berangkai; menyusun karangan deskriptif pendek bertema lingkungan rumah dan sekolah.", tp: "Menulis kata menggunakan induk aksara dan anak huruf.", lingkup: "Aksara" }
+      ],
+      3: [ // Kelas IV Semester 1
+        { no: "1", elemen: "Menyimak", cp: "Peserta didik memahami isi teks dongeng/legenda, teks instruksi, dan percakapan sehari-hari dalam various dialek bahasa Lampung yang diperdengarkan.", tp: "Memahami informasi dari teks lisan tentang budaya Lampung.", lingkup: "Budaya" },
+        { no: "2", elemen: "Membaca dan Memirsa", cp: "Peserta didik membaca dan memahami isi teks narasi pendek, cerita rakyat Lampung, serta konversi teks latin ke dalam tulisan aksara Lampung dengan benar.", tp: "Membaca teks informatif sederhana tentang adat Lampung.", lingkup: "Adat" },
+        { no: "3", elemen: "Berbicara dan Mempresentasikan", cp: "Peserta didik melakukan percakapan sederhana, menceritakan pengalaman pribadi, dan mengungkapkan keinginan menggunakan bahasa Lampung yang komunikatif.", tp: "Menjelaskan budaya daerah secara lisan.", lingkup: "Presentasi" },
+        { no: "4", elemen: "Menulis", cp: "Peserta didik menulis kalimat beraksara Lampung secara berangkai; menyusun karangan deskriptif pendek bertema lingkungan rumah dan sekolah.", tp: "Menulis paragraf sederhana tentang budaya daerah.", lingkup: "Paragraf" }
+      ],
+      4: [ // Kelas IV Semester 2
+        { no: "1", elemen: "Menyimak", cp: "Peserta didik memahami isi teks dongeng/legenda, teks instruksi, dan percakapan sehari-hari dalam various dialek bahasa Lampung yang diperdengarkan.", tp: "Menyimpulkan isi cerita atau informasi yang didengar.", lingkup: "Daerah" },
+        { no: "2", elemen: "Membaca dan Memirsa", cp: "Peserta didik membaca dan memahami isi teks narasi pendek, cerita rakyat Lampung, serta konversi teks latin ke dalam tulisan aksara Lampung dengan benar.", tp: "Membaca kata dan kalimat beraksara Lampung secara lancar.", lingkup: "Aksara" },
+        { no: "3", elemen: "Berbicara dan Mempresentasikan", cp: "Peserta didik melakukan percakapan sederhana, menceritakan pengalaman pribadi, dan mengungkapkan keinginan menggunakan bahasa Lampung yang komunikatif.", tp: "Menyampaikan pendapat secara santun dalam Bahasa Lampung.", lingkup: "Komunikasi" },
+        { no: "4", elemen: "Menulis", cp: "Peserta didik menulis kalimat beraksara Lampung secara berangkai; menyusun karangan deskriptif pendek bertema lingkungan rumah dan sekolah.", tp: "Menulis kalimat sederhana menggunakan aksara Lampung.", lingkup: "Penulisan" }
+      ]
+    };
+
+    // KAMUS DATA KHUSUS BAHASA DAN AKSARA LAMPUNG FASE C
+    const dataLampungFaseC = {
+      1: [ // Kelas V Semester 1
+        { no: "1", elemen: "Menyimak", cp: "Peserta didik memahami ragam bahasa Lampung (Sakai Sambayan/pergaulan) and pidato adat serta pesan moral dari sastra lisan (padiw/tetimbay) yang disimak.", tp: "Menganalisis gagasan utama dari pidato adat atau berita daerah.", lingkup: "Pidato" },
+        { no: "2", elemen: "Membaca dan Memirsa", cp: "Peserta didik membaca, menelaah, dan menginterpretasikan makna teks sastra cetak, naskah kuno Lampung, serta hukum adat tertulis secara mandiri.", tp: "Memahami istilah budaya dan kekerabatan Lampung dalam teks.", lingkup: "Budaya" },
+        { no: "3", elemen: "Berbicara dan Mempresentasikan", cp: "Peserta didik berpidato adat sederhana (sesanti), ber-dialektika dalam forum informal/formal, serta berbalas pantun (adi-adi/muwayang) sesuai tata krama Lampung.", tp: "Menggunakan ragam bahasa Lampung sesuai situasi komunikasi.", lingkup: "Ragam" },
+        { no: "4", elemen: "Menulis", cp: "Peserta didik menulis karya kreatif berbentuk puisi Lampung (Saget/Tangguh), teks pidato, serta mengubah teks panjang latin ke dalam aksara Lampung secara sistematis.", tp: "Menulis paragraf deskriptif menggunakan Bahasa Lampung yang baik.", lingkup: "Paragraf" }
+      ],
+      2: [ // Kelas V Semester 2
+        { no: "1", elemen: "Menyimak", cp: "Peserta didik memahami ragam bahasa Lampung (Sakai Sambayan/pergaulan) and pidato adat serta pesan moral dari sastra lisan (padiw/tetimbay) yang disimak.", tp: "Menyimpulkan pesan tersirat dalam berita dan pidato adat.", lingkup: "Warta" },
+        { no: "2", elemen: "Membaca dan Memirsa", cp: "Peserta didik membaca, menelaah, dan menginterpretasikan makna teks sastra cetak, naskah kuno Lampung, serta hukum adat tertulis secara mandiri.", tp: "Membaca paragraf beraksara Lampung menggunakan anak surat kompleks.", lingkup: "Aksara" },
+        { no: "3", elemen: "Berbicara dan Mempresentasikan", cp: "Peserta didik berpidato adat sederhana (sesanti), ber-dialektika dalam forum informal/formal, serta berbalas pantun (adi-adi/muwayang) sesuai tata krama Lampung.", tp: "Membacakan puisi atau sastra lisan Lampung dengan ekspresif.", lingkup: "Sastra" },
+        { no: "4", elemen: "Menulis", cp: "Peserta didik menulis karya kreatif berbentuk puisi Lampung (Saget/Tangguh), teks pidato, serta mengubah teks panjang latin ke dalam aksara Lampung secara sistematis.", tp: "Menulis kalimat kompleks menggunakan aksara Lampung.", lingkup: "Nengen" }
+      ],
+      3: [ // Kelas VI Semester 1
+        { no: "1", elemen: "Menyimak", cp: "Peserta didik memahami ragam bahasa Lampung (Sakai Sambayan/pergaulan) and pidato adat serta pesan moral dari sastra lisan (padiw/tetimbay) yang disimak.", tp: "Mengevaluasi isi pidato adat dan informasi budaya Lampung.", lingkup: "Analisis" },
+        { no: "2", elemen: "Membaca dan Memirsa", cp: "Peserta didik membaca, menelaah, dan menginterpretasikan makna teks sastra cetak, naskah kuno Lampung, serta hukum adat tertulis secara mandiri.", tp: "Menganalisis isi berbagai teks budaya Lampung.", lingkup: "Teks" },
+        { no: "3", elemen: "Berbicara dan Mempresentasikan", cp: "Peserta didik berpidato adat sederhana (sesanti), ber-dialektika dalam forum informal/formal, serta berbalas pantun (adi-adi/muwayang) sesuai tata krama Lampung.", tp: "Menyampaikan presentasi tentang budaya dan adat Lampung.", lingkup: "Presentasi" },
+        { no: "4", elemen: "Menulis", cp: "Peserta didik menulis karya kreatif berbentuk puisi Lampung (Saget/Tangguh), teks pidato, serta mengubah teks panjang latin ke dalam aksara Lampung secara sistematis.", tp: "Menulis teks informatif tentang budaya Lampung.", lingkup: "Informatif" }
+      ],
+      4: [ // Kelas VI Semester 2
+        { no: "1", elemen: "Menyimak", cp: "Peserta didik memahami ragam bahasa Lampung (Sakai Sambayan/pergaulan) and pidato adat serta pesan moral dari sastra lisan (padiw/tetimbay) yang disimak.", tp: "Menafsirkan nilai budaya dan karakter dalam various tuturan Lampung.", lingkup: "Nilai" },
+        { no: "2", elemen: "Membaca dan Memirsa", cp: "Peserta didik membaca, menelaah, dan menginterpretasikan makna teks sastra cetak, naskah kuno Lampung, serta hukum adat tertulis secara mandiri.", tp: "Membaca dan memahami teks panjang beraksara Lampung.", lingkup: "Aksara" },
+        { no: "3", elemen: "Berbicara dan Mempresentasikan", cp: "Peserta didik berpidato adat sederhana (sesanti), ber-dialektika dalam forum informal/formal, serta berbalas pantun (adi-adi/muwayang) sesuai tata krama Lampung.", tp: "Menampilkan pidato atau deklamasi berbahasa Lampung secara percaya diri.", lingkup: "Deklamasi" },
+        { no: "4", elemen: "Menulis", cp: "Peserta didik menulis karya kreatif berbentuk puisi Lampung (Saget/Tangguh), teks pidato, serta mengubah teks panjang latin ke dalam aksara Lampung secara sistematis.", tp: "Menghasilkan teks kreatif menggunakan Bahasa dan Aksara Lampung.", lingkup: "Proyek" }
+      ]
+    };
+
+    // KAMUS DATA KHUSUS PENDIDIKAN ANTI KORUPSI (PAK) FASE A
+    const dataPakFaseA = {
+      1: [ // Kelas I Semester 1
+        { no: "1", elemen: "Ketaatan pada Aturan", cp: "Peserta didik mengenal, mematuhi, dan membiasakan diri mengikuti aturan dasar di rumah dan di sekolah secara konsisten (disiplin dan tanggung jawab).", tp: "Mengenal dan mematuhi aturan dasar di rumah dan di kelas secara konsisten.", lingkup: "Aturan" },
+        { no: "2", elemen: "Konsep Kepemilikan", cp: "Peserta didik membedakan barang milik pribadi dengan milik orang lain; meminta izin sebelum meminjam and mengembalikan barang secara utuh (jujur).", tp: "Membedakan barang milik pribadi dengan milik orang lain dan selalu meminta izin sebelum meminjam.", lingkup: "Milik" }
+      ],
+      2: [ // Kelas I Semester 2
+        { no: "1", elemen: "Menjaga Amanah", cp: "Peserta didik melaksanakan tugas sederhana dari guru atau orang tua dengan penuh tanggung jawab; menyampaikan pesan atau titipan dengan jujur.", tp: "Melaksanakan tugas sederhana dari guru atau orang tua dengan penuh tanggung jawab.", lingkup: "Amanah" },
+        { no: "2", elemen: "Membangun Budaya Antikorupsi", cp: "Peserta didik mempraktikkan sikap saling menghargai, berkata jujur, peduli pada teman, dan berani mengakui kesalahan diri sendiri di lingkungan terdekat.", tp: "Berkata jujur, peduli pada teman, dan berani mengakui kesalahan diri sendiri.", lingkup: "Integritas" }
+      ],
+      3: [ // Kelas II Semester 1
+        { no: "1", elemen: "Ketaatan pada Aturan", cp: "Peserta didik mengenal, mematuhi, dan membiasakan diri mengikuti aturan dasar di rumah dan di sekolah secara konsisten (disiplin dan tanggung jawab).", tp: "Membiasakan diri mengikuti aturan dasar secara mandiri dan konsisten.", lingkup: "Disiplin" },
+        { no: "2", elemen: "Konsep Kepemilikan", cp: "Peserta didik membedakan barang milik pribadi dengan milik orang lain; meminta izin sebelum meminjam and mengembalikan barang secara utuh (jujur).", tp: "Mengembalikan barang pinjaman secara utuh dan tepat waktu.", lingkup: "Hak" }
+      ],
+      4: [ // Kelas II Semester 2
+        { no: "1", elemen: "Pengelolaan Dilema Etis", cp: "Peserta didik mengenali situasi benar dan salah dalam kehidupan sehari-hari; memilih untuk berbuat jujur meskipun ada godaan atau rasa takut.", tp: "Mengenali situasi benar dan salah dalam kehidupan sehari-hari dan memilih untuk berbuat jujur.", lingkup: "Etis" },
+        { no: "2", elemen: "Membangun Budaya Antikorupsi", cp: "Peserta didik mempraktikkan sikap saling menghargai, berkata jujur, peduli pada teman, dan berani mengakui kesalahan diri sendiri di lingkungan terdekat.", tp: "Mempraktikkan sikap saling menghargai dan kerja sama yang adil dengan teman.", lingkup: "Keadilan" }
+      ]
+    };
+
+    // KAMUS DATA KHUSUS PENDIDIKAN ANTI KORUPSI (PAK) FASE B
+    const dataPakFaseB = {
+      1: [ // Kelas III Semester 1
+        { no: "1", elemen: "Ketaatan pada Aturan", cp: "Peserta didik mengidentifikasi pentingnya kesepakatan bersama; menerapkan kepatuhan terhadap regulasi kelas dan sekolah tanpa pengawasan.", tp: "Mengidentifikasi pentingnya kesepakatan bersama dan menerapkan kepatuhan terhadap aturan kelas.", lingkup: "Sepakat" },
+        { no: "2", elemen: "Konsep Kepemilikan", cp: "Peserta didik memahami hak kepemilikan bersama di fasilitas umum/sekolah; menjaga barang publik agar tidak rusak dan tidak mengambil yang bukan haknya.", tp: "Memahami hak kepemilikan bersama di fasilitas sekolah dan menjaganya agar tidak rusak.", lingkup: "Fasilitas" }
+      ],
+      2: [ // Kelas III Semester 2
+        { no: "1", elemen: "Menjaga Amanah", cp: "Peserta didik mengemban tugas kelompok atau peran kepemimpinan kecil di kelas; menjaga rahasia kebaikan dan menepati janji yang dibuat.", tp: "Mengemban tugas kelompok atau peran kepemimpinan kecil dengan disiplin dan menepati janji.", lingkup: "Pemimpin" },
+        { no: "2", elemen: "Membangun Budaya Antikorupsi", cp: "Peserta didik merancang tindakan pencegahan kecurangan di kelas; mengajak teman berperilaku adil, bekerja keras, hidup sederhana, dan gotong royong.", tp: "Membiasakan hidup sederhana, bekerja keras, dan gotong royong di lingkungan sekolah.", lingkup: "Sederhana" }
+      ],
+      3: [ // Kelas IV Semester 1
+        { no: "1", elemen: "Pengelolaan Dilema Etis", cp: "Peserta didik mengidentifikasi pilihan-pilihan tindakan ketika dihadapkan pada situasi sulit; berani menolak ajakan berbuat curang (seperti menyontek).", tp: "Menolak ajakan berbuat curang seperti menyontek atau menyalin pekerjaan teman.", lingkup: "Jujur" },
+        { no: "2", elemen: "Ketaatan pada Aturan", cp: "Peserta didik mengidentifikasi pentingnya kesepakatan bersama; menerapkan kepatuhan terhadap regulasi kelas dan sekolah tanpa pengawasan.", tp: "Menunjukkan kepatuhan terhadap regulasi sekolah tanpa perlu pengawasan langsung dari guru.", lingkup: "Mandiri" }
+      ],
+      4: [ // Kelas IV Semester 2
+        { no: "1", elemen: "Konsep Kepemilikan", cp: "Peserta didik memahami hak kepemilikan bersama di fasilitas umum/sekolah; menjaga barang publik agar tidak rusak dan tidak mengambil yang bukan haknya.", tp: "Menghargai hak milik bersama dan menolak mengambil barang yang bukan haknya.", lingkup: "Sosial" },
+        { no: "2", elemen: "Membangun Budaya Antikorupsi", cp: "Peserta didik merancang tindakan pencegahan kecurangan di kelas; mengajak teman berperilaku adil, bekerja keras, hidup sederhana, dan gotong royong.", tp: "Merancang tindakan pencegahan kecurangan kecil di kelas dan mengajak teman berperilaku adil.", lingkup: "Kantin" }
+      ]
+    };
+
+    // KAMUS DATA KHUSUS PENDIDIKAN ANTI KORUPSI (PAK) FASE C
+    const dataPakFaseC = {
+      1: [ // Kelas V Semester 1
+        { no: "1", elemen: "Ketaatan pada Aturan", cp: "Peserta didik menganalisis dampak pelanggaran aturan terhadap ketertiban bersama; menegakkan aturan dalam kelompok secara adil dan transparan.", tp: "Menganalisis dampak pelanggaran aturan terhadap ketertiban bersama dan menegakkannya secara adil.", lingkup: "Regulasi" },
+        { no: "2", elemen: "Konsep Kepemilikan", cp: "Peserta didik menginternalisasi pentingnya integritas atas kepemilikan; menolak segala bentuk pemanfaatan barang milik orang lain/negara demi keuntungan pribadi.", tp: "Menginternalisasi pentingnya integritas atas kepemilikan dan menolak pemanfaatan fasilitas untuk kepentingan pribadi.", lingkup: "Integritas" }
+      ],
+      2: [ // Kelas V Semester 2
+        { no: "1", elemen: "Menjaga Amanah", cp: "Peserta didik mempertanggungjawabkan pengelolaan sumber daya kecil (misal: uang kas kelas); bertindak jujur dan dapat dipercaya dalam setiap amanah.", tp: "Mempertanggungjawabkan pengelolaan sumber daya kecil kelas secara transparan.", lingkup: "Transparan" },
+        { no: "2", elemen: "Membangun Budaya Antikorupsi", cp: "Peserta didik mengampanyekan nilai-nilai integritas (sembilan nilai antikorupsi) melalui karya kreatif; berani melaporkan atau menegur tindakan tidak jujur di sekolah.", tp: "Mempraktikkan sembilan nilai antikorupsi secara aktif dan konsisten.", lingkup: "Nilai" }
+      ],
+      3: [ // Kelas VI Semester 1
+        { no: "1", elemen: "Pengelolaan Dilema Etis", cp: "Peserta didik mengambil keputusan etis yang tepat saat terjadi benturan kepentingan; mengutamakan nilai kebenaran dan keadilan di atas kepentingan kelompok.", tp: "Mengambil keputusan etis yang tepat saat terjadi benturan kepentingan di lingkungan sekolah.", lingkup: "Resolusi" },
+        { no: "2", elemen: "Ketaatan pada Aturan", cp: "Peserta didik menganalisis dampak pelanggaran aturan terhadap ketertiban bersama; menegakkan aturan dalam kelompok secara adil dan transparan.", tp: "Berpartisipasi aktif dalam perumusan tata tertib kelompok atau organisasi siswa secara dekokratis.", lingkup: "Tata Tertib" }
+      ],
+      4: [ // Kelas VI Semester 2
+        { no: "1", elemen: "Membangun Budaya Antikorupsi", cp: "Peserta didik mengampanyekan nilai-nilai integritas (sembilan nilai antikorupsi) melalui karya kreatif; berani melaporkan atau menegur tindakan tidak jujur di sekolah.", tp: "Mengampanyekan nilai-nilai integritas melalui karya kreatif dan berani menegur tindakan tidak jujur.", lingkup: "Kampanye" },
+        { no: "2", elemen: "Menjaga Amanah", cp: "Peserta didik mempertanggungjawabkan pengelolaan sumber daya kecil (misal: uang kas kelas); bertindak jujur dan dapat dipercaya dalam setiap amanah.", tp: "Menunjukkan komitmen tinggi terhadap pelaksanaan janji dan amanah kepemimpinan di sekolah.", lingkup: "Komitmen" }
+      ]
+    };
+
+    // KAMUS DATA KHUSUS PENDIDIKAN AGAMA ISLAM (PAI) FASE A
+    const dataPaiFaseA = {
+      1: [ // Kelas I Semester 1
+        { no: "1", elemen: "Al-Qur'an dan Hadis", cp: "Peserta didik mampu mengenal huruf hijaiah dan harakatnya, huruf hijaiah bersambung, membaca surah-surah pendek Al-Qur'an (al-Fatihah, al-Ikhlas, al-Falaq, an-Nas) serta hadis tentang kebersihan dengan baik dan benar sesuai kaidah sederhana.", tp: "Mengenal huruf hijaiyah dan melafalkan surah pendek dengan benar.", lingkup: "Surah" },
+        { no: "2", elemen: "Akidah", cp: "Peserta didik mampu mengenal rukun iman kepada Allah Swt. melalui nama-nama-Nya yang agung (Asmaulhusna: al-Ahad, as-Samad) serta mengenal rukun iman lainnya seperti iman kepada malaikat, kitab, rasul, hari akhir, serta qada dan qadar.", tp: "Mengenal Allah sebagai Pencipta alam semesta.", lingkup: "Maha Pencipta" },
+        { no: "3", elemen: "Akhlak", cp: "Peserta didik terbiasa mempraktikkan akhlak mulia dalam kehidupan sehari-hari, diawali dengan menyayangi diri sendiri, menghormati keluarga (orang tua, saudara), guru, teman, serta merawat lingkungan sekitar.", tp: "Membiasakan perilaku jujur, santun, dan hormat kepada orang tua serta guru.", lingkup: "Akhlak" },
+        { no: "4", elemen: "Fikih", cp: "Peserta didik mampu mengenal rukun Islam dan kalimat syahadatain, memahami dan menerapkan tata cara bersuci (wudu, tayamum, istinja) serta melaksanakan salat fardu secara tertib.", tp: "Mengenal tata cara bersuci dan berdoa sehari-hari.", lingkup: "Bersuci & Doa" },
+        { no: "5", elemen: "Sejarah Peradaban Islam", cp: "Peserta didik mampu menceritakan kisah keteladanan Nabi Muhammad saw. pada masa kanak-kanak dan masa remaja, serta meneladani perilaku jujur dan amanah beliau dalam kehidupan.", tp: "Mengenal Nabi Muhammad ﷺ sebagai teladan.", lingkup: "Kisah Nabi" }
+      ],
+      2: [ // Kelas I Semester 2
+        { no: "1", elemen: "Al-Qur'an dan Hadis", cp: "Peserta didik mampu mengenal huruf hijaiah dan harakatnya, huruf hijaiah bersambung, membaca surah-surah pendek Al-Qur'an (al-Fatihah, al-Ikhlas, al-Falaq, an-Nas) serta hadis tentang kebersihan dengan baik dan benar sesuai kaidah sederhana.", tp: "Membaca dan menghafal surah pendek pilihan.", lingkup: "Surah Pilihan" },
+        { no: "2", elemen: "Akidah", cp: "Peserta didik mampu mengenal rukun iman kepada Allah Swt. melalui nama-nama-Nya yang agung (Asmaulhusna: al-Ahad, as-Samad) serta mengenal rukun iman lainnya seperti iman kepada malaikat, kitab, rasul, hari akhir, serta qada dan qadar.", tp: "Mengenal sifat-sifat Allah melalui Asmaul Husna sederhana.", lingkup: "Asmaul Husna" },
+        { no: "3", elemen: "Akhlak", cp: "Peserta didik terbiasa mempraktikkan akhlak mulia dalam kehidupan sehari-hari, diawali dengan menyayangi diri sendiri, menghormati keluarga (orang tua, saudara), guru, teman, serta merawat lingkungan sekitar.", tp: "Membiasakan hidup disiplin dan bertanggung jawab.", lingkup: "Disiplin" },
+        { no: "4", elemen: "Fikih", cp: "Peserta didik mampu mengenal rukun Islam dan kalimat syahadatain, memahami dan menerapkan tata cara bersuci (wudu, tayamum, istinja) serta melaksanakan salat fardu secara tertib.", tp: "Mempraktikkan tata cara wudu sederhana.", lingkup: "Wudu" },
+        { no: "5", elemen: "Sejarah Peradaban Islam", cp: "Peserta didik mampu menceritakan kisah keteladanan Nabi Muhammad saw. pada masa kanak-kanak dan masa remaja, serta meneladani perilaku jujur dan amanah beliau dalam kehidupan.", tp: "Mengenal keluarga Nabi Muhammad ﷺ.", lingkup: "Keluarga" }
+      ],
+      3: [ // Kelas II Semester 1
+        { no: "1", elemen: "Al-Qur'an dan Hadis", cp: "Peserta didik mampu mengenal huruf hijaiah dan harakatnya, huruf hijaiah bersambung, membaca surah-surah pendek Al-Qur'an (al-Fatihah, al-Ikhlas, al-Falaq, an-Nas) serta hadis tentang kebersihan dengan baik dan benar sesuai kaidah sederhana.", tp: "Membaca surah pendek dengan tartil sederhana.", lingkup: "Surah Pendek" },
+        { no: "2", elemen: "Akidah", cp: "Peserta didik mampu mengenal rukun iman kepada Allah Swt. melalui nama-nama-Nya yang agung (Asmaulhusna: al-Ahad, as-Samad) serta mengenal rukun iman lainnya seperti iman kepada malaikat, kitab, rasul, hari akhir, serta qada dan qadar.", tp: "Meyakini Allah Maha Esa dan Maha Mengetahui.", lingkup: "Tauhid" },
+        { no: "3", elemen: "Akhlak", cp: "Peserta didik terbiasa mempraktikkan akhlak mulia dalam kehidupan sehari-hari, diawali dengan menyayangi diri sendiri, menghormati keluarga (orang tua, saudara), guru, teman, serta merawat lingkungan sekitar.", tp: "Menunjukkan sikap peduli dan menghargai sesama.", lingkup: "Peduli" },
+        { no: "4", elemen: "Fikih", cp: "Peserta didik mampu mengenal rukun Islam dan kalimat syahadatain, memahami dan menerapkan tata cara bersuci (wudu, tayamum, istinja) serta melaksanakan salat fardu secara tertib.", tp: "Mempraktikkan gerakan dan bacaan salat dasar.", lingkup: "Gerakan Salat" },
+        { no: "5", elemen: "Sejarah Peradaban Islam", cp: "Peserta didik mampu menceritakan kisah keteladanan Nabi Muhammad saw. pada masa kanak-kanak dan masa remaja, serta meneladani perilaku jujur dan amanah beliau dalam kehidupan.", tp: "Mengenal masa kecil Nabi Muhammad ﷺ.", lingkup: "Masa Kecil" }
+      ],
+      4: [ // Kelas II Semester 2
+        { no: "1", elemen: "Al-Qur'an dan Hadis", cp: "Peserta didik mampu mengenal huruf hijaiah dan harakatnya, huruf hijaiah bersambung, membaca surah-surah pendek Al-Qur'an (al-Fatihah, al-Ikhlas, al-Falaq, an-Nas) serta hadis tentang kebersihan dengan baik dan benar sesuai kaidah sederhana.", tp: "Menghafal dan memahami pesan sederhana surah pendek.", lingkup: "Hafalan" },
+        { no: "2", elemen: "Akidah", cp: "Peserta didik mampu mengenal rukun iman kepada Allah Swt. melalui nama-nama-Nya yang agung (Asmaulhusna: al-Ahad, as-Samad) serta mengenal rukun iman lainnya seperti iman kepada malaikat, kitab, rasul, hari akhir, serta qada dan qadar.", tp: "Mengenal malaikat Allah dan tugasnya.", lingkup: "Malaikat" },
+        { no: "3", elemen: "Akhlak", cp: "Peserta didik terbiasa mempraktikkan akhlak mulia dalam kehidupan sehari-hari, diawali dengan menyayangi diri sendiri, menghormati keluarga (orang tua, saudara), guru, teman, serta merawat lingkungan sekitar.", tp: "Membiasakan sikap jujur dan amanah.", lingkup: "Amanah" },
+        { no: "4", elemen: "Fikih", cp: "Peserta didik mampu mengenal rukun Islam dan kalimat syahadatain, memahami dan menerapkan tata cara bersuci (wudu, tayamum, istinja) serta melaksanakan salat fardu secara tertib.", tp: "Mempraktikkan salat berjamaah sederhana.", lingkup: "Jamaah" },
+        { no: "5", elemen: "Sejarah Peradaban Islam", cp: "Peserta didik mampu menceritakan kisah keteladanan Nabi Muhammad saw. pada masa kanak-kanak dan masa remaja, serta meneladani perilaku jujur dan amanah beliau dalam kehidupan.", tp: "Meneladani sifat-sifat Rasulullah ﷺ.", lingkup: "Sifat Rasul" }
+      ]
+    };
+
+    // KAMUS DATA KHUSUS PENDIDIKAN AGAMA ISLAM (PAI) FASE B
+    const dataPaiFaseB = {
+      1: [ // Kelas III Semester 1
+        { no: "1", elemen: "Al-Qur'an dan Hadis", cp: "Peserta didik mampu membaca, menulis, dan menghafal beberapa surah pendek Al-Qur'an (al-Buruj, al-Fil, al-Ma'un, at-Takasur) serta memahami hadis tentang keragaman dan hadis tentang persaudaraan dengan baik.", tp: "Membaca dan memahami kandungan surah pilihan.", lingkup: "Kandungan" },
+        { no: "2", elemen: "Akidah", cp: "Peserta didik mampu memahami sifat-sifat wajib bagi Allah Swt., beberapa Asmaulhusna (al-Malik, al-Aziz, al-Quddus, as-Salam, al-Mu'min), serta rukun iman kepada kitab-kitab Allah Swt. dan nabi dan rasul.", tp: "Memahami rukun iman.", lingkup: "Rukun Iman" },
+        { no: "3", elemen: "Akhlak", cp: "Peserta didik mampu memahami dan membiasakan perilaku terpuji seperti ikhlas, sabar, syukur, jujur, menunjukkan sikap berbakti kepada orang tua dan guru, menghargai sesama manusia, serta menjaga kelestarian lingkungan.", tp: "Membiasakan hidup disiplin dan bertanggung jawab.", lingkup: "Akhlak Mulia" },
+        { no: "4", elemen: "Fikih", cp: "Peserta didik mampu memahami ketentuan puasa Ramadan, salat tarawih, witir, zakat fitrah, infak, sedekah, serta tata cara pelaksanaan salat Jumat, salat duha, dan salat tahajud.", tp: "Mempraktikkan salat dengan bacaan yang benar.", lingkup: "Gerak & Bacaan" },
+        { no: "5", elemen: "Sejarah Peradaban Islam", cp: "Peserta didik mampu menceritakan kisah keteladanan Nabi Muhammad saw. pada masa dewasa, awal kerasulan, peristiwa hijrah ke Habasyah dan Taif, serta meneladani kesabaran beliau.", tp: "Mengenal dakwah Rasulullah di Makkah.", lingkup: "Dakwah" }
+      ],
+      2: [ // Kelas III Semester 2
+        { no: "1", elemen: "Al-Qur'an dan Hadis", cp: "Peserta didik mampu membaca, menulis, dan menghafal beberapa surah pendek Al-Qur'an (al-Buruj, al-Fil, al-Ma'un, at-Takasur) serta memahami hadis tentang keragaman dan hadis tentang persaudaraan dengan baik.", tp: "Memahami hadis sederhana tentang akhlak.", lingkup: "Hadis" },
+        { no: "2", elemen: "Akidah", cp: "Peserta didik mampu memahami sifat-sifat wajib bagi Allah Swt., beberapa Asmaulhusna (al-Malik, al-Aziz, al-Quddus, as-Salam, al-Mu'min), serta rukun iman kepada kitab-kitab Allah Swt. dan nabi dan rasul.", tp: "Memahami iman kepada kitab-kitab Allah.", lingkup: "Kitab Allah" },
+        { no: "3", elemen: "Akhlak", cp: "Peserta didik mampu memahami dan membiasakan perilaku terpuji seperti ikhlas, sabar, syukur, jujur, menunjukkan sikap berbakti kepada orang tua dan guru, menghargai sesama manusia, serta menjaga kelestarian lingkungan.", tp: "Menunjukkan perilaku percaya diri dan mandiri.", lingkup: "Karakter" },
+        { no: "4", elemen: "Fikih", cp: "Peserta didik mampu memahami ketentuan puasa Ramadan, salat tarawih, witir, zakat fitrah, infak, sedekah, serta tata cara pelaksanaan salat Jumat, salat duha, dan salat tahajud.", tp: "Mempraktikkan salat berjamaah dan doa setelah salat.", lingkup: "Doa Salat" },
+        { no: "5", elemen: "Sejarah Peradaban Islam", cp: "Peserta didik mampu menceritakan kisah keteladanan Nabi Muhammad saw. pada masa dewasa, awal kerasulan, peristiwa hijrah ke Habasyah dan Taif, serta meneladani kesabaran beliau.", tp: "Mengenal hijrah Nabi Muhammad ﷺ.", lingkup: "Hijrah" }
+      ],
+      3: [ // Kelas IV Semester 1
+        { no: "1", elemen: "Al-Qur'an dan Hadis", cp: "Peserta didik mampu membaca, menulis, dan menghafal beberapa surah pendek Al-Qur'an (al-Buruj, al-Fil, al-Ma'un, at-Takasur) serta memahami hadis tentang keragaman dan hadis tentang persaudaraan dengan baik.", tp: "Memahami kandungan surah dan hadis terkait kehidupan sehari-hari.", lingkup: "Hadis Sosial" },
+        { no: "2", elemen: "Akidah", cp: "Peserta didik mampu memahami sifat-sifat wajib bagi Allah Swt., beberapa Asmaulhusna (al-Malik, al-Aziz, al-Quddus, as-Salam, al-Mu'min), serta rukun iman kepada kitab-kitab Allah Swt. dan nabi dan rasul.", tp: "Memahami iman kepada rasul-rasul Allah.", lingkup: "Rasul" },
+        { no: "3", elemen: "Akhlak", cp: "Peserta didik mampu memahami dan membiasakan perilaku terpuji seperti ikhlas, sabar, syukur, jujur, menunjukkan sikap berbakti kepada orang tua dan guru, menghargai sesama manusia, serta menjaga kelestarian lingkungan.", tp: "Menunjukkan sikap rendah hati dan peduli.", lingkup: "Tawadhu" },
+        { no: "4", elemen: "Fikih", cp: "Peserta didik mampu memahami ketentuan puasa Ramadan, salat tarawih, witir, zakat fitrah, infak, sedekah, serta tata cara pelaksanaan salat Jumat, salat duha, dan salat tahajud.", tp: "Memahami ketentuan puasa Ramadan.", lingkup: "Puasa Ramadan" },
+        { no: "5", elemen: "Sejarah Peradaban Islam", cp: "Peserta didik mampu menceritakan kisah keteladanan Nabi Muhammad saw. pada masa dewasa, awal kerasulan, peristiwa hijrah ke Habasyah and Taif, serta meneladani kesabaran beliau.", tp: "Mengenal perkembangan Islam di Madinah.", lingkup: "Keluarga" }
+      ],
+      4: [ // Kelas IV Semester 2
+        { no: "1", elemen: "Al-Qur'an dan Hadis", cp: "Peserta didik mampu membaca, menulis, dan menghafal beberapa surah pendek Al-Qur'an (al-Buruj, al-Fil, al-Ma'un, at-Takasur) serta memahami hadis tentang keragaman dan hadis tentang persaudaraan dengan baik.", tp: "Menjelaskan pesan moral dalam surah dan hadis pilihan.", lingkup: "Pesan Surah" },
+        { no: "2", elemen: "Akidah", cp: "Peserta didik mampu memahami sifat-sifat wajib bagi Allah Swt., beberapa Asmaulhusna (al-Malik, al-Aziz, al-Quddus, as-Salam, al-Mu'min), serta rukun iman kepada kitab-kitab Allah Swt. dan nabi dan rasul.", tp: "Memahami iman kepada hari akhir.", lingkup: "Hari Kiamat" },
+        { no: "3", elemen: "Akhlak", cp: "Peserta didik mampu memahami dan membiasakan perilaku terpuji seperti ikhlas, sabar, syukur, jujur, menunjukkan sikap berbakti kepada orang tua dan guru, menghargai sesama manusia, serta menjaga kelestarian lingkungan.", tp: "Menunjukkan sikap toleran dan menghargai perbedaan.", lingkup: "Toleransi" },
+        { no: "4", elemen: "Fikih", cp: "Peserta didik mampu memahami ketentuan puasa Ramadan, salat tarawih, witir, zakat fitrah, infak, sedekah, serta tata cara pelaksanaan salat Jumat, salat duha, dan salat tahajud.", tp: "Mempraktikkan zakat fitrah dan sedekah.", lingkup: "Amal Sosial" },
+        { no: "5", elemen: "Sejarah Peradaban Islam", cp: "Peserta didik mampu menceritakan kisah keteladanan Nabi Muhammad saw. pada masa dewasa, awal kerasulan, peristiwa hijrah ke Habasyah dan Taif, serta meneladani kesabaran beliau.", tp: "Meneladani perjuangan para sahabat.", lingkup: "Para Sahabat" }
+      ]
+    };
+
+    // KAMUS DATA KHUSUS PENDIDIKAN AGAMA ISLAM (PAI) FASE C
+    const dataPaiFaseC = {
+      1: [ // Kelas V Semester 1
+        { no: "1", elemen: "Al-Qur'an dan Hadis", cp: "Peserta didik mampu membaca, menulis, menghafal, dan memahami makna ayat Al-Qur'an serta hadis tentang toleransi, persaudaraan, dan moderasi beragama dengan baik.", tp: "Menganalisis kandungan surah dan hadis tentang kehidupan sosial.", lingkup: "Surah Sosial" },
+        { no: "2", elemen: "Akidah", cp: "Peserta didik memahami rukun iman lainnya seperti iman kepada qada dan qadar, serta menguatkan keyakinan melalui bukti kebesaran Allah Swt.", tp: "Memahami iman kepada qada dan qadar.", lingkup: "Ketetapan" },
+        { no: "3", elemen: "Akhlak", cp: "Peserta didik memahami dan membiasakan perilaku mulia (akhlak karimah) seperti integritas, kerja keras, tanggung jawab, peduli lingkungan, dan toleransi.", tp: "Menunjukkan integritas dan tanggung jawab dalam kehidupan sehari-hari.", lingkup: "Muslim Baik" },
+        { no: "4", elemen: "Fikih", cp: "Peserta didik memahami ketentuan zakat, infak, sedekah, serta tata cara pelaksanaan ibadah haji, umrah, dan prinsip muamalah sederhana.", tp: "Memahami ketentuan zakat, infak, dan sedekah.", lingkup: "Amal" },
+        { no: "5", elemen: "Sejarah Peradaban Islam", cp: "Peserta didik mampu menceritakan kisah keteladanan para tokoh Islam, perkembangan peradaban Islam klasik, serta kontribusi Islam bagi peradaban dunia.", tp: "Mengenal perkembangan peradaban Islam klasik.", lingkup: "Masa Klasik" }
+      ],
+      2: [ // Kelas V Semester 2
+        { no: "1", elemen: "Al-Qur'an dan Hadis", cp: "Peserta didik mampu membaca, menulis, menghafal, dan memahami makna ayat Al-Qur'an serta hadis tentang toleransi, persaudaraan, dan moderasi beragama dengan baik.", tp: "Menjelaskan nilai-nilai moderasi beragama dalam Al-Qur'an dan hadis.", lingkup: "Toleransi" },
+        { no: "2", elemen: "Akidah", cp: "Peserta didik memahami rukun iman lainnya seperti iman kepada qada dan qadar, serta menguatkan keyakinan melalui bukti kebesaran Allah Swt.", tp: "Menguatkan keyakinan melalui bukti kebesaran Allah.", lingkup: "Tauhid" },
+        { no: "3", elemen: "Akhlak", cp: "Peserta didik memahami dan membiasakan perilaku mulia (akhlak karimah) seperti integritas, kerja keras, tanggung jawab, peduli lingkungan, dan toleransi.", tp: "Menunjukkan sikap kerja keras dan peduli lingkungan.", lingkup: "Lingkungan" },
+        { no: "4", elemen: "Fikih", cp: "Peserta didik memahami ketentuan zakat, infak, sedekah, serta tata cara pelaksanaan ibadah haji, umrah, dan prinsip muamalah sederhana.", tp: "Memahami ketentuan ibadah haji dan umrah.", lingkup: "Haji" },
+        { no: "5", elemen: "Sejarah Peradaban Islam", cp: "Peserta didik mampu menceritakan kisah keteladanan para tokoh Islam, perkembangan peradaban Islam klasik, serta kontribusi Islam bagi peradaban dunia.", tp: "Mengenal tokoh-tokoh ilmuwan Muslim.", lingkup: "Tokoh" }
+      ],
+      3: [ // Kelas VI Semester 1
+        { no: "1", elemen: "Al-Qur'an dan Hadis", cp: "Peserta didik mampu membaca, menulis, menghafal, dan memahami makna ayat Al-Qur'an serta hadis tentang toleransi, persaudaraan, dan moderasi beragama dengan baik.", tp: "Mengkaji kandungan surah dan hadis terkait persatuan dan persaudaraan.", lingkup: "Persatuan" },
+        { no: "2", elemen: "Akidah", cp: "Peserta didik memahami rukun iman lainnya seperti iman kepada qada dan qadar, serta menguatkan keyakinan melalui bukti kebesaran Allah Swt.", tp: "Menunjukkan perilaku yang mencerminkan keimanan yang kuat.", lingkup: "Implementasi" },
+        { no: "3", elemen: "Akhlak", cp: "Peserta didik memahami dan membiasakan perilaku mulia (akhlak karimah) seperti integritas, kerja keras, tanggung jawab, peduli lingkungan, dan toleransi.", tp: "Membiasakan akhlak mulia dalam kehidupan bermasyarakat.", lingkup: "Masyarakat" },
+        { no: "4", elemen: "Fikih", cp: "Peserta didik memahami ketentuan zakat, infak, sedekah, serta tata cara pelaksanaan ibadah haji, umrah, dan prinsip muamalah sederhana.", tp: "Memahami ketentuan muamalah sederhana sesuai syariat.", lingkup: "Syariat" },
+        { no: "5", elemen: "Sejarah Peradaban Islam", cp: "Peserta didik mampu menceritakan kisah keteladanan para tokoh Islam, perkembangan peradaban Islam klasik, serta kontribusi Islam bagi peradaban dunia.", tp: "Meneladani perjuangan tokoh Islam dalam perkembangan peradaban.", lingkup: "Tokoh Dunia" }
+      ],
+      4: [ // Kelas VI Semester 2
+        { no: "1", elemen: "Al-Qur'an dan Hadis", cp: "Peserta didik mampu membaca, menulis, menghafal, dan memahami makna ayat Al-Qur'an serta hadis tentang toleransi, persaudaraan, dan moderasi beragama dengan baik.", tp: "Menggamalkan nilai-nilai Al-Qur'an dan hadis dalam kehidupan sehari-hari.", lingkup: "Aktualisasi" },
+        { no: "2", elemen: "Akidah", cp: "Peserta didik memahami rukun iman lainnya seperti iman kepada qada dan qadar, serta menguatkan keyakinan melalui bukti kebesaran Allah Swt.", tp: "Menunjukkan keteguhan iman dalam menghadapi tantangan kehidupan.", lingkup: "Tantangan" },
+        { no: "3", elemen: "Akhlak", cp: "Peserta didik memahami and membiasakan perilaku mulia (akhlak karimah) seperti integritas, kerja keras, tanggung jawab, peduli lingkungan, dan toleransi.", tp: "Menjadi teladan dalam perilaku jujur, disiplin, dan bertanggung jawab.", lingkup: "Keteladanan" },
+        { no: "4", elemen: "Fikih", cp: "Peserta didik memahami ketentuan zakat, infak, sedekah, serta tata cara pelaksanaan ibadah haji, umrah, dan prinsip muamalah sederhana.", tp: "Menerapkan praktik ibadah dan muamalah secara benar.", lingkup: "Praktik" },
+        { no: "5", elemen: "Sejarah Peradaban Islam", cp: "Peserta didik mampu menceritakan kisah keteladanan para tokoh Islam, perkembangan peradaban Islam klasik, serta kontribusi Islam bagi peradaban dunia.", tp: "Menyusun refleksi tentang kontribusi Islam bagi peradaban dunia.", lingkup: "Kontribusi" }
+      ]
+    };
+
+    // LOGIKA NAVIGASI DAN HALAMAN
+    const pages = document.querySelectorAll('.page-panel');
+    const navItems = document.querySelectorAll('.nav-item');
+
+    let renderedSubject = "";
+    let renderedPhase = "";
+
+    function showPage(n){
+      pages.forEach(p => p.classList.remove('active'));
+      const targetPage = document.getElementById('page'+n);
+      if(targetPage) targetPage.classList.add('active');
+
+      navItems.forEach(item => {
+        if(Number(item.dataset.page) === n) {
+          item.classList.add('active');
+        } else {
+          item.classList.remove('active');
+        }
+      });
+
+      if(n === 3) renderCP();
+      if(n === 4) renderATPMatriks();
+      window.scrollTo({top:0, behavior:'smooth'});
+    }
+
+    navItems.forEach(item => {
+      item.addEventListener('click', e => {
+        e.preventDefault();
+        const pageNum = Number(item.dataset.page);
+        showPage(pageNum);
+      });
+    });
+
+    document.getElementById('startBtn').addEventListener('click', () => showPage(2));
+    document.getElementById('backToForm').addEventListener('click', () => showPage(2));
+    document.getElementById('toAtpPage').addEventListener('click', () => showPage(4));
+    document.getElementById('backToPage3').addEventListener('click', () => showPage(3));
+    document.getElementById('printAtpBtn').addEventListener('click', () => window.print());
+
+    document.getElementById('schoolForm').addEventListener('submit', (e) => {
+      e.preventDefault();
+      showPage(3);
+    });
+
+    // FUNGSI RENDER HALAMAN 3 (CP)
+    function renderCP(){
+      const subject = document.getElementById('subjectSelect').value;
+      const phase = document.getElementById('phaseSelect').value;
+      const selectEl = document.getElementById('subjectSelect');
+      const subjectTxt = selectEl.options[selectEl.selectedIndex].text;
+      
+      let rawClasses = [];
+      let labelLeft = "";
+      let labelRight = "";
+
+      if(phase === "Fase A") {
+        rawClasses = ["Kelas I", "Kelas II"];
+        labelLeft = "Guru Kelas/Mapel (Kls II),";
+        labelRight = "Guru Kelas/Mapel (Kls I),";
+      } else if(phase === "Fase B") {
+        rawClasses = ["Kelas III", "Kelas IV"];
+        labelLeft = "Guru Kelas/Mapel (Kls IV),";
+        labelRight = "Guru Kelas/Mapel (Kls III),";
+      } else {
+        rawClasses = ["Kelas V", "Kelas VI"];
+        labelLeft = "Guru Kelas/Mapel (Kls VI),";
+        labelRight = "Guru Kelas/Mapel (Kls V),";
+      }
+
+      document.getElementById('cpDocSchool').textContent = document.getElementById('schoolName').value;
+      document.getElementById('cpDocSubject').textContent = subjectTxt;
+      document.getElementById('cpDocAddress').textContent = document.getElementById('schoolAddress').value;
+      document.getElementById('cpDocPhase').textContent = `${phase} (${rawClasses[0]} & ${rawClasses[1]})`;
+      document.getElementById('cpDocYear').textContent = document.getElementById('schoolYear').value;
+
+      const tableBody = document.getElementById('cpTableBody');
+      tableBody.innerHTML = '';
+      const rows = cpData[subject]?.[phase] || [];
+
+      if(rows.length === 0) {
+        tableBody.innerHTML = `<tr><td colspan="3" class="text-center py-8 text-gray-400 italic font-semibold bg-gray-50">Mata pelajaran ini tidak tersedia di ${phase} (Dikosongkan).</td></tr>`;
+        return;
+      }
+
+      rows.forEach((row, idx) => {
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-gray-50/80 transition";
+        tr.innerHTML = `
+          <td class="text-center font-bold text-gray-600">${idx+1}</td>
+          <td class="font-bold text-[#12345b] bg-[#fafcf9]">${row[0]}</td>
+          <td class="text-gray-800 text-justify leading-relaxed text-xs">${cleanCpText(row[1])}</td>
+        `;
+        tableBody.appendChild(tr);
+      });
+
+      document.getElementById('placeDateCp').textContent = document.getElementById('placeDate').value;
+      
+      document.getElementById('teacherLabelLeft').textContent = labelLeft;
+      document.getElementById('sigTeacherLeft').textContent = document.getElementById('teacherB').value;
+      document.getElementById('nipTeacherLeft').textContent = "NIP " + document.getElementById('nipB').value;
+
+      document.getElementById('teacherLabelRight').textContent = labelRight;
+      document.getElementById('sigTeacherRight').textContent = document.getElementById('teacherA').value;
+      document.getElementById('nipTeacherRight').textContent = "NIP " + document.getElementById('nipA').value;
+
+      document.getElementById('sigPrincipal').textContent = document.getElementById('principalName').value;
+      document.getElementById('nipPrincipal').textContent = "NIP " + document.getElementById('principalNip').value;
+
+      if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+      }
+    }
+
+    // ALGORITMA EVALUASI LEVEL KOGNITIF BERDASARKAN KKO TEKS TP
+    function evaluateCognitiveScore(tpText) {
+      if (!tpText) return 0;
+      const lower = tpText.toLowerCase();
+      
+      const lv4 = ["menyimpulkan", "menafsirkan", "mempresentasikan", "menganalisis", "mengevaluasi", "menyusun", "membuat", "menghubungkan", "merancang", "mengampanyekan", "mengkaji"];
+      const lv3 = ["menulis", "menerapkan", "mempraktikkan", "memperkenalkan", "memperagakan", "menggunakan", "menyajikan", "menguji", "mengembangkan", "mengemban", "mempertanggungjawabkan", "mengamalkan"];
+      const lv2 = ["mengidentifikasi", "memahami", "menentukan", "menceritakan", "menjelaskan", "merespons", "menjawab", "bertanya", "mengungkapkan", "menemukan", "mengumpulkan", "mengelompokkan", "mengenali", "membedakan", "meyakini", "menunjukkan"];
+      const lv1 = ["mengenal", "membaca", "menyebutkan", "meniru", "menghafal", "menebalkan", "menyalin", "mematuhi", "mengikuti", "membiasakan"];
+
+      for (let word of lv4) { if (lower.includes(word)) return 4; }
+      for (let word of lv3) { if (lower.includes(word)) return 3; }
+      for (let word of lv2) { if (lower.includes(word)) return 2; }
+      for (let word of lv1) { if (lower.includes(word)) return 1; }
+
+      return 1; // Skor bawaan
+    }
+
+    // DISTRIBUSI JAM PELAJARAN (JJP) SECARA DINAMIS DAN CERDAS
+    function distributeJjpForSemester(s) {
+      const bodyEl = document.getElementById(`sem${s}-body`);
+      if (!bodyEl) return;
+
+      const rows = Array.from(bodyEl.querySelectorAll('tr'));
+      
+      const validRowsInfo = rows.map((row, index) => {
+        const cells = row.querySelectorAll('td');
+        if (cells.length < 5) return null;
+        
+        const elemenCpText = cells[1].querySelector('.editable-cell') ? cells[1].querySelector('.editable-cell').textContent.trim() : "";
+        const tpText = cells[2].querySelector('.editable-cell') ? cells[2].querySelector('.editable-cell').textContent.trim() : "";
+        const hasContent = (elemenCpText !== "" || tpText !== "");
+        const score = evaluateCognitiveScore(tpText);
+        
+        return {
+          rowElement: row,
+          index: index,
+          hasContent: hasContent,
+          score: score,
+          jjpCell: cells[4].querySelector('.editable-cell-center')
+        };
+      }).filter(info => info !== null && info.hasContent);
+
+      const N = validRowsInfo.length;
+      if (N === 0) return;
+
+      const totalJjp = parseInt(document.getElementById(`totalJjpSem${s}`).textContent) || 0;
+      
+      const base = Math.floor(totalJjp / N);
+      let remainder = totalJjp % N;
+
+      validRowsInfo.forEach(info => {
+        info.allocatedJjp = base;
+      });
+
+      const sortedToDistribute = [...validRowsInfo].sort((a, b) => {
+        if (b.score !== a.score) {
+          return b.score - a.score;
+        }
+        return b.index - a.index;
+      });
+
+      for (let i = 0; i < remainder; i++) {
+        if (sortedToDistribute[i]) {
+          sortedToDistribute[i].allocatedJjp += 1;
+        }
+      }
+
+      validRowsInfo.forEach(info => {
+        if (info.jjpCell) {
+          info.jjpCell.textContent = info.allocatedJjp;
+        }
+      });
+
+      rows.forEach(row => {
+        const cells = row.querySelectorAll('td');
+        if (cells.length >= 5) {
+          const elemenCpText = cells[1].querySelector('.editable-cell') ? cells[1].querySelector('.editable-cell').textContent.trim() : "";
+          const tpText = cells[2].querySelector('.editable-cell') ? cells[2].querySelector('.editable-cell').textContent.trim() : "";
+          if (elemenCpText === "" && tpText === "") {
+            const jjpDiv = cells[4].querySelector('.editable-cell-center');
+            if (jjpDiv) jjpDiv.textContent = "";
+          }
+        }
+      });
+    }
+
+    // Fungsi Pembantu Pencari CP Elemen Seni Musik, Rupa, Tari, dan Teater
+    function getSeniCp(subject, phase, element) {
+      const rows = cpData[subject]?.[phase] || [];
+      const match = rows.find(r => r[0].toLowerCase().trim() === element.toLowerCase().trim());
+      return match ? match[1] : "";
+    }
+
+    // Fungsi Pembantu Penyusun Data Semester Seni
+    function buildSeniData(subject, phase, rawConfig) {
+      const compiled = {};
+      for (const s in rawConfig) {
+        compiled[s] = rawConfig[s].map(item => ({
+          no: item.no,
+          elemen: item.elemen,
+          cp: getSeniCp(subject, phase, item.elemen),
+          tp: item.tp,
+          lingkup: item.lingkup
+        }));
+      }
+      return compiled;
+    }
+
+    // FUNGSI RENDER DAN SINKRONISASI MATRIKS ATP (HALAMAN 4)
+    function renderATPMatriks() {
+      const subject = document.getElementById('subjectSelect').value;
+      const phase = document.getElementById('phaseSelect').value;
+      const selectEl = document.getElementById('subjectSelect');
+      const subjectTxt = selectEl.options[selectEl.selectedIndex].text;
+
+      if (subject !== renderedSubject || phase !== renderedPhase) {
+        renderedSubject = subject;
+        renderedPhase = phase;
+        
+        document.getElementById('sem1-body').innerHTML = "";
+        document.getElementById('sem2-body').innerHTML = "";
+        document.getElementById('sem3-body').innerHTML = "";
+        document.getElementById('sem4-body').innerHTML = "";
+      }
+
+      let rawClasses = [];
+      let labelLeft = "";
+      let labelRight = "";
+
+      if(phase === "Fase A") {
+        rawClasses = ["Kelas I", "Kelas II"];
+        labelLeft = "Guru Kelas/Mapel (Kls II),";
+        labelRight = "Guru Kelas/Mapel (Kls I),";
+      } else if(phase === "Fase B") {
+        rawClasses = ["Kelas III", "Kelas IV"];
+        labelLeft = "Guru Kelas/Mapel (Kls IV),";
+        labelRight = "Guru Kelas/Mapel (Kls III),";
+      } else {
+        rawClasses = ["Kelas V", "Kelas VI"];
+        labelLeft = "Guru Kelas/Mapel (Kls VI),";
+        labelRight = "Guru Kelas/Mapel (Kls V),";
+      }
+
+      // Setup Meta Identitas Tabel
+      document.getElementById('atpSchoolName').textContent = document.getElementById('schoolName').value;
+      document.getElementById('atpSubjectName').textContent = subjectTxt;
+      document.getElementById('atpPhaseClass').textContent = `${phase} / ${rawClasses[0]} & ${rawClasses[1]}`;
+      document.getElementById('atpYear').textContent = document.getElementById('schoolYear').value;
+
+      // Label Header Semester 1-4
+      document.getElementById('sem1-title').textContent = `Semester Ganjil (${rawClasses[0]})`;
+      document.getElementById('sem2-title').textContent = `Semester Genap (${rawClasses[0]})`;
+      document.getElementById('sem3-title').textContent = `Semester Ganjil (${rawClasses[1]})`;
+      document.getElementById('sem4-title').textContent = `Semester Genap (${rawClasses[1]})`;
+
+      const calcJjp = (semesterIndex) => {
+        const jp = parseInt(document.getElementById(`jpSem${semesterIndex}`).value) || 0;
+        const me = parseInt(document.getElementById(`meSem${semesterIndex}`).value) || 0;
+        return jp * me;
+      };
+
+      document.getElementById('totalJjpSem1').textContent = calcJjp(1);
+      document.getElementById('totalJjpSem2').textContent = calcJjp(2);
+      document.getElementById('totalJjpSem3').textContent = calcJjp(3);
+      document.getElementById('totalJjpSem4').textContent = calcJjp(4);
+
+      // CHECK PEMILIHAN SUBJECT DAN FASE
+      const isBhsIndoFaseA = (subject === "Bahasa Indonesia" && phase === "Fase A");
+      const isBhsIndoFaseB = (subject === "Bahasa Indonesia" && phase === "Fase B");
+      const isBhsIndoFaseC = (subject === "Bahasa Indonesia" && phase === "Fase C");
+      const isMatematikaFaseA = (subject === "Matematika" && phase === "Fase A");
+      const isMatematikaFaseB = (subject === "Matematika" && phase === "Fase B");
+      const isMatematikaFaseC = (subject === "Matematika" && phase === "Fase C");
+      const isPancasilaFaseA = (subject === "Pendidikan Pancasila" && phase === "Fase A");
+      const isPancasilaFaseB = (subject === "Pendidikan Pancasila" && phase === "Fase B");
+      const isPancasilaFaseC = (subject === "Pendidikan Pancasila" && phase === "Fase C");
+      const isIpasFaseB = (subject === "IPAS" && phase === "Fase B");
+      const isIpasFaseC = (subject === "IPAS" && phase === "Fase C");
+      
+      const isSeniMusikA = (subject === "Seni Musik" && phase === "Fase A");
+      const isSeniMusikB = (subject === "Seni Musik" && phase === "Fase B");
+      const isSeniMusikC = (subject === "Seni Musik" && phase === "Fase C");
+
+      const isSeniRupaA = (subject === "Seni Rupa" && phase === "Fase A");
+      const isSeniRupaB = (subject === "Seni Rupa" && phase === "Fase B");
+      const isSeniRupaC = (subject === "Seni Rupa" && phase === "Fase C");
+
+      const isSeniTariA = (subject === "Seni Tari" && phase === "Fase A");
+      const isSeniTariB = (subject === "Seni Tari" && phase === "Fase B");
+      const isSeniTariC = (subject === "Seni Tari" && phase === "Fase C");
+
+      const isSeniTeaterA = (subject === "Seni Teater" && phase === "Fase A");
+      const isSeniTeaterB = (subject === "Seni Teater" && phase === "Fase B");
+      const isSeniTeaterC = (subject === "Seni Teater" && phase === "Fase C");
+
+      const isPjokFaseA = (subject === "PJOK" && phase === "Fase A");
+      const isPjokFaseB = (subject === "PJOK" && phase === "Fase B");
+      const isPjokFaseC = (subject === "PJOK" && phase === "Fase C");
+
+      const isBhsInggrisFaseB = (subject === "Bahasa Inggris" && phase === "Fase B");
+      const isBhsInggrisFaseC = (subject === "Bahasa Inggris" && phase === "Fase C");
+
+      const isKodingAiFaseC = (subject === "Koding dan AI" && phase === "Fase C");
+
+      const isLampungFaseA = (subject === "Bahasa dan Aksara Lampung" && phase === "Fase A");
+      const isLampungFaseB = (subject === "Bahasa dan Aksara Lampung" && phase === "Fase B");
+      const isLampungFaseC = (subject === "Bahasa dan Aksara Lampung" && phase === "Fase C");
+
+      const isPakFaseA = (subject === "Pendidikan Anti Korupsi" && phase === "Fase A");
+      const isPakFaseB = (subject === "Pendidikan Anti Korupsi" && phase === "Fase B");
+      const isPakFaseC = (subject === "Pendidikan Anti Korupsi" && phase === "Fase C");
+
+      const isPaiFaseA = (subject === "Pendidikan Agama Islam" && phase === "Fase A");
+      const isPaiFaseB = (subject === "Pendidikan Agama Islam" && phase === "Fase B");
+      const isPaiFaseC = (subject === "Pendidikan Agama Islam" && phase === "Fase C");
+
+      for (let s = 1; s <= 4; s++) {
+        const bodyEl = document.getElementById(`sem${s}-body`);
+        
+        if (bodyEl.children.length === 0) {
+          if (isBhsIndoFaseA) {
+            const dataSemester = dataBhsIndoFaseA[s];
+            dataSemester.forEach(item => {
+              bodyEl.appendChild(createRowTemplate(item.no, item.elemen, item.cp, item.tp, item.lingkup));
+            });
+          } else if (isMatematikaFaseA) {
+            const dataSemester = dataMatematikaFaseA[s];
+            dataSemester.forEach(item => {
+              bodyEl.appendChild(createRowTemplate(item.no, item.elemen, item.cp, item.tp, item.lingkup));
+            });
+          } else if (isMatematikaFaseB) {
+            const dataSemester = dataMatematikaFaseB[s];
+            dataSemester.forEach(item => {
+              bodyEl.appendChild(createRowTemplate(item.no, item.elemen, item.cp, item.tp, item.lingkup));
+            });
+          } else if (isMatematikaFaseC) {
+            const dataSemester = dataMatematikaFaseC[s];
+            dataSemester.forEach(item => {
+              bodyEl.appendChild(createRowTemplate(item.no, item.elemen, item.cp, item.tp, item.lingkup));
+            });
+          } else if (isPancasilaFaseA) {
+            const dataSemester = dataPancasilaFaseA[s];
+            dataSemester.forEach(item => {
+              bodyEl.appendChild(createRowTemplate(item.no, item.elemen, item.cp, item.tp, item.lingkup));
+            });
+          } else if (isPancasilaFaseB) {
+            const dataSemester = dataPancasilaFaseB[s];
+            dataSemester.forEach(item => {
+              bodyEl.appendChild(createRowTemplate(item.no, item.elemen, item.cp, item.tp, item.lingkup));
+            });
+          } else if (isPancasilaFaseC) {
+            const dataSemester = dataPancasilaFaseC[s];
+            dataSemester.forEach(item => {
+              bodyEl.appendChild(createRowTemplate(item.no, item.elemen, item.cp, item.tp, item.lingkup));
+            });
+          } else if (isIpasFaseB) {
+            const dataSemester = dataIpasFaseB[s];
+            dataSemester.forEach(item => {
+              bodyEl.appendChild(createRowTemplate(item.no, item.elemen, item.cp, item.tp, item.lingkup));
+            });
+          } else if (isIpasFaseC) {
+            const dataSemester = dataIpasFaseC[s];
+            dataSemester.forEach(item => {
+              bodyEl.appendChild(createRowTemplate(item.no, item.elemen, item.cp, item.tp, item.lingkup));
+            });
+          } else if (isSeniMusikA) {
+            const dataSemester = buildSeniData("Seni Musik", "Fase A", rawSeniMusikA)[s];
+            dataSemester.forEach(item => {
+              bodyEl.appendChild(createRowTemplate(item.no, item.elemen, item.cp, item.tp, item.lingkup));
+            });
+          } else if (isSeniMusikB) {
+            const dataSemester = buildSeniData("Seni Musik", "Fase B", rawSeniMusikB)[s];
+            dataSemester.forEach(item => {
+              bodyEl.appendChild(createRowTemplate(item.no, item.elemen, item.cp, item.tp, item.lingkup));
+            });
+          } else if (isSeniMusikC) {
+            const dataSemester = buildSeniData("Seni Musik", "Fase C", rawSeniMusikC)[s];
+            dataSemester.forEach(item => {
+              bodyEl.appendChild(createRowTemplate(item.no, item.elemen, item.cp, item.tp, item.lingkup));
+            });
+          } else if (isSeniRupaA) {
+            const dataSemester = buildSeniData("Seni Rupa", "Fase A", rawSeniRupaA)[s];
+            dataSemester.forEach(item => {
+              bodyEl.appendChild(createRowTemplate(item.no, item.elemen, item.cp, item.tp, item.lingkup));
+            });
+          } else if (isSeniRupaB) {
+            const dataSemester = buildSeniData("Seni Rupa", "Fase B", rawSeniRupaB)[s];
+            dataSemester.forEach(item => {
+              bodyEl.appendChild(createRowTemplate(item.no, item.elemen, item.cp, item.tp, item.lingkup));
+            });
+          } else if (isSeniRupaC) {
+            const dataSemester = buildSeniData("Seni Rupa", "Fase C", rawSeniRupaC)[s];
+            dataSemester.forEach(item => {
+              bodyEl.appendChild(createRowTemplate(item.no, item.elemen, item.cp, item.tp, item.lingkup));
+            });
+          } else if (isSeniTariA) {
+            const dataSemester = buildSeniData("Seni Tari", "Fase A", rawSeniTariA)[s];
+            dataSemester.forEach(item => {
+              bodyEl.appendChild(createRowTemplate(item.no, item.elemen, item.cp, item.tp, item.lingkup));
+            });
+          } else if (isSeniTariB) {
+            const dataSemester = buildSeniData("Seni Tari", "Fase B", rawSeniTariB)[s];
+            dataSemester.forEach(item => {
+              bodyEl.appendChild(createRowTemplate(item.no, item.elemen, item.cp, item.tp, item.lingkup));
+            });
+          } else if (isSeniTariC) {
+            const dataSemester = buildSeniData("Seni Tari", "Fase C", rawSeniTariC)[s];
+            dataSemester.forEach(item => {
+              bodyEl.appendChild(createRowTemplate(item.no, item.elemen, item.cp, item.tp, item.lingkup));
+            });
+          } else if (isSeniTeaterA) {
+            const dataSemester = buildSeniData("Seni Teater", "Fase A", rawSeniTeaterA)[s];
+            dataSemester.forEach(item => {
+              bodyEl.appendChild(createRowTemplate(item.no, item.elemen, item.cp, item.tp, item.lingkup));
+            });
+          } else if (isSeniTeaterB) {
+            const dataSemester = buildSeniData("Seni Teater", "Fase B", rawSeniTeaterB)[s];
+            dataSemester.forEach(item => {
+              bodyEl.appendChild(createRowTemplate(item.no, item.elemen, item.cp, item.tp, item.lingkup));
+            });
+          } else if (isSeniTeaterC) {
+            const dataSemester = buildSeniData("Seni Teater", "Fase C", rawSeniTeaterC)[s];
+            dataSemester.forEach(item => {
+              bodyEl.appendChild(createRowTemplate(item.no, item.elemen, item.cp, item.tp, item.lingkup));
+            });
+          } else if (isPjokFaseA) {
+            const dataSemester = dataPjokFaseA[s];
+            dataSemester.forEach(item => {
+              bodyEl.appendChild(createRowTemplate(item.no, item.elemen, item.cp, item.tp, item.lingkup));
+            });
+          } else if (isPjokFaseB) {
+            const dataSemester = dataPjokFaseB[s];
+            dataSemester.forEach(item => {
+              bodyEl.appendChild(createRowTemplate(item.no, item.elemen, item.cp, item.tp, item.lingkup));
+            });
+          } else if (isPjokFaseC) {
+            const dataSemester = dataPjokFaseC[s];
+            dataSemester.forEach(item => {
+              bodyEl.appendChild(createRowTemplate(item.no, item.elemen, item.cp, item.tp, item.lingkup));
+            });
+          } else if (isBhsIndoFaseB) {
+            const dataSemester = dataBhsIndoFaseB[s];
+            dataSemester.forEach(item => {
+              bodyEl.appendChild(createRowTemplate(item.no, item.elemen, item.cp, item.tp, item.lingkup));
+            });
+          } else if (isBhsIndoFaseC) {
+            const dataSemester = dataBhsIndoFaseC[s];
+            dataSemester.forEach(item => {
+              bodyEl.appendChild(createRowTemplate(item.no, item.elemen, item.cp, item.tp, item.lingkup));
+            });
+          } else if (isBhsInggrisFaseB) {
+            const dataSemester = dataBhsInggrisFaseB[s];
+            dataSemester.forEach(item => {
+              bodyEl.appendChild(createRowTemplate(item.no, item.elemen, item.cp, item.tp, item.lingkup));
+            });
+          } else if (isBhsInggrisFaseC) {
+            const dataSemester = dataBhsInggrisFaseC[s];
+            dataSemester.forEach(item => {
+              bodyEl.appendChild(createRowTemplate(item.no, item.elemen, item.cp, item.tp, item.lingkup));
+            });
+          } else if (isKodingAiFaseC) {
+            const dataSemester = dataKodingAiFaseC[s];
+            dataSemester.forEach(item => {
+              bodyEl.appendChild(createRowTemplate(item.no, item.elemen, item.cp, item.tp, item.lingkup));
+            });
+          } else if (isLampungFaseA) {
+            const dataSemester = dataLampungFaseA[s];
+            dataSemester.forEach(item => {
+              bodyEl.appendChild(createRowTemplate(item.no, item.elemen, item.cp, item.tp, item.lingkup));
+            });
+          } else if (isLampungFaseB) {
+            const dataSemester = dataLampungFaseB[s];
+            dataSemester.forEach(item => {
+              bodyEl.appendChild(createRowTemplate(item.no, item.elemen, item.cp, item.tp, item.lingkup));
+            });
+          } else if (isLampungFaseC) {
+            const dataSemester = dataLampungFaseC[s];
+            dataSemester.forEach(item => {
+              bodyEl.appendChild(createRowTemplate(item.no, item.elemen, item.cp, item.tp, item.lingkup));
+            });
+          } else if (isPakFaseA) {
+            const dataSemester = dataPakFaseA[s];
+            dataSemester.forEach(item => {
+              bodyEl.appendChild(createRowTemplate(item.no, item.elemen, item.cp, item.tp, item.lingkup));
+            });
+          } else if (isPakFaseB) {
+            const dataSemester = dataPakFaseB[s];
+            dataSemester.forEach(item => {
+              bodyEl.appendChild(createRowTemplate(item.no, item.elemen, item.cp, item.tp, item.lingkup));
+            });
+          } else if (isPakFaseC) {
+            const dataSemester = dataPakFaseC[s];
+            dataSemester.forEach(item => {
+              bodyEl.appendChild(createRowTemplate(item.no, item.elemen, item.cp, item.tp, item.lingkup));
+            });
+          } else if (isPaiFaseA) {
+            const dataSemester = dataPaiFaseA[s];
+            dataSemester.forEach(item => {
+              bodyEl.appendChild(createRowTemplate(item.no, item.elemen, item.cp, item.tp, item.lingkup));
+            });
+          } else if (isPaiFaseB) {
+            const dataSemester = dataPaiFaseB[s];
+            dataSemester.forEach(item => {
+              bodyEl.appendChild(createRowTemplate(item.no, item.elemen, item.cp, item.tp, item.lingkup));
+            });
+          } else if (isPaiFaseC) {
+            const dataSemester = dataPaiFaseC[s];
+            dataSemester.forEach(item => {
+              bodyEl.appendChild(createRowTemplate(item.no, item.elemen, item.cp, item.tp, item.lingkup));
+            });
+          } else {
+            for (let i = 0; i < 4; i++) {
+              bodyEl.appendChild(createRowTemplate());
+            }
+          }
+        }
+        
+        distributeJjpForSemester(s);
+      }
+
+      // Sinkronisasi Data Tanda Tangan Dokumen ATP
+      document.getElementById('atpPlaceDate').textContent = document.getElementById('placeDate').value;
+      
+      document.getElementById('atpTeacherLabelLeft').textContent = labelLeft;
+      document.getElementById('atpSigTeacherLeft').textContent = document.getElementById('teacherB').value;
+      document.getElementById('atpNipTeacherLeft').textContent = "NIP " + document.getElementById('nipB').value;
+
+      document.getElementById('atpTeacherLabelRight').textContent = labelRight;
+      document.getElementById('atpSigTeacherRight').textContent = document.getElementById('teacherA').value;
+      document.getElementById('atpNipTeacherRight').textContent = "NIP " + document.getElementById('nipA').value;
+
+      document.getElementById('atpSigPrincipal').textContent = document.getElementById('principalName').value;
+      document.getElementById('atpNipPrincipal').textContent = "NIP " + document.getElementById('principalNip').value;
+
+      if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+      }
+    }
+
+    // Fungsi pembersih teks CP (menghilangkan frasa "Peserta didik" di awal kalimat)
+    function cleanCpText(cpText) {
+      if (!cpText) return "";
+      let clean = cpText.trim();
+      clean = clean.replace(/^peserta\s+didik\s+/i, '');
+      if (clean.length > 0) {
+        clean = clean.charAt(0).toUpperCase() + clean.slice(1);
+      }
+      return clean;
+    }
+
+    // Fungsi pembuat format TP (menyisipkan frasa "Peserta didik" di awal kalimat)
+    function formatTpText(tpText) {
+      if (!tpText) return "";
+      let formatted = tpText.trim();
+      formatted = formatted.replace(/^tp\s*\d+\s*/i, ''); // Hapus prefiks TP 1, TP 2 jika ada
+      
+      if (!formatted.toLowerCase().startsWith("peserta didik")) {
+        let firstChar = formatted.charAt(0).toLowerCase();
+        formatted = "Peserta didik " + firstChar + formatted.slice(1);
+      }
+      return formatted;
+    }
+
+    // Pembuatan Template Baris
+    function createRowTemplate(no = "", elemen = "", cp = "", tp = "", lingkup = "", jjp = "") {
+      const tr = document.createElement('tr');
+      tr.className = "hover:bg-gray-50/50 transition";
+      
+      const cleanedCp = cleanCpText(cp);
+      const formattedTp = formatTpText(tp);
+
+      tr.innerHTML = `
+        <td class="text-center font-semibold"><div class="editable-cell-center text-center" contenteditable="true">${no}</div></td>
+        <td class="text-left align-top">
+           <div class="editable-cell font-bold text-[#12345b] mb-1" contenteditable="true">${elemen}</div>
+           ${cleanedCp ? `<div class="editable-cell text-gray-600 font-normal text-[10px] leading-relaxed text-justify mt-1 p-1 bg-gray-50 border border-gray-100 rounded" contenteditable="true">${cleanedCp}</div>` : ''}
+        </td>
+        <td class="text-left align-top text-gray-800 leading-relaxed font-medium"><div class="editable-cell text-left" contenteditable="true">${formattedTp}</div></td>
+        <td class="text-left align-top"><div class="editable-cell text-left" contenteditable="true">${lingkup}</div></td>
+        <td class="text-center align-top font-semibold"><div class="editable-cell-center text-center" contenteditable="true">${jjp}</div></td>
+      `;
+      return tr;
+    }
+
+    // Fungsi Tambah Baris
+    function addBlankRow(semesterNum) {
+      const tbody = document.getElementById(`sem${semesterNum}-body`);
+      if (tbody) {
+        tbody.appendChild(createRowTemplate());
+        distributeJjpForSemester(semesterNum); 
+      }
+    }
+
+    // Fungsi Hapus Baris Terakhir
+    function deleteLastRow(semesterNum) {
+      const tbody = document.getElementById(`sem${semesterNum}-body`);
+      if (tbody && tbody.children.length > 0) {
+        tbody.removeChild(tbody.lastElementChild);
+        distributeJjpForSemester(semesterNum);
+      }
+    }
+
+    // MENGAWASI PERUBAHAN INPUT REAL-TIME DI TABEL UNTUK DISTRIBUSI ULANG JJP
+    for (let s = 1; s <= 4; s++) {
+      const bodyEl = document.getElementById(`sem${s}-body`);
+      if (bodyEl) {
+        bodyEl.addEventListener('input', () => {
+          distributeJjpForSemester(s);
+        });
+      }
+      
+      const totalJjpHeader = document.getElementById(`totalJjpSem${s}`);
+      if (totalJjpHeader) {
+        totalJjpHeader.addEventListener('input', () => {
+          distributeJjpForSemester(s);
+        });
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+      if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+      }
+    });
+  </script>
+ </body>
+</html>
